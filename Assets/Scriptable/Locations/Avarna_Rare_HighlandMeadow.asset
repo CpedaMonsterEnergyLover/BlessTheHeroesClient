@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb4b033857f34ce481464daf891c0d06, type: 3}
+  m_Name: Avarna_Rare_HighlandMeadow
+  m_EditorClassIdentifier: 
+  name: Highland meadow
+  rarity: 1
+  unique: 0
+  sprite: {fileID: 21300000, guid: 606675d09257d1c47bd1611a49e8e31e, type: 3}
+  description: 
+  dropTable:
+    content:
+    - lootTable: {fileID: 11400000, guid: f550a6fdf957d4e47a9e282b3596c66c, type: 2}
+      value: 0.299
+    - lootTable: {fileID: 11400000, guid: 4dafe888db5ca1044a3fa2cf0bceb2ae, type: 2}
+      value: 0.313
+    coinsDropRate: 0
+    coins: {x: 0, y: 0}
+  cardAction:
+    rid: -2
+  evaluatorSet:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

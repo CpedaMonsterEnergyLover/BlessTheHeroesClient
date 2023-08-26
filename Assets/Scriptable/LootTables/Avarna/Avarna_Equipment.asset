@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6bd33de41244720bdba12e83a887994, type: 3}
+  m_Name: Avarna_Equipment
+  m_EditorClassIdentifier: 
+  content:
+  - item: {fileID: 11400000, guid: e19d11ba728434c4c90a8061cf2a6af9, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 71b92cd986e518b41886a52909862d97, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 2f2759c779ff804408b3d289aeb96b97, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 8606483993bae5d43928acef567cea73, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 595500d0e93970b409f0c8741b20094e, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 1252dcdb43059de4d961c2b5a14ca8fa, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: f1b8dbf0d6441d94598b20818b01741e, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: 70e9596d947d8794a915ec7a8014a466, type: 2}
+    value: 0.11111111
+  - item: {fileID: 11400000, guid: e0c0cf1ecb552c649ad29978256d468d, type: 2}
+    value: 0.11111111

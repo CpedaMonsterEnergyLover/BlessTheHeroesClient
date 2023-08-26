@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a6cf2e5b40f40c7a740df856ac7cb47, type: 3}
+  m_Name: Obsidian
+  m_EditorClassIdentifier: 
+  name: Malachite
+  diceType: 2
+  prefab: {fileID: 2130091248491014891, guid: 068c7d7f27174ae45a01c0e8657d0746, type: 3}
+  dices:
+  - values: 000000000100000001000000020000000200000003000000
+    energy: 000000000000000000000000000000000000000000000000
+  - values: 000000000000000001000000010000000200000002000000
+    energy: 000000000000000000000000000000000000000000000000
+  - values: 000000000000000001000000010000000100000002000000
+    energy: 000000000000000000000000000000000000000000000000

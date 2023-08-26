@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d43e7c1ada0f4b39911e47cce67d0749, type: 3}
+  m_Name: AvarnaMountains0
+  m_EditorClassIdentifier: 
+  name: Floor I
+  storyCards:
+  - {fileID: 11400000, guid: 82e41ed5403cd5244baa16f273974ff8, type: 2}
+  - {fileID: 11400000, guid: cc073bf826c367547ac7eb936e741f55, type: 2}
+  - {fileID: 11400000, guid: c1853477bbc07ee4aa747bf9a63af4e2, type: 2}
+  allCards:
+  - {fileID: 11400000, guid: bef6a0ab7a3fc8d47b42f44ea4f38d38, type: 2}
+  - {fileID: 11400000, guid: e484db926a435c1439aca2ddf600e174, type: 2}
+  - {fileID: 11400000, guid: 469021826090835449d1ead5ea6f3f58, type: 2}
+  - {fileID: 11400000, guid: a3d68b4ad3f9b3b4b9d92160e10fbfde, type: 2}
+  - {fileID: 11400000, guid: 3ee2a20d4f009964eba3866b7e87e91c, type: 2}
+  - {fileID: 11400000, guid: 6aa55ae084916334e8800a6a5cc4f08e, type: 2}
+  - {fileID: 11400000, guid: 0b86909455225cf4a8a08dab54fa107f, type: 2}
+  - {fileID: 11400000, guid: ecd0168a199559e40afdeba93b9d2d64, type: 2}
+  - {fileID: 11400000, guid: cc86f23ee4bed904f83293b4c09901bf, type: 2}
+  - {fileID: 11400000, guid: 15f0ea5ec5e97314e862684ec64d8e46, type: 2}
+  - {fileID: 11400000, guid: f59661f5a09462047ab1d03b68b3aa6e, type: 2}
+  - {fileID: 11400000, guid: 47578591e159f224c9df366744049c22, type: 2}
+  - {fileID: 11400000, guid: bf3e514097190f448b5973507f402a11, type: 2}
+  - {fileID: 11400000, guid: 8f9d271dbd375ce4a969ec743a9bcb10, type: 2}
+  - {fileID: 11400000, guid: 563bd37fe6e2f6a48837cb2f315649df, type: 2}
+  - {fileID: 11400000, guid: 498b95e51eb28e84fb47fb595edb2177, type: 2}
+  - {fileID: 11400000, guid: ee089dfd7f0fc8141ae1b26b97d31438, type: 2}
+  - {fileID: 11400000, guid: 3d4cd4c9a8148c44a80caeca85ebfe59, type: 2}
+  - {fileID: 11400000, guid: fffb8445e102cfd488a2260c258fca2d, type: 2}

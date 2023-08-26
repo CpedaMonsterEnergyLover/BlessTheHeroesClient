@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2159d61bcd784f0bab8c5b37954de1a7, type: 3}
+  m_Name: George
+  m_EditorClassIdentifier: 
+  name: George
+  sprite: {fileID: 21300000, guid: 9b7c8aa3a06e4fa46b7ad6b0621cb28e, type: 3}
+  health: 12
+  mana: 14
+  abilities:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  speed: 2
+  attackType: 0
+  armorType: 1
+  equipment:
+  - {fileID: 11400000, guid: 9a24b6d94bdc8094ebfca1360138babb, type: 2}
+  - {fileID: 11400000, guid: e19d11ba728434c4c90a8061cf2a6af9, type: 2}
+  - {fileID: 11400000, guid: 8606483993bae5d43928acef567cea73, type: 2}
+  - {fileID: 0}

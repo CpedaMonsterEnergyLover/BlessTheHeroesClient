@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb4b033857f34ce481464daf891c0d06, type: 3}
+  m_Name: Avarna_Common_ForestThicket
+  m_EditorClassIdentifier: 
+  name: Thicket
+  rarity: 0
+  unique: 0
+  sprite: {fileID: 21300000, guid: c1845a96cf5e29c44b7cfa34c0a388f1, type: 3}
+  description: "Perched in mountain heights, the forest harbors hidden dangers\u2014wolves'
+    eerie calls and lurking bandits amid ancient trees."
+  dropTable:
+    content:
+    - lootTable: {fileID: 11400000, guid: 49475b5eb6a42644182eb5c52af9b7ea, type: 2}
+      value: 0.46
+    - lootTable: {fileID: 11400000, guid: 7668ecf0e35675e47aad2e60cb260cda, type: 2}
+      value: 0.264
+    coinsDropRate: 0
+    coins: {x: 0, y: 0}
+  cardAction:
+    rid: -2
+  evaluatorSet:
+    rid: 7482186820166091012
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 7482186820166091012
+      type: {class: EvaluatorSet, ns: Util.Dice, asm: Assembly-CSharp}
+      data:
+        evaluators:
+        - rid: 7482186820166091013
+        - rid: 7482186820166091015
+        - rid: 7482186820166091017
+        actions:
+        - rid: 7482186820166091014
+        - rid: 7482186820166091016
+        - rid: 7482186820166091018
+    - rid: 7482186820166091013
+      type: {class: RangeEvaluator, ns: Util.Dice, asm: Assembly-CSharp}
+      data:
+        from: 1
+        to: 3
+    - rid: 7482186820166091014
+      type: {class: SpawnCreaturesAction, ns: CardAPI, asm: Assembly-CSharp}
+      data:
+        name: 
+        creature: {fileID: 11400000, guid: ca1593d48b15a7549a1f3ce981654f77, type: 2}
+        amount: 3
+    - rid: 7482186820166091015
+      type: {class: RangeEvaluator, ns: Util.Dice, asm: Assembly-CSharp}
+      data:
+        from: 4
+        to: 5
+    - rid: 7482186820166091016
+      type: {class: SpawnCreaturesAction, ns: CardAPI, asm: Assembly-CSharp}
+      data:
+        name: 
+        creature: {fileID: 11400000, guid: 36c610fb7e2017046be60a3808a37065, type: 2}
+        amount: 2
+    - rid: 7482186820166091017
+      type: {class: SingleEvaluator, ns: Util.Dice, asm: Assembly-CSharp}
+      data:
+        targetRoll: 6
+    - rid: 7482186820166091018
+      type: {class: SpawnCreaturesAction, ns: CardAPI, asm: Assembly-CSharp}
+      data:
+        name: 
+        creature: {fileID: 11400000, guid: e4ee127ef8bb1264fb6a206757dfffda, type: 2}
+        amount: 1
