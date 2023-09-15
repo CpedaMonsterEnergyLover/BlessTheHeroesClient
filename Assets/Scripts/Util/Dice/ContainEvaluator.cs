@@ -3,7 +3,7 @@
 namespace Util.Dice
 {
     [System.Serializable]
-    public class ContainEvaluator : UniversalDiceEvaluator
+    public class ContainEvaluator : EvaluatorBase
     {
         [Header("Contain Evaluator")]
         [SerializeField, Range(1, 6)] private int step;

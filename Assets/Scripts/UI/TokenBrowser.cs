@@ -1,8 +1,11 @@
-﻿using Gameplay.Tokens;
+﻿using System.Linq;
+using Gameplay.Tokens;
+using Gameplay.Tokens.Buffs;
 using TMPro;
 using UI.Elements;
 using UnityEngine;
 using UnityEngine.UI;
+using Util.Enums;
 
 namespace UI
 {
@@ -15,6 +18,8 @@ namespace UI
         [SerializeField] private ProgressBar healthBar;
         [SerializeField] private EquipmentSlot[] equipmentSlots = new EquipmentSlot[4];
         [SerializeField] private AbilitySlot[] abilitySlots = new AbilitySlot[4];
+        [SerializeField] private BuffIcon[] buffIcons = new BuffIcon[16];
+        [SerializeField] private BuffIcon[] debuffIcons = new BuffIcon[16];
         
         // TODO: make Instance private and expose public methods
         public static TokenBrowser Instance { get; private set; }
@@ -41,13 +46,15 @@ namespace UI
             manaBar.SetActive(token.ScriptableToken.Mana != 0);
             healthBar.UpdateValues(token.CurrentHealth, token.MaxHealth);
             UpdateAbilities(token);
+            UpdateBuffs(token);
+            UpdateDebuffs(token);
 
             switch (token)
             {
-                case HeroToken hero:
-                    SelectHero(hero);
+                case IControllableToken controllable:
+                    SelectControllable(controllable);
                     break;
-                case CreatureToken creature:
+                case IUncontrollableToken creature:
                     SelectCreature(creature);
                     break;
             }
@@ -55,22 +62,26 @@ namespace UI
             SubTokenEvents(token);
         }
         
-        private void SelectHero(HeroToken hero)
+        private void SelectControllable(IControllableToken controllable)
         {
-            UpdateEquipment(hero);
-            UpdateHeroStatsText(hero);
+            if (controllable is HeroToken hero)
+                UpdateEquipment(hero);
+            else 
+                ClearEquipment();
+            UpdateControllableStatsText(controllable);
         }
 
-        private void SelectCreature(CreatureToken creature)
+        private void SelectCreature(IUncontrollableToken creature)
         {
             ClearEquipment();
             UpdateCreatureStatsText(creature);
         }
 
-        public void OnActionChanged(HeroToken hero)
+        public void OnActionsChanged(IToken token)
         {
-            foreach (AbilitySlot slot in abilitySlots) 
-                slot.UpdateInteractable(hero);
+            if(ReferenceEquals(SelectedToken, token))
+                foreach (AbilitySlot slot in abilitySlots) 
+                    slot.UpdateInteractable(token);
         }
 
         public void OnManaChanged(int current, int max)
@@ -89,10 +100,10 @@ namespace UI
         {
             switch (token)
             {
-                case HeroToken hero:
-                    UpdateHeroStatsText(hero);
+                case IControllableToken controllable:
+                    UpdateControllableStatsText(controllable);
                     break;
-                case CreatureToken creature:
+                case IUncontrollableToken creature:
                     UpdateCreatureStatsText(creature);
                     break;
             }
@@ -102,9 +113,8 @@ namespace UI
         
         public void UpdateEquipment(HeroToken heroToken)
         {
-#pragma warning disable CS0252, CS0253
-            if(heroToken != SelectedToken) return;
-#pragma warning restore CS0252, CS0253
+            if(!ReferenceEquals(heroToken, SelectedToken)) return;
+            
             for (int i = 0; i < 4; i++)
             {
                 var equip = heroToken.GetEquipmentAt(i);
@@ -124,21 +134,45 @@ namespace UI
             for (int i = 0; i < 4; i++) 
                 abilitySlots[i].SetAbility(abilities[i]);
         }
-      
-        private void UpdateHeroStatsText(HeroToken hero)
+
+        private void UpdateBuffs(IToken token)
         {
-            Scriptable.Hero scriptable = hero.Scriptable;
-            statsText.SetText(
-                $"{scriptable.AttackType}\n" +
-                $"Spell+{hero.SpellPower}\n" +
-                $"Attack+{hero.AttackPower}\n" +
-                $"Defense+{hero.Defense}\n" +
-                $"SPD: {scriptable.Speed}\n" +
-                $"ACT: {hero.ActionPoints}\n" +
-                $"MOV:{hero.MovementPoints}");
+            var buffs = token.BuffManager.ActiveBuffs.Take(16).OrderBy(e => e.Scriptable.name).ToArray();
+            int buffsAmount = buffs.Length;
+            for (int i = 0; i < buffsAmount; i++) buffIcons[i].SetBuff(buffs[i]);
+            for(int i = buffsAmount; i < 16; i++) buffIcons[i].SetBuff(null);
         }
 
-        private void UpdateCreatureStatsText(CreatureToken creature)
+        private void UpdateDebuffs(IToken token)
+        {
+            var buffs = token.BuffManager.ActiveDebuffs.Take(16).OrderBy(e => e.Scriptable.name).ToArray();
+            int buffsAmount = buffs.Length;
+            for (int i = 0; i < buffsAmount; i++) debuffIcons[i].SetBuff(buffs[i]);
+            for(int i = buffsAmount; i < 16; i++) debuffIcons[i].SetBuff(null);
+        }
+
+        public void UpdateEffectsChanges(IToken token, BuffEffect effect)
+        {
+            if (effect.Scriptable.EffectType is BuffEffectType.Negative)
+                UpdateDebuffs(token);
+            else 
+                UpdateBuffs(token);
+        }
+      
+        private void UpdateControllableStatsText(IToken token)
+        {
+            var scriptable = token.ScriptableToken;
+            statsText.SetText(
+                $"{scriptable.AttackType}\n" +
+                $"Spell+{token.SpellPower}\n" +
+                $"Attack+{token.AttackPower}\n" +
+                $"Defense+{token.Defense}\n" +
+                $"SPD: {token.Speed}\n" +
+                $"ACT: {token.ActionPoints}\n" +
+                $"MOV:{token.MovementPoints}");
+        }
+
+        private void UpdateCreatureStatsText(IUncontrollableToken creature)
         {
             statsText.SetText($"ATK: {creature.AttackDiceAmount}\nDEF:{creature.DefenseDiceAmount}\nACT: {creature.ActionPoints}\nMOV: {creature.MovementPoints}");
         }

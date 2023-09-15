@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Util.Enums;
 using Util.LootTables;
 
 namespace Scriptable
@@ -7,6 +8,7 @@ namespace Scriptable
     public class Creature : Token
     {
         [Header("Creature fields")] 
+        [SerializeField] private CreatureType creatureType;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
         [SerializeField, Range(1, 3)] private int defenseDiceAmount;
         [SerializeField] private DiceSet overrideAttackDice;
@@ -16,7 +18,9 @@ namespace Scriptable
         
         public int AttackDiceAmount => attackDiceAmount;
         public int DefenseDiceAmount => defenseDiceAmount;
-        public DropTable DropTable => dropTable;
+        public override DropTable DropTable => dropTable;
+        public CreatureType CreatureType => creatureType;
+        
         
         
         public bool OverrideAttackDice(out DiceSet overrideSet)

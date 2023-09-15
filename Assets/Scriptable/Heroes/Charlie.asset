@@ -16,13 +16,13 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: e6ce50d55d4557241afa7f805e3b0aa5, type: 3}
   health: 20
   mana: 8
+  attackType: 0
+  speed: 2
   abilities:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  speed: 2
-  attackType: 0
   armorType: 3
   equipment:
   - {fileID: 11400000, guid: f1b8dbf0d6441d94598b20818b01741e, type: 2}

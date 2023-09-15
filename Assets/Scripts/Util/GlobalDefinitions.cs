@@ -8,10 +8,16 @@ namespace Util
         private static GlobalDefinitions Instance { get; set; }
         GlobalDefinitions() => Instance = this;
 
-        [SerializeField] private CreatureToken creatureTokenPrefab;
         [SerializeField] private HeroToken heroTokenPrefab;
+        [SerializeField] private CompanionToken companionTokenPrefab;
+        [SerializeField] private CreatureToken creatureTokenPrefab;
+        [SerializeField] private BossToken bossTokenPrefab;
         [SerializeField] private Vector3 tokenOutlineWidth;
         [SerializeField] private Vector3 cardOutlineWidth;
+        [SerializeField] private Sprite damageAnimationSprite;
+        [SerializeField] private Sprite poisonDamageAnimationSprite;
+        [SerializeField] private Sprite defensedDamageAnimationSprite;
+        [SerializeField] private Sprite healingAnimationSprite;
 
         [SerializeField, ColorUsage(true, true)] private Color tokenOutlineGreenColor;
         [SerializeField, ColorUsage(true, true)] private Color tokenOutlineYellowColor;
@@ -22,7 +28,18 @@ namespace Util
         public static Vector4 TokenOutlineGreenColor => Instance.tokenOutlineGreenColor;
         public static Vector4 TokenOutlineYellowColor => Instance.tokenOutlineYellowColor;
         public static Vector4 TokenOutlineRedColor => Instance.tokenOutlineRedColor;
-        
+        public static Sprite DamageAnimationSprite => Instance.damageAnimationSprite;
+        public static Sprite DefensedDamageAnimationSprite => Instance.defensedDamageAnimationSprite;
+        public static Sprite PoisonDamageAnimationSprite => Instance.poisonDamageAnimationSprite;
+        public static Sprite HealingAnimationSprite => Instance.healingAnimationSprite;
+
+
+        public static BossToken CreateBossToken(Scriptable.Boss boss)
+        {
+            var token = Instantiate(Instance.bossTokenPrefab);
+            token.SetScriptable(boss);
+            return token;
+        }
         
         public static CreatureToken CreateCreatureToken(Scriptable.Creature creature)
         {
@@ -35,6 +52,13 @@ namespace Util
         {
             var token = Instantiate(Instance.heroTokenPrefab);
             token.SetScriptable(hero);
+            return token;
+        }
+        
+        public static CompanionToken CreateCompanionToken(Scriptable.Creature creature)
+        {
+            var token = Instantiate(Instance.companionTokenPrefab);
+            token.SetScriptable(creature);
             return token;
         }
     }

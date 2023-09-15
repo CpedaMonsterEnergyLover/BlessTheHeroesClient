@@ -1,9 +1,11 @@
-﻿using Gameplay.Abilities;
+﻿using Cysharp.Threading.Tasks;
+using Gameplay.Abilities;
 using Gameplay.GameField;
-using Gameplay.Interaction;
+using Gameplay.Tokens.Buffs;
 using UI.Elements;
 using UnityEngine;
 using Util.Enums;
+using Util.Tokens;
 
 namespace Gameplay.Tokens
 {
@@ -15,11 +17,19 @@ namespace Gameplay.Tokens
         
         // Methods
         public void SetCard(Card card);
-        public void Damage(int damage, int delayMS = 200);
+        public UniTask Attack(IToken target);
+        public bool Push(Card card);
+        public UniTaskVoid Despawn();
+        public bool IsInAttackRange(IToken attacker);
         
         
         // Properties
+        public GameObject GameObject { get; }
         public bool Initialized { get; }
+        public int ActionPoints { get; }
+        public int MovementPoints { get; }
+        public AttackType AttackType { get; }
+        public int Speed { get; }
         public Scriptable.DiceSet AttackDiceSet { get; }
         public Scriptable.DiceSet MagicDiceSet { get; }
         public Scriptable.DiceSet DefenseDiceSet { get; }
@@ -27,19 +37,38 @@ namespace Gameplay.Tokens
         public int DefenseDiceAmount { get; }
         public Scriptable.Token ScriptableToken { get; }
         public Transform TokenTransform { get; }
+        public TokenOutline TokenOutline { get; }
         public Card TokenCard { get; }
         public int TokenActionPoints { get; }
-        public InteractionLine InteractionLine { get; }
-        public int CurrentMana { get; }
+        public int MaxHealth { get; }
         public int MaxMana { get; }
         public int CurrentHealth { get; }
-        public int MaxHealth { get; }
+        public int CurrentMana { get; }
+        public int SpellPower { get; }
+        public int AttackPower { get; }
+        public int Defense { get; }
+        public bool Dead { get; }
         public Ability[] Abilities { get; }
+        public bool HasAbility(string id, out Ability ability);
         public RangedAttackVisualizer RangedAttackVisualizer { get; }
-
-
-
+        public BuffManager BuffManager { get; }
         
+        
+        // API
+        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null);
+        public void Heal(int health);
+        public void ReplenishMana(int mana);
+        public void SetActionPoints(int amount);
+        public void SetMovementPoints(int amount);
+        public void AddSpellPower(int amount);
+        public void AddSpeed(int amount);
+        public void AddDefense(int amount);
+        public void AddAttackPower(int amount);
+        public void AddMaxMana(int amount);
+        public void AddMaxHealth(int amount);
+
+
+
         // Events
         public delegate void TokenDragEvent(IToken token);
         public static event TokenDragEvent OnStartDragging;

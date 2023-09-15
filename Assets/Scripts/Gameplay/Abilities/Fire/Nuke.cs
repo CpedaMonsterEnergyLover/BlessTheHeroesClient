@@ -13,7 +13,10 @@ namespace Gameplay.Abilities
         [SerializeField] private int damage;
         [SerializeField] private ParticleSystem nukeParticles;
 
-        
+
+        protected override void OnTokenSet(IToken token)
+        {
+        }
 
         public override bool ValidateTarget(IInteractable target)
         {
@@ -38,7 +41,7 @@ namespace Gameplay.Abilities
             // Animate explosion
             ManageTween();
             nukeParticles.Play();
-            foreach (CreatureToken creature in card.Creatures) 
+            foreach (IUncontrollableToken creature in card.Creatures) 
                 creature.Damage(damage);
             castBalllight.intensity = 15f;
             castBalllight.range = 3f;

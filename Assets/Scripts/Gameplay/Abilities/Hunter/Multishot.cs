@@ -33,20 +33,22 @@ namespace Gameplay.Abilities.Hunter
         // Class methods
         protected override void OnTokenSet(IToken token)
         {
-            base.OnTokenSet(token);
-            Token.OnAttackPerformed += OnAttackPerformed;
+            Caster.OnAttackPerformed += OnAttackPerformed;
         }
 
-        private void OnDisable() => Token.OnAttackPerformed -= OnAttackPerformed;
+        private void OnDisable() => Caster.OnAttackPerformed -= OnAttackPerformed;
 
 
         private void OnAttackPerformed(IToken token, IToken attackTarget, AttackType attackType, int damage, int _)
         {
             if(token is not HeroToken ||
+               attackTarget is not CreatureToken creatureToken ||
                attackType is not AttackType.Ranged) return;
 
             Card card = attackTarget.TokenCard;
-            var targets = card.Creatures.OrderBy(_ => Random.value).Take(stage).ToArray();
+            var creatures = card.Creatures;
+            creatures.Remove(creatureToken);
+            var targets = creatures.OrderBy(_ => Random.value).Take(stage).ToArray();
             if(targets.Length == 0)
             {
                 UpgradeStage();
@@ -74,13 +76,7 @@ namespace Gameplay.Abilities.Hunter
             stage++;
             if (stage == 3) stage = 0;
             
-            UpdateSlotIcon();
-        }
-
-        private void UpdateSlotIcon()
-        {
-            if(AbilitySlot is null) return;
-            AbilitySlot.SetIcon(Icon);
+            if(AbilitySlot is not null) AbilitySlot.UpdateIcon();
         }
     }
 }

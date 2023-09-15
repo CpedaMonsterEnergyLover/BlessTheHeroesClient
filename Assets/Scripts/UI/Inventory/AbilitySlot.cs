@@ -63,7 +63,6 @@ namespace UI
             if (ability is PassiveAbility)
             {
                 frameImage.enabled = false;
-                
                 icon.transform.localScale = Vector3.one * 0.9f;
             }
             else
@@ -101,7 +100,18 @@ namespace UI
             SelfUpdateInteractable();
         }
 
-        public void SetIcon(Sprite newIcon) => icon.sprite = newIcon;
+        public void UpdateIcon() => icon.sprite = ability.Icon;
+        
+        public void UpdateManacost()
+        {
+            if (ability is CastableAbility castable)
+            {
+                manaText.transform.parent.gameObject.SetActive(true);
+                manaText.SetText(castable.Manacost.ToString());
+            }
+            else
+                manaText.transform.parent.gameObject.SetActive(false);
+        }
 
 
         // IDragHandler
@@ -142,10 +152,10 @@ namespace UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if(ability is null or not InstantAbility) return;
+            if(ability is not InstantAbility instant) return;
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
             
-            AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, ability);
+            AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, instant);
         }
     }
 }

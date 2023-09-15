@@ -121,7 +121,7 @@ namespace Editor
                     if (GUILayout.Button("Add evaluator"))
                     {
                         manager.EvaluatorSet.AddEvaluator(
-                            (UniversalDiceEvaluator) Activator.CreateInstance(evaluatorTypes[selectedEvaluatorIndex]));
+                            (EvaluatorBase) Activator.CreateInstance(evaluatorTypes[selectedEvaluatorIndex]));
                     }
                     EditorGUILayout.Separator();
                     names = new List<string>();
@@ -155,7 +155,7 @@ namespace Editor
 
         private void UpdateEvaluatorTypes()
         {
-            Type parentType = typeof(Util.Dice.UniversalDiceEvaluator);
+            Type parentType = typeof(Util.Dice.EvaluatorBase);
             evaluatorTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.IsSubclassOf(parentType) && t != parentType)

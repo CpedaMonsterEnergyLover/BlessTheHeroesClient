@@ -3,7 +3,7 @@
 namespace Util.Dice
 {
     [System.Serializable]
-    public class RangeEvaluator : UniversalDiceEvaluator
+    public class RangeEvaluator : EvaluatorBase
     {
         [Header("Range Evaluator")]
         [SerializeField] private int from;

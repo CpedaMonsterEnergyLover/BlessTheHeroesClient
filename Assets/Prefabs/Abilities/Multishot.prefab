@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e52301c9fb414dad8477df0bdb1cc131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: Multishot
+  title: Multishot
   icon: {fileID: 98178660, guid: 0fb91064579f7db49b88a1c16830633c, type: 3}
   detailDescription: With each ranged attack, hunter adds additional arrow to his
     next shot. Each additional arrow then will be shoot at random enemy on the same

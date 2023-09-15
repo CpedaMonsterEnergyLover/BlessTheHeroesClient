@@ -6,26 +6,26 @@ namespace Gameplay.Abilities
 {
     public abstract class Ability : MonoBehaviour
     {
-        [Header("BaseAbility Fields")] 
-        [SerializeField] private new string name;
+        [Header("BaseAbility Fields")]
+        [SerializeField] protected string title;
         [SerializeField] protected Sprite icon;
-        [SerializeField, TextArea] private string detailDescription;
-        [SerializeField, TextArea] private string literalDescription;
+        [SerializeField, TextArea] protected string detailDescription;
+        [SerializeField, TextArea] protected string literalDescription;
 
-        protected IToken Token { get; private set; }
+        protected IToken Caster { get; private set; }
         public AbilitySlot AbilitySlot { get; set; }
-        public string Name => name;
+        public virtual string Title => title;
         public virtual Sprite Icon => icon;
-        public string DetailDescription => detailDescription;
-        public string LiteralDescription => literalDescription;
+        public virtual string DetailDescription => detailDescription;
+        public virtual string LiteralDescription => literalDescription;
 
+
+
+        protected abstract void OnTokenSet(IToken token);
         
-
-        protected virtual void OnTokenSet(IToken token){ }
-
         public void SetToken(IToken token)
         {
-            Token = token;
+            Caster = token;
             OnTokenSet(token);
         }
     }

@@ -11,7 +11,7 @@ namespace Gameplay.Interaction
     {
         [SerializeField] private InteractionManager interactionManager;
 
-        private IToken token;
+        private IControllableToken token;
         private static InteractionManager InteractionManager { get; set; }
         
         public static bool IsDragging { get; private set; }
@@ -41,12 +41,13 @@ namespace Gameplay.Interaction
 
         private void OnCastStart(Ability ability)
         {
+            var selectedToken = TokenBrowser.Instance.SelectedToken;
             if(ability is not ActiveAbility active ||
-                TokenBrowser.Instance.SelectedToken is not HeroToken hero || 
-               !active.ApproveCast(hero)) return;
+               selectedToken is not IControllableToken controllable ||
+               !active.ApproveCast(selectedToken)) return;
             
             IsDragging = true;
-            token = TokenBrowser.Instance.SelectedToken;
+            token = controllable;
             active.OnCastStart();
             var interactionResult = InteractionManager.GetInteractionResult();
             token.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
@@ -77,20 +78,25 @@ namespace Gameplay.Interaction
             var interactionResult = InteractionManager.GetInteractionResult();
             token.InteractionLine.SetEnabled(false, interactionResult.IntersectionPoint);
             bool valid = active.ValidateTarget(interactionResult.Target);
-            if(valid) Cast(token, ability);
+            if(valid) Cast(token, active);
             token = null;
         }
 
-        public static void Cast(IToken token, Ability ability)
+        public static void Cast(IToken caster, CastableAbility castable)
         {
-            if (ability is not CastableAbility castable ||
-                token is not HeroToken hero || 
-                !castable.ApproveCast(hero) ||
-                !((IHasMana) hero).DrainMana(castable.Manacost)) return;
+            if (!castable.ApproveCast(caster)) return;
+
+            var target = castable is InstantAbility 
+                ? caster.TokenCard
+                : InteractionManager.GetInteractionResult().Target;
+            
+            if(castable is ActiveAbility active && !active.ValidateTarget(target)) return;
+            
+            if(castable.Manacost > 0 && !((IHasMana) caster).DrainMana(castable.Manacost)) return;
             
             castable.SetOnCooldown();
-            castable.Cast(InteractionManager.GetInteractionResult().Target);
-            hero.SetActionPoints(hero.ActionPoints - 1);
+            castable.Cast(target);
+            if(castable.RequiresAct) caster.SetActionPoints(caster.ActionPoints - 1);
         }
     }
 }

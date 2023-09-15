@@ -3,7 +3,7 @@
 namespace Util.Dice
 {
     [System.Serializable]
-    public class SingleEvaluator : UniversalDiceEvaluator
+    public class SingleEvaluator : EvaluatorBase
     {
         [Header("Single Evaluator")]
         [SerializeField] private int targetRoll;

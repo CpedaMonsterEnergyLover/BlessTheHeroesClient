@@ -44,10 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba5d68932a314f3fbbcd2d0e9908df98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: Eagle Eye
-  type: 0
+  title: Eagle Eye
   icon: {fileID: -486419617, guid: 0fb91064579f7db49b88a1c16830633c, type: 3}
-  manacost: 1
-  cooldown: 1
   detailDescription: Opens any closed card on the field.
   literalDescription: 
+  manacost: 1
+  cooldown: 1

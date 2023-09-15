@@ -1,5 +1,4 @@
 ﻿using Gameplay.GameCycle;
-using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -42,13 +41,13 @@ namespace Util.Tokens
         {
             switch (interactable)
             {
-                case HeroToken hero:
-                    if(hero.ActionPoints == 0)
+                case IControllableToken controllable:
+                    if(controllable.ActionPoints == 0)
                         SetColor(GlobalDefinitions.TokenOutlineYellowColor, 1);
                     else 
                         SetColor(GlobalDefinitions.TokenOutlineGreenColor, 0);
                     break;
-                case CreatureToken:
+                case IUncontrollableToken:
                     if(TurnManager.CurrentStage is TurnStage.PlayersTurn)
                        SetColor(GlobalDefinitions.TokenOutlineGreenColor, 0); 
                     else 

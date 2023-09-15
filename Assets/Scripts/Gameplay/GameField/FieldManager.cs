@@ -112,9 +112,9 @@ namespace Gameplay.GameField
             return true;
         }
 
-        public static List<CreatureToken> GetAllCreatures()
+        public static List<IUncontrollableToken> GetAllCreatures()
         {
-            List<CreatureToken> creatures = new();
+            List<IUncontrollableToken> creatures = new();
             foreach (var (pos, card) in Cards)
             {
                 if(card.IsOpened)

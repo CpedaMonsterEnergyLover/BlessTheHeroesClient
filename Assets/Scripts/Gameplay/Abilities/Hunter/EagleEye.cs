@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.GameField;
 using Gameplay.Interaction;
+using Gameplay.Tokens;
 
 namespace Gameplay.Abilities.Hunter
 {
@@ -11,6 +12,10 @@ namespace Gameplay.Abilities.Hunter
         }
 
         public override void OnCastEnd()
+        {
+        }
+
+        protected override void OnTokenSet(IToken token)
         {
         }
 

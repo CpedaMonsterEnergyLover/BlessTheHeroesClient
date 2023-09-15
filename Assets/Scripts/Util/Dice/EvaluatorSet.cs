@@ -9,10 +9,10 @@ namespace Util.Dice
     [Serializable]
     public class EvaluatorSet
     {
-        [SerializeReference] private List<UniversalDiceEvaluator> evaluators = new();
+        [SerializeReference] private List<EvaluatorBase> evaluators = new();
         [SerializeReference] private List<CardAction> actions = new ();
         
-        public void AddEvaluator(UniversalDiceEvaluator evaluator) => evaluators.Add(evaluator);
+        public void AddEvaluator(EvaluatorBase evaluatorBase) => evaluators.Add(evaluatorBase);
         public void AddAction(CardAction action) => actions.Add(action);
 
         public string Description

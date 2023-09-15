@@ -13,6 +13,6 @@ namespace CardAPI
 
 
         public abstract string Description { get; }
-        public abstract void Execute(Card card, HeroToken executor, object data = null);
+        public abstract void Execute(Card card, IControllableToken executor, object data = null);
     }
 }

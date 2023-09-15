@@ -7,7 +7,6 @@ using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Util;
 using Random = UnityEngine.Random;
 
@@ -20,7 +19,11 @@ namespace Gameplay.Abilities
         [SerializeField] private ParticleSystem stormParticles;
         [SerializeField] private Light stormLight;
 
+
         
+        protected override void OnTokenSet(IToken token)
+        {
+        }
 
         public override bool ValidateTarget(IInteractable target)
         {
@@ -33,9 +36,9 @@ namespace Gameplay.Abilities
             AnimateCast(true);
             
             // Throw dice
-            DiceUtil.CaclulateMagicDiceThrow(diceAmount, DiceManager.MagicDiceSet, out int damage, out int[] sides);
+            DiceUtil.CaclulateMagicDiceThrow(diceAmount, Caster.MagicDiceSet, out int damage, out int[] sides);
             damage = Mathf.Clamp(damage, 1, 10);
-            await DiceManager.ThrowReplay(DiceManager.MagicDiceSet, diceAmount, sides);
+            await DiceManager.ThrowReplay(Caster.MagicDiceSet, diceAmount, sides);
             AnimateCast(false);
 
             // Animate storm

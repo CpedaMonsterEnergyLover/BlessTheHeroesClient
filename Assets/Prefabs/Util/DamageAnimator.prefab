@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4572197748515326178}
   - component: {fileID: 3191283284075894622}
   - component: {fileID: 2028780058775617873}
-  m_Layer: 6
-  m_Name: DamagePopup
+  m_Layer: 0
+  m_Name: DamageAnimator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -180,7 +180,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.082, y: 0}
+  m_AnchoredPosition: {x: -0.1, y: 0}
   m_SizeDelta: {x: 3.86, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &8602257238679864121
@@ -283,7 +283,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -5
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

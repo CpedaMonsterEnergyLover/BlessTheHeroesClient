@@ -13,31 +13,33 @@ namespace Util.Tokens
     {
         [SerializeField] private int width;
         [SerializeField] private float tokenSize;
-        [SerializeField] private TokenLayoutMode layoutMode;
+        [SerializeField] private CardSide cardSide;
         [SerializeField] private Card card;
 
         private float fullRowOffset;
         private float halfTokenSize;
         private bool playingAnimation;
 
-        private enum TokenLayoutMode
+        
+        
+        private enum CardSide
         {
-            Up = 1,
-            Down = -1
+            Creatures = -1,
+            Heroes = 1
         }
+        
+        private void Awake() => Prepare();
 
-        private void Awake() => PrepareVariables();
-
-        private void PrepareVariables()
+        private void Prepare()
         {
             halfTokenSize = tokenSize / 2f;
             fullRowOffset = width * tokenSize / -2f + halfTokenSize;
         }
 
-        public void UpdateLayout(Transform except = null, bool instantly = true)
+        public void UpdateLayout(Transform toIgnore = null, bool instantly = true)
         {
             int childCount = transform.childCount;
-            if(childCount == 0) return;
+            if (childCount == 0) return;
             
             int rows = Mathf.FloorToInt(childCount / (float) width);
             int lastRow = childCount % width;
@@ -46,7 +48,7 @@ namespace Util.Tokens
             {
                 foreach (Transform child in transform)
                 {
-                    if(child == except) continue;
+                    if(child == toIgnore) continue;
                     child.localPosition = GetChildPosition(child.GetSiblingIndex(), rows, lastRow);
                 }
             }
@@ -56,7 +58,7 @@ namespace Util.Tokens
                 var toAnimate = new List<(Transform, Vector3)>();
                 foreach (Transform child in transform)
                 {
-                    if(child == except) continue;
+                    if(child == toIgnore) continue;
                     initialPositions.Add(child.localPosition);
                     toAnimate.Add((child, GetChildPosition(child.GetSiblingIndex(), rows, lastRow)));
                 }
@@ -88,35 +90,41 @@ namespace Util.Tokens
 
         private Vector3 GetChildPosition(int siblingIndex, int rows, int lastRow)
         {
-            int pos = siblingIndex;
-            int col = pos % width;
-            int row = Mathf.FloorToInt(pos / (float) width);
+            if (cardSide is CardSide.Creatures && card.HasBoss) return BossPosition;
+            
+            int col = siblingIndex % width;
+            int row = Mathf.FloorToInt(siblingIndex / (float) width);
             float xOffset = row == rows ? fullRowOffset + (width - lastRow) * tokenSize / 2f : fullRowOffset;
             float x = col * tokenSize;
             float y = row * tokenSize;
-            return new Vector3(x + xOffset, 0, y * (int) layoutMode); 
+            return new Vector3(x + xOffset, 0, y * (int) cardSide); 
         }
 
         public Vector3 GetLastChildPosition()
         {
+            if (cardSide is CardSide.Creatures && card.HasBoss) return BossPosition;
+
             int childCount = transform.childCount;
             int rows = Mathf.FloorToInt(childCount / (float) width);
             int lastRow = childCount % width;
             return GetChildPosition(childCount - 1, rows, lastRow); 
         }
 
-        public void AttachToken(IToken token, bool resetPosition, bool except = false, bool instantly = true)
+        public Vector3 BossPosition => new(0, 0, -0.235f);
+
+        public void AttachToken(IToken token, bool resetPosition, bool ignore = false, bool instantly = true)
         {
             Transform t = token.TokenTransform;
             t.SetParent(transform, !resetPosition);
             if(resetPosition) t.localPosition = Vector3.zero;
-            UpdateLayout(except ? token.TokenTransform : null, instantly);
+            UpdateLayout(ignore ? token.TokenTransform : null, instantly);
         }
+
 
 
         private void OnValidate()
         {
-            PrepareVariables();
+            Prepare();
             UpdateLayout();
         }
 

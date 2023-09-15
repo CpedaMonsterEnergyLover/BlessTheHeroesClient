@@ -19497,18 +19497,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c804a3ec117b4279a5e41e29888970b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: Firestorm
+  title: Fire Storm
   icon: {fileID: 21300000, guid: 0d852f5493cecf94a90183f3f83ce947, type: 3}
-  manacost: 5
-  cooldown: 1
   detailDescription: Throw a set of 2 magic dices. Deals damage equal to dice throw
     result randomly distributed among all enemies on a targeted location.
   literalDescription: Firestorm goes brrrr
+  manacost: 5
+  cooldown: 1
   castBallParticles: {fileID: 1107963080624820038}
   castBalllight: {fileID: 5218576402556242599}
   castBallDefaultIntensity: 3
   diceAmount: 2
-  diceSet: {fileID: 11400000, guid: 60a022997db6a3a4fad557fd89b5ddba, type: 2}
   stormParticles: {fileID: 3745325275284278165}
   stormLight: {fileID: 8815313117432326415}
 --- !u!1001 &976177174063994864

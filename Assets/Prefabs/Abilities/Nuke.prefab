@@ -46,14 +46,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b746914c386445e2ad4e38ca269384fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: Nuke
-  type: 0
+  title: Nuke
   icon: {fileID: 21300000, guid: 9725fb87facc42a4984598500f76e0fb, type: 3}
-  manacost: 0
-  cooldown: 0
   detailDescription: Throw a set of 3 magic dices. Deals damage equal to dice throw
     result to all enemies on selected location.
   literalDescription: BA-DUMMMMM!!!!!!
+  manacost: 0
+  cooldown: 0
   castBallParticles: {fileID: 875626620857668927}
   castBalllight: {fileID: 5416287592148816094}
   castBallDefaultIntensity: 3

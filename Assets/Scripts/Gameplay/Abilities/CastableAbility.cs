@@ -8,18 +8,22 @@ namespace Gameplay.Abilities
 {
     public abstract class CastableAbility : Ability
     {
-        [SerializeField] private int manacost;
+        [SerializeField] protected int manacost;
         [SerializeField] private uint cooldown;
-        
-        public int Manacost => manacost;
+
+        public virtual bool RequiresAct => true;
+        public virtual int Manacost => manacost;
         public uint BaseCooldown => cooldown;
         public uint CurrentCooldown { get; private set; }
         
+        
+        
         public abstract UniTask Cast(IInteractable target);
-        public virtual bool ApproveCast(HeroToken hero)
-            => hero.ActionPoints != 0 &&
-               CurrentCooldown == 0 &&
-               Manacost <= hero.CurrentMana;
+        
+        public bool ApproveCast(IToken token)
+            => CurrentCooldown == 0 &&
+               Manacost <= token.CurrentMana && 
+               (!RequiresAct || token.ActionPoints > 0);
         
         private void Awake()
         {

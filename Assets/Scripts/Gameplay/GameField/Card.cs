@@ -25,25 +25,32 @@ namespace Gameplay.GameField
         [SerializeField] private TokenOutline tokenOutline;
         [SerializeField] private TMP_Text eventText;
         
-        private readonly List<CreatureToken> creatures = new(8);
-        private readonly List<HeroToken> heroes = new(4);
+        private readonly List<IUncontrollableToken> creatures = new(8);
+        private readonly List<IControllableToken> heroes = new(8);
 
-
+#if UNITY_EDITOR
+        public Scriptable.Token debug_TokenToSpawn;
+#endif
+        
+        
+        
         public bool OpenOnStart { get; set; }
         public bool IsOpened { get; private set; }
         public Scriptable.Location Scriptable { get; private set; }
         public Vector2Int GridPosition { get; private set; }
         public TokenOutline TokenOutline => tokenOutline;
-        public List<CreatureToken> Creatures => creatures.ToList();
-        public bool FullOfCreatures => creatures.Count == 8;
-        public List<HeroToken> Heroes => heroes.ToList();
-        public bool HasHeroes => heroes.Count > 0;
+        public List<IUncontrollableToken> Creatures => creatures.ToList();
+        public List<IControllableToken> Heroes => heroes.ToList();
+        public int CreaturesAmount => creatures.Count;
+        public int HeroesAmount => heroes.Count;
         public bool IsPlayingHeroesAnimation => heroesLayout.IsPlayingAnimation;
         public bool IsPlayingCreaturesAnimation => creaturesLayout.IsPlayingAnimation;
         public bool IsPlayingAnimation => 
             animationSequence is not null ||
             IsPlayingHeroesAnimation || 
             IsPlayingCreaturesAnimation;
+
+        public bool HasBoss => creatures.FirstOrDefault(c => c is BossToken) is not null;
         public bool HasAvailableAction => Scriptable.CardAction is not null;
         private Sequence animationSequence;
 
@@ -128,71 +135,106 @@ namespace Gameplay.GameField
             foreach (Scriptable.Item item in drop) 
                 InventoryManager.Instance.AddItem(item, 1);
         }
+        
+        public bool HasSpaceForHero() => HeroesAmount < 8;
+        public bool HasSpaceForBoss() => !HasBoss;
+        public bool HasSpaceForCreature() => CreaturesAmount < 8 && !HasBoss;
+        
+        public bool HasSpaceForToken(IToken token)
+        {
+            return token switch
+            {
+                IControllableToken => HasSpaceForHero(),
+                BossToken => HasSpaceForBoss(),
+                _ => HasSpaceForCreature()
+            };
+        }
 
+        // TODO: find BUGZ bcz i removed check for having a space
         public void AddToken(IToken token, bool resetPosition = false, bool except = false, bool instantly = true)
         {
-            switch (token)
+            if (token is IControllableToken controllable)
             {
-                case CreatureToken creature:
-                    if (creatures.Count >= 8) return;
-                    creatures.Add(creature);
-                    creaturesLayout.AttachToken(creature, resetPosition, except, instantly);
-                    break;
-                case HeroToken hero:
-                    if (heroes.Count >= 4) return;
-                    heroes.Add(hero);
-                    heroesLayout.AttachToken(hero, resetPosition, except, instantly);
-                    break;
+                heroes.Add(controllable);
+                heroesLayout.AttachToken(controllable, resetPosition, except, instantly);
             }
+            else if(token is IUncontrollableToken uncontrollable)
+            {
+                if (uncontrollable is BossToken)
+                    PushOrDespawnCreatures();
 
+                creatures.Add(uncontrollable);
+                creaturesLayout.AttachToken(token, resetPosition, except, instantly);
+            }
             token.SetCard(this);
+        }
+
+        public async UniTask AddTokenAsync(IToken token)
+        {
+            AddToken(token, resetPosition: true, instantly: false);
+            await UniTask.WhenAll(
+                UniTask.WaitUntil(() => !IsPlayingCreaturesAnimation), 
+                UniTask.WaitUntil(() => token.Initialized));
         }
 
         public void RemoveToken(IToken token, bool instantly = true)
         {
-            switch (token)
+            if (token is IControllableToken controllable)
             {
-                case CreatureToken creature:
-                    if (creatures.Contains(creature))
-                    {
-                        creatures.Remove(creature);
-                        creaturesLayout.UpdateLayout(instantly: instantly);
-                    }
-                    break;
-                case HeroToken hero:
-                    if (heroes.Contains(hero))
-                    {
-                        heroes.Remove(hero);
-                        heroesLayout.UpdateLayout(instantly: instantly);
-                    }
-                    break;
+                if (heroes.Contains(controllable))
+                {
+                    heroes.Remove(controllable);
+                    heroesLayout.UpdateLayout(instantly: instantly);
+                }
+            } else if (token is IUncontrollableToken uncontrollable)
+            {
+                if (creatures.Contains(uncontrollable))
+                {
+                    creatures.Remove(uncontrollable);
+                    creaturesLayout.UpdateLayout(instantly: instantly);
+                }
             }
         }
 
+        public void PushOrDespawnCreatures()
+        {
+            var neighbours = new List<Card>();
+            PatternSearch.IteratePlus(GridPosition, 1, v =>
+            {
+                if (FieldManager.GetCard(v, out Card n) && n.IsOpened) neighbours.Add(n);
+            }, includeCenter: false);
+            foreach (IUncontrollableToken creature in Creatures)
+            {
+                if(creature is BossToken) return;
+
+                neighbours = neighbours.OrderBy(_ => Random.value).ToList();
+                bool pushed = false;
+                foreach (Card neighbour in neighbours)
+                {
+                    pushed = creature.Push(neighbour);
+                    if(pushed)
+                        break;
+                }
+
+                if(!pushed) creature.Despawn().Forget();
+            }
+        }
+        
         public void RemoveTokenWithoutUpdate(IToken token)
         {
-            switch (token)
-            {
-                case CreatureToken creature:
-                    creatures.Remove(creature);
-                    break;
-                case HeroToken hero:
-                    heroes.Remove(hero);
-                    break;
-            }
+            if (token is IControllableToken controllable)
+                heroes.Remove(controllable);
+            else if (token is IUncontrollableToken uncontrollable)
+                creatures.Remove(uncontrollable);
         }
 
-        public void UpdateLayoutWithoutRemoval(IToken token, bool instantly = false)
+        public async UniTask UpdateLayout(IToken token, bool instantly = false)
         {
-            switch (token)
-            {
-                case CreatureToken:
-                    creaturesLayout.UpdateLayout(instantly: instantly);
-                    break;
-                case HeroToken:
-                    heroesLayout.UpdateLayout(instantly: instantly);
-                    break;
-            }
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            if (token is IControllableToken)
+                heroesLayout.UpdateLayout(instantly: instantly);
+            else if (token is IUncontrollableToken) 
+                creaturesLayout.UpdateLayout(instantly: instantly);
         }
         
         public void SetScriptable(Scriptable.Location location)
@@ -209,6 +251,8 @@ namespace Gameplay.GameField
 
             foreach (Scriptable.Hero hero in heroesToSpawn)
             {
+                if(!HasSpaceForHero()) return;
+                
                 IToken token = GlobalDefinitions.CreateHeroToken(hero);
                 AddToken(token, resetPosition: true, instantly: false);
                 await UniTask.WhenAll(
@@ -223,15 +267,16 @@ namespace Gameplay.GameField
         {
             return token switch
             {
+                IControllableToken => heroesLayout.GetLastChildPosition(),
+                BossToken => creaturesLayout.BossPosition,
                 CreatureToken => creaturesLayout.GetLastChildPosition(),
-                HeroToken => heroesLayout.GetLastChildPosition(),
                 _ => Vector3.zero
             };
         }
-
+        
         public void OutlineAttackableCreatures(bool isEnabled)
         {
-            foreach (CreatureToken token in creatures) 
+            foreach (IUncontrollableToken token in creatures) 
                 token.TokenOutline.SetEnabled(isEnabled && token.CanBeTargeted);
         }
 

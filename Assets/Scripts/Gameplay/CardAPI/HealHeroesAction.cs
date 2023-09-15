@@ -17,7 +17,7 @@ namespace CardAPI
         public override string Description
             => $"restores {amount} health to {(selector == TargetSelector.Card ? " all heroes on that location." : " a hero.")}";
 
-        public override void Execute(Card card, HeroToken executor, object data = null)
+        public override void Execute(Card card, IControllableToken executor, object data = null)
         {
             switch (selector)
             {

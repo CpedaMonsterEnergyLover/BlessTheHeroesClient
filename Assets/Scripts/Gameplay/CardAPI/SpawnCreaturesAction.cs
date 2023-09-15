@@ -19,7 +19,7 @@ namespace CardAPI
         public override string Description 
             =>  $"spawns {(amount == -1 ? "D" : amount)} x {creature.Name}";
         
-        public override void Execute(Card card, HeroToken executor, object data = null)
+        public override void Execute(Card card, IControllableToken executor, object data = null)
         {
             int amountToSpawn = amount == -1 
                 ? data is int value
@@ -33,11 +33,9 @@ namespace CardAPI
         {
             for (int i = 0; i < amountToSpawn; i++)
             {
-                IToken token = GlobalDefinitions.CreateCreatureToken(creature);
-                card.AddToken(token, resetPosition: true, instantly: false);
-                await UniTask.WhenAll(
-                    UniTask.WaitUntil(()=> !card.IsPlayingCreaturesAnimation), 
-                    UniTask.WaitUntil(() => token.Initialized));
+                if(!card.HasSpaceForCreature()) return;
+                
+                await card.AddTokenAsync(GlobalDefinitions.CreateCreatureToken(creature));
             }
         }
     }

@@ -5,7 +5,6 @@ using Gameplay.Tokens;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Util.Enums;
 
 namespace UI.Tooltips
 {
@@ -29,7 +28,7 @@ namespace UI.Tooltips
                 return;
             }
 
-            titleText.SetText(ability.Name);
+            titleText.SetText(ability.Title);
             detailDescriptionText.SetText(ability.DetailDescription);
             literalDescriptionText.SetText(ability.LiteralDescription);
             
@@ -51,7 +50,7 @@ namespace UI.Tooltips
             // State text
             if(TokenBrowser.Instance.SelectedToken is HeroToken hero && ability is CastableAbility castable1)
             {
-                stateText.SetText(hero.ActionPoints <= 0
+                stateText.SetText(castable1.RequiresAct && hero.ActionPoints <= 0
                     ? "<color=red>Not enough ACT"
                     : castable1.CurrentCooldown > 0
                         ? "<color=red>Ability is on cooldown" 

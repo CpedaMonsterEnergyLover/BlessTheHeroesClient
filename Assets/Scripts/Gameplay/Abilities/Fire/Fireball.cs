@@ -12,12 +12,16 @@ namespace Gameplay.Abilities
         [Header("Fireball Fields")]
         [SerializeField] private int attackDiceAmount;
         [SerializeField] private ParticleSystem explosionParticles;
-        
+
 
         
+        protected override void OnTokenSet(IToken token)
+        {
+        }
+
         public override bool ValidateTarget(IInteractable target)
         {
-            return target is CreatureToken;
+            return target is CreatureToken { CanBeTargeted: true };
         }
 
         public override async UniTask Cast(IInteractable target)
@@ -26,8 +30,8 @@ namespace Gameplay.Abilities
             AnimateCast(true);
 
             // Throw dice
-            Util.DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, DiceManager.MagicDiceSet, out int damage, out int[] sides);
-            await DiceManager.ThrowReplay(DiceManager.MagicDiceSet, attackDiceAmount, sides);
+            Util.DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, Caster.MagicDiceSet, out int damage, out int[] sides);
+            await DiceManager.ThrowReplay(Caster.MagicDiceSet, attackDiceAmount, sides);
             
             // Animate fireball
             var tween = transform
@@ -44,7 +48,7 @@ namespace Gameplay.Abilities
             await UniTask.WaitUntil(() => !explosionParticles.isPlaying);
             transform.localPosition = new Vector3(0, 0.5f, 0);
         }
-        
+
         private void AnimateExplosionLight()
         {
             ManageTween();

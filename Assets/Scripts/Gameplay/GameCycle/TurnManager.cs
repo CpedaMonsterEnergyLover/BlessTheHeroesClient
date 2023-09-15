@@ -77,8 +77,14 @@ namespace Gameplay.GameCycle
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
             OnMonstersTurnStarted?.Invoke();
             turnBrowser.SetPassButtonEnabled(false);
-            foreach (CreatureToken creature in FieldManager.GetAllCreatures()) 
+            foreach (IUncontrollableToken creature in FieldManager.GetAllCreatures())
+            {
+                if(creature.Dead) continue;
+                creature.TokenOutline.SetEnabled(true);
                 await creature.MakeTurn();
+                await UniTask.Delay(TimeSpan.FromMilliseconds(200));
+                creature.TokenOutline.SetEnabled(false);
+            }
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
             NextTurn();
         }

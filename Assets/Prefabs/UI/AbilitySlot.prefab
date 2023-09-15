@@ -399,7 +399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 2018273560359630850}
   frameImage: {fileID: 9122447216173829260}
-  text: {fileID: 2018273560312551870}
+  manaText: {fileID: 2018273560312551870}
   cooldownText: {fileID: 6204026706752265219}
 --- !u!1 &2018273561597704719
 GameObject:
@@ -538,7 +538,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

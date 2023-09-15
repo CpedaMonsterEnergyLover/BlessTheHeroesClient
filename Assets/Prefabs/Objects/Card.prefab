@@ -225,6 +225,7 @@ MonoBehaviour:
   heroesLayout: {fileID: 1667439364564034225}
   tokenOutline: {fileID: 7624368474232867309}
   eventText: {fileID: 4047672134410262727}
+  debug_TokenToSpawn: {fileID: 0}
 --- !u!114 &7624368474232867309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4146,7 +4147,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 4
   tokenSize: 0.43
-  layoutMode: -1
+  cardSide: 1
   card: {fileID: 2867057023056321799}
 --- !u!1 &5447027056706281198
 GameObject:
@@ -4194,7 +4195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 4
   tokenSize: 0.43
-  layoutMode: 1
+  cardSide: -1
   card: {fileID: 2867057023056321799}
 --- !u!1 &9045937538202796900
 GameObject:

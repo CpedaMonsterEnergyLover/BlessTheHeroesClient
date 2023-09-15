@@ -6,42 +6,76 @@ using TMPro;
 using UnityEngine;
 using Util.Interface;
 
-namespace Gameplay.Tokens
+namespace Util.Tokens
 {
     public class DamageAnimator : MonoBehaviour, IHasAnimation
     {
         [SerializeField] private SpriteRenderer sprite;
         [SerializeField] private TMP_Text text;
 
+
         private bool isPlayingAnimation;
         private Sequence currentSequence;
         private CancellationTokenSource cts = new();
-        
-        
+
+
+        private void OnDestroy()
+        {
+            if (cts is not null)
+            {
+                cts.Cancel();
+                cts.Dispose();
+                cts = null;
+            }
+        }
+
         // Class methods
-        public async UniTask PlayAsync(int damage, int delayMS)
+        public async UniTask PlayDamage(int damage, int delayMS, Sprite overrideDamageSprite)
         {
             if(cts is not null) cts.Cancel();
             cts = new CancellationTokenSource();
-            await AnimationTask(damage, delayMS, cts.Token);
+            overrideDamageSprite = damage == 0
+                ? GlobalDefinitions.DefensedDamageAnimationSprite
+                : overrideDamageSprite;
+            await AnimationTask(damage, delayMS, cts.Token, -1, overrideDamageSprite);
         }
 
-        private async UniTask AnimationTask(int damage, int delayMS, CancellationToken token)
+        public async UniTask PlayHealing(int healing, int delayMS)
+        {
+            if(cts is not null) cts.Cancel();
+            cts = new CancellationTokenSource();
+            await AnimationTask(healing, delayMS, cts.Token, 1);
+        }
+
+        private async UniTask AnimationTask(int damage, int delayMS, CancellationToken token, int direction, Sprite overrideDamageSprite = null)
         {
             if (currentSequence is not null)
             {
                 currentSequence.Kill();
                 currentSequence = null;
             }
+
+            if (direction < 0)
+            {
+                text.SetText($"-{damage}");
+                text.color = Color.yellow;
+                sprite.sprite = overrideDamageSprite is not null 
+                    ? overrideDamageSprite 
+                    : GlobalDefinitions.DamageAnimationSprite;
+            } 
+            else if (direction > 0)
+            {
+                text.SetText($"+{damage}");
+                text.color = Color.green;
+                sprite.sprite = GlobalDefinitions.HealingAnimationSprite;
+            }
             
-            text.SetText($"-{damage}");
             isPlayingAnimation = true;
             Transform spriteTransform = sprite.transform;
             Transform textTransform = text.transform;
             spriteTransform.localScale = Vector3.zero;
             textTransform.localScale = Vector3.zero;
             sprite.color = Color.white;
-            text.color = Color.white;
             gameObject.SetActive(true);
 
             // Wait until attack animation hits the token
