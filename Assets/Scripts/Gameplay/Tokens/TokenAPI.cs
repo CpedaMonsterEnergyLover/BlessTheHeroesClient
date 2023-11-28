@@ -1,62 +1,94 @@
 ﻿using Cysharp.Threading.Tasks;
+using Gameplay.Aggro;
 using UI;
 using UnityEngine;
 using Util.Tokens;
 
 namespace Gameplay.Tokens
 {
-    public abstract partial class Token<T>
+    public abstract partial class Token<T, TJ>
     {
+        public event IToken.TokenResourceEvent OnDamaged;
+        public event IToken.TokenResourceEvent OnHealed;
+        public event IToken.TokenResourceEvent OnManaReplenished;
+        public event IToken.TokenEvent OnDeath;
+        public event IToken.TokenMoveEvent OnMove;
+        public event IToken.TokenDamageAbsorbtionEvent OnDamageAbsorbed;
+
+        
+        
         public void AddMaxHealth(int amount)
         {
+            if(amount == 0) return;
             maxHealthBonus += amount;
-            ((IHasHealth) this).SetHealth(Mathf.Clamp(CurrentHealth + amount, 1, MaxHealth));
+            SetHealth(Mathf.Clamp(CurrentHealth + amount, 1, MaxHealth));
         }
+
 
         public void AddMaxMana(int amount)
         {
+            if(amount == 0) return;
             maxManaBonus += amount;
-            ((IHasMana) this).SetMana(Mathf.Clamp(CurrentMana + amount, 0, MaxMana));
+            SetMana(Mathf.Clamp(CurrentMana + amount, 0, MaxMana));
         }
 
         public void AddAttackPower(int amount)
         {
+            if(amount == 0) return;
             attackPower += amount;
             InvokeDataChangedEvent();
         }
 
         public void AddDefense(int amount)
         {
+            if(amount == 0) return;
             defense += amount;
             InvokeDataChangedEvent();
         }
 
         public void AddSpellPower(int amount)
         {
+            if(amount == 0) return;
             spellPower += amount;
             InvokeDataChangedEvent();
         }
         
         public void AddSpeed(int amount)
         {
+            if(amount == 0) return;
             speedBonus += amount;
             InvokeDataChangedEvent();
         }
 
-        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null)
+        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null, IAggroManager aggroReceiver = null)
         {
-            DamageAsync(damage, delayMS, overrideDamageSprite).Forget();
-        }
+            if(Dead) return;
+            var absorbed = OnDamageAbsorbed?.Invoke(damage);
+            if(aggroReceiver is not null)
+            {
+                aggroReceiver.AddAggro(damage, this);
+                aggroManager.AddAggro(damage, aggroReceiver.IToken);
+            }
 
-        public void Heal(int health)
+            DamageAsync(damage,absorbed ?? 0, delayMS, overrideDamageSprite).Forget();
+        }
+        
+        public void Heal(int health, IAggroManager aggroReceiver = null)
         {
-            HealAsync(health).Forget();
+            if(Dead) return;
+            int raw = CurrentHealth + health;
+            int clamped = Mathf.Clamp(raw, CurrentHealth, MaxHealth);
+            if(aggroReceiver is not null) aggroReceiver.AddAggro(health - (raw - clamped), this);
+            SetHealth(clamped);
+            damageAnimator.PlayHealing(health, 200).Forget();
+            OnHealed?.Invoke(health);
         }
 
         public void ReplenishMana(int mana)
         {
             if(MaxMana == 0) return;
-            ((IHasMana)this).SetMana(Mathf.Clamp(CurrentMana + mana, CurrentMana, MaxMana));
+            SetMana(Mathf.Clamp(CurrentMana + mana, CurrentMana, MaxMana));
+            OnManaReplenished?.Invoke(mana);
         }
         
         public void SetMovementPoints(int amount)
@@ -69,7 +101,27 @@ namespace Gameplay.Tokens
         {
             ActionPoints = Mathf.Clamp(amount, 0, int.MaxValue);
             InvokeDataChangedEvent();
-            TokenBrowser.Instance.OnActionsChanged(this);
+            OnActionsChanged?.Invoke(this);
+        }
+        
+        public bool DrainMana(int amount)
+        {
+            if (amount > CurrentMana) return false;
+            SetMana(CurrentMana - amount);
+            return true;
+        }
+        
+        public void SetHealth(int value)
+        {
+            CurrentHealth = value;
+            healthText.SetText(value.ToString());
+            OnHealthChanged?.Invoke(this);
+        }
+
+        public void SetMana(int value)
+        {
+            CurrentMana = value;
+            OnManaChanged?.Invoke(this);
         }
     }
 }

@@ -24,6 +24,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   creatureType: 0
+  canAct: 1
   attackDiceAmount: 2
   defenseDiceAmount: 2
   overrideAttackDice: {fileID: 0}

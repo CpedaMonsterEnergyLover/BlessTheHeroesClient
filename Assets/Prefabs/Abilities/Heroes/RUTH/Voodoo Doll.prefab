@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2582124822637291445
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2582124822637291443}
+  - component: {fileID: 2582124822637291442}
+  m_Layer: 0
+  m_Name: Voodoo Doll
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2582124822637291443
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2582124822637291445}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2582124822637291442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2582124822637291445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2172f5a5487a48f6865d83bfdc78c254, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  title: VOODOO DOLL
+  icon: {fileID: 415489161, guid: 5126c4203f7ac8e4b8e148bfccfbe2b3, type: 3}
+  detailDescription: Creates a voodoo doll of selected token
+  literalDescription: 
+  pattern: 5
+  radius: 1
+  includeCenter: 1
+  manacost: 0
+  cooldown: 0
+  tokenToSpawn: {fileID: 11400000, guid: 1b83ab31ebbf5d144a55533f8dd164e5, type: 2}
+  voodooDollBuffEffect: {fileID: 1081656893922295299, guid: 1c54bf15992d36442bf9144ce17c8cbb,
+    type: 3}

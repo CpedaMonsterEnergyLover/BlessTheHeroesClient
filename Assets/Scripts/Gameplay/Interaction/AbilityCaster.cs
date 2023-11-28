@@ -1,4 +1,5 @@
-﻿using Gameplay.Abilities;
+﻿using System.Collections.Generic;
+using Gameplay.Abilities;
 using Gameplay.Tokens;
 using UI;
 using UnityEngine;
@@ -11,12 +12,13 @@ namespace Gameplay.Interaction
     {
         [SerializeField] private InteractionManager interactionManager;
 
-        private IControllableToken token;
+        private IControllableToken caster;
         private static InteractionManager InteractionManager { get; set; }
-        
+        private static readonly List<IInteractable> TargetsCache = new();
         public static bool IsDragging { get; private set; }
 
 
+        
         private void Awake()
         {
             InteractionManager = interactionManager;
@@ -25,6 +27,8 @@ namespace Gameplay.Interaction
 
         private void OnEnable()
         {
+            AbilitySlot.OnInstantAbilityHoverEnter += OnInstantAbilityHoverEnter;
+            AbilitySlot.OnInstantAbilityHoverExit += OnInstantAbilityHoverExit;
             AbilitySlot.OnCastStart += OnCastStart;
             AbilitySlot.OnCastEnd += OnCastEnd;
             AbilitySlot.OnCast += OnCast;
@@ -32,71 +36,92 @@ namespace Gameplay.Interaction
 
         private void OnDisable()
         {
+            AbilitySlot.OnInstantAbilityHoverEnter -= OnInstantAbilityHoverEnter;
+            AbilitySlot.OnInstantAbilityHoverExit -= OnInstantAbilityHoverExit;
             AbilitySlot.OnCastStart -= OnCastStart;
             AbilitySlot.OnCastEnd -= OnCastEnd;
             AbilitySlot.OnCast -= OnCast;
         }
 
 
-
-        private void OnCastStart(Ability ability)
+        private void OnCastStart(ActiveAbility ability)
         {
-            var selectedToken = TokenBrowser.Instance.SelectedToken;
-            if(ability is not ActiveAbility active ||
-               selectedToken is not IControllableToken controllable ||
-               !active.ApproveCast(selectedToken)) return;
-            
+            if(ability.Caster is not IControllableToken controllable ||
+               !ability.ApproveCast(controllable)) return;
+
+            caster = controllable;
+            caster.InvokeStartDraggingEvent();
+            TargetsCache.Clear();
+            ability.GetTargetsList(TargetsCache);
+            foreach (IInteractable target in TargetsCache) 
+                target.Outline.SetEnabled(true);
             IsDragging = true;
-            token = controllable;
-            active.OnCastStart();
+            ability.OnCastStart();
             var interactionResult = InteractionManager.GetInteractionResult();
-            token.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
+            caster.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
         }
 
-        private void OnCast(Ability ability)
+        private void OnCast(ActiveAbility ability)
         {
-            if(!IsDragging || ability is not ActiveAbility active) return;
+            if(!IsDragging) return;
             
             var interactionResult = InteractionManager.GetInteractionResult();
-            bool validTarget = active.ValidateTarget(interactionResult.Target);
-            token.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
+            bool validTarget = TargetsCache.Contains(interactionResult.Target);
+            caster.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
             InteractionState state = interactionResult.IsValid
                 ? validTarget
                     ? InteractionState.Allow
                     : InteractionState.Abandon
                 : InteractionState.None;
-            token.InteractionLine.SetInteractableColor(state);
-            token.InteractionLine.UpdatePosition(interactionResult.IntersectionPoint);
+            caster.InteractionLine.SetInteractableColor(state);
+            caster.InteractionLine.UpdatePosition(interactionResult.IntersectionPoint);
         }
 
-        private void OnCastEnd(Ability ability)
+        private void OnCastEnd(ActiveAbility ability)
         {
-            if(!IsDragging || ability is not ActiveAbility active) return;
+            if (!IsDragging) return;
 
+            caster.InvokeEndDraggingEvent();
+            foreach (IInteractable target in TargetsCache) 
+                target.UpdateOutlineByCanInteract();
             IsDragging = false;
-            active.OnCastEnd();
+            ability.OnCastEnd();
             var interactionResult = InteractionManager.GetInteractionResult();
-            token.InteractionLine.SetEnabled(false, interactionResult.IntersectionPoint);
-            bool valid = active.ValidateTarget(interactionResult.Target);
-            if(valid) Cast(token, active);
-            token = null;
+            caster.InteractionLine.SetEnabled(false, interactionResult.IntersectionPoint);
+            Cast(caster, interactionResult.Target, ability);
+            caster = null;
         }
 
-        public static void Cast(IToken caster, CastableAbility castable)
+        private void OnInstantAbilityHoverEnter(InstantAbility instant)
         {
-            if (!castable.ApproveCast(caster)) return;
+            TargetsCache.Clear();
+            instant.GetTargetsList(TargetsCache);
+            instant.Caster.InvokeStartDraggingEvent();
+            foreach (IInteractable target in TargetsCache) 
+                target.Outline.SetEnabled(true);
+        }
 
-            var target = castable is InstantAbility 
-                ? caster.TokenCard
-                : InteractionManager.GetInteractionResult().Target;
+        private void OnInstantAbilityHoverExit(InstantAbility instant)
+        {
+            instant.Caster.InvokeEndDraggingEvent();
+            foreach (IInteractable target in TargetsCache) 
+                target.UpdateOutlineByCanInteract();
+        }
+
+        public static void Cast(IToken caster, IInteractable target, CastableAbility castable)
+        {
+            if (!castable.ApproveCast(caster) || 
+                !TargetsCache.Contains(target)) return;
             
-            if(castable is ActiveAbility active && !active.ValidateTarget(target)) return;
-            
-            if(castable.Manacost > 0 && !((IHasMana) caster).DrainMana(castable.Manacost)) return;
+            if (castable.Manacost > 0 && 
+                !caster.DrainMana(castable.Manacost)) return;
+
+            if (castable.Healthcost > 0)
+                caster.Damage(castable.Healthcost);
             
             castable.SetOnCooldown();
             castable.Cast(target);
-            if(castable.RequiresAct) caster.SetActionPoints(caster.ActionPoints - 1);
+            if (castable.RequiresAct) caster.SetActionPoints(caster.ActionPoints - 1);
         }
     }
 }

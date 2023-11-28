@@ -6,11 +6,7 @@ namespace Effects
     [RequireComponent(typeof(IEffectsPool))]
     public class EffectsManager : MonoBehaviour
     {
-        private static EffectsManager Instance { get; set; }
-
         private static IEffectsPool[] pools;
-
-        private EffectsManager() => Instance = this;
 
         
         

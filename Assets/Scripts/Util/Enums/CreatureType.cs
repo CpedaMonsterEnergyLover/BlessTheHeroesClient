@@ -5,6 +5,7 @@
         Humanoid,
         Beast,
         Elemental,
-        Insect
+        Demon,
+        Unclassified
     }
 }

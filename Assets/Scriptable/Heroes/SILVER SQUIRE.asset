@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2159d61bcd784f0bab8c5b37954de1a7, type: 3}
+  m_Name: SILVER SQUIRE
+  m_EditorClassIdentifier: 
+  name: SILVER SQUIRE
+  sprite: {fileID: 21300000, guid: c4a9371df8334b448bf3d4bd4981f67f, type: 3}
+  health: 20
+  mana: 8
+  attackType: 0
+  speed: 2
+  abilities:
+  - {fileID: 4195871065017500489, guid: b91d88e86bb5d7144a214d7a73d7553e, type: 3}
+  - {fileID: 2544957759828499851, guid: 86ef4aacad82c90478ac9654a77503ca, type: 3}
+  - {fileID: 5298531316840450755, guid: 9d1e03907384d554aac4f6bac39bb3b8, type: 3}
+  - {fileID: 5522971332525512848, guid: 6656059898b0e234194015cd4d717202, type: 3}
+  armorType: 3
+  equipment:
+  - {fileID: 11400000, guid: f1b8dbf0d6441d94598b20818b01741e, type: 2}
+  - {fileID: 11400000, guid: 2f2759c779ff804408b3d289aeb96b97, type: 2}
+  - {fileID: 11400000, guid: 1252dcdb43059de4d961c2b5a14ca8fa, type: 2}
+  - {fileID: 0}

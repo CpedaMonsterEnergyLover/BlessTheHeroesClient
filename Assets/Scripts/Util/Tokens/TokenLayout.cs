@@ -5,11 +5,10 @@ using DG.Tweening;
 using Gameplay.GameField;
 using Gameplay.Tokens;
 using UnityEngine;
-using Util.Interface;
 
 namespace Util.Tokens
 {
-    public class TokenLayout : MonoBehaviour, IHasAnimation
+    public class TokenLayout : MonoBehaviour
     {
         [SerializeField] private int width;
         [SerializeField] private float tokenSize;
@@ -19,6 +18,8 @@ namespace Util.Tokens
         private float fullRowOffset;
         private float halfTokenSize;
         private bool playingAnimation;
+        public bool IsPlayingAnimation => playingAnimation;
+
 
         
         
@@ -127,9 +128,5 @@ namespace Util.Tokens
             Prepare();
             UpdateLayout();
         }
-
-        
-        // IHasAnimation
-        public bool IsPlayingAnimation => playingAnimation;
     }
 }

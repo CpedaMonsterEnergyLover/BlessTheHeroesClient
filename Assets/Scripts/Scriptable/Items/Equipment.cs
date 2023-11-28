@@ -1,10 +1,9 @@
 ﻿using System.Text;
 using UnityEngine;
-using Util.Interface;
 
 namespace Scriptable
 {
-    public abstract class Equipment : Item, IInventoryItem
+    public abstract class Equipment : Item
     {
         [Header("Equipment data")]
         [SerializeField] private int mana;
@@ -13,14 +12,17 @@ namespace Scriptable
         [SerializeField] private int attackPower;
         [SerializeField] private int defense;
 
-
         public int Mana => mana;
         public int Health => health;
         public int SpellPower => spellPower;
         public int AttackPower => attackPower;
         public int Defense => defense;
 
+        
+        
         public abstract bool CanEquipInSlot(int slot);
+
+        public override int StackSize => 1;
 
         public virtual StringBuilder GetStatsStringBuilder()
         {
@@ -33,9 +35,5 @@ namespace Scriptable
             if (sb.Length > 0) sb.Insert(0, "When equipped, gives:\n");
             return sb;
         }
-
-
-        // IInventoryItem
-        public override int StackSize => 1;
     }
 }

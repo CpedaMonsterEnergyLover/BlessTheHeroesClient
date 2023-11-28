@@ -4,20 +4,20 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using Util.Interface;
 
 namespace Util.Tokens
 {
-    public class DamageAnimator : MonoBehaviour, IHasAnimation
+    public class DamageAnimator : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer sprite;
         [SerializeField] private TMP_Text text;
-
-
-        private bool isPlayingAnimation;
+        
         private Sequence currentSequence;
         private CancellationTokenSource cts = new();
+        private bool isPlayingAnimation;
+        public bool IsPlayingAnimation => isPlayingAnimation;
 
+        
 
         private void OnDestroy()
         {
@@ -102,9 +102,5 @@ namespace Util.Tokens
             cts = null;
             isPlayingAnimation = false;
         }
-        
-        
-        // IHasAnimation
-        public bool IsPlayingAnimation => isPlayingAnimation;
     }
 }

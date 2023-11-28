@@ -1,6 +1,6 @@
 ﻿using System.Linq;
+using Gameplay.BuffEffects;
 using Gameplay.Tokens;
-using Gameplay.Tokens.Buffs;
 using TMPro;
 using UI.Elements;
 using UnityEngine;
@@ -79,24 +79,23 @@ namespace UI
 
         public void OnActionsChanged(IToken token)
         {
-            if(ReferenceEquals(SelectedToken, token))
-                foreach (AbilitySlot slot in abilitySlots) 
-                    slot.UpdateInteractable(token);
+            foreach (AbilitySlot slot in abilitySlots) 
+                slot.UpdateInteractable(token);
         }
 
-        public void OnManaChanged(int current, int max)
+        private void OnManaChanged(IToken token)
         {
-            manaBar.UpdateValues(current, max);
+            manaBar.UpdateValues(token.CurrentMana, token.MaxMana);
             foreach (AbilitySlot slot in abilitySlots) 
                 slot.OnManaChanged(SelectedToken);
         }
 
-        public void OnHealthChanged(int current, int max)
+        private void OnHealthChanged(IToken token)
         {
-            healthBar.UpdateValues(current, max);
+            healthBar.UpdateValues(token.CurrentHealth, token.MaxHealth);
         }
 
-        private void OnDataChanged(IToken token)
+        private void OnStatsChanged(IToken token)
         {
             switch (token)
             {
@@ -109,7 +108,7 @@ namespace UI
             }
         }
 
-        private void OnTokenDestroy(IToken token) => UnsubTokenEvents(token);
+        private void OnDestroyed(IToken token) => UnsubTokenEvents(token);
         
         public void UpdateEquipment(HeroToken heroToken)
         {
@@ -153,7 +152,7 @@ namespace UI
 
         public void UpdateEffectsChanges(IToken token, BuffEffect effect)
         {
-            if (effect.Scriptable.EffectType is BuffEffectType.Negative)
+            if (effect.Scriptable.EffectDirection is BuffEffectDirection.Negative)
                 UpdateDebuffs(token);
             else 
                 UpdateBuffs(token);
@@ -179,14 +178,20 @@ namespace UI
 
         private void SubTokenEvents(IToken token)
         {
-            token.OnTokenDestroy += OnTokenDestroy;
-            token.OnTokenDataChanged += OnDataChanged;
+            token.OnActionsChanged += OnActionsChanged;
+            token.OnManaChanged += OnManaChanged;
+            token.OnHealthChanged += OnHealthChanged;
+            token.OnDestroyed += OnDestroyed;
+            token.OnStatsChanged += OnStatsChanged;
         }
 
         private void UnsubTokenEvents(IToken token)
         {
-            token.OnTokenDestroy -= OnTokenDestroy;
-            token.OnTokenDataChanged -= OnDataChanged;
+            token.OnActionsChanged -= OnActionsChanged;
+            token.OnManaChanged -= OnManaChanged;
+            token.OnHealthChanged -= OnHealthChanged;
+            token.OnDestroyed -= OnDestroyed;
+            token.OnStatsChanged -= OnStatsChanged;
         }
     }
 }

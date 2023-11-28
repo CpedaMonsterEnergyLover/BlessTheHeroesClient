@@ -2,7 +2,9 @@
 {
     public enum BuffEffectType
     {
-        Positive,
-        Negative
+        Curse,
+        Venom,
+        Magic,
+        Disease
     }
 }

@@ -1,42 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Gameplay.Aggro;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
 using UI;
 using UI.Interaction;
 using UnityEngine;
+using Util;
 using Util.Enums;
 using Util.Interaction;
 using Util.Patterns;
 
 namespace Gameplay.Tokens
 {
-    public abstract class ControllableToken<T> : Token<T>,
+    public abstract class ControllableToken<T> : Token<T, ControllableAggroManager>,
         IControllableToken, IInteractableOnDrag
         where T : Scriptable.Token
     {
         [SerializeField] private InteractionLine interactionLine;
-
+        public ControllableAggroManager AggroManager => aggroManager;
         public InteractionLine InteractionLine => interactionLine;
-
+        
         public override bool CanInteract => 
             TurnManager.CurrentStage is TurnStage.PlayersTurn &&
             !Dead &&
             IToken.DraggedToken is null &&
             !IsPlayingAnimation &&
             (ActionPoints > 0 || MovementPoints > 0);
+
+        public override Vector4 OutlineColor => ActionPoints == 0
+            ? GlobalDefinitions.TokenOutlineYellowColor
+            : GlobalDefinitions.TokenOutlineGreenColor;
         
         protected abstract bool CanInteractWithCards { get; }
         public override bool CanBeTargeted => false;
 
 
         
-        // Class methods
+        public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(Initialized && CanInteract);
+
         protected override void OnPlayersTurnStarted()
         {
-            ActionPoints = 2;
+            ActionPoints = DefaultActionPoints;
             MovementPoints = Speed;
             UpdateOutlineByCanInteract();
             InvokeDataChangedEvent();
@@ -44,7 +51,7 @@ namespace Gameplay.Tokens
 
         protected override void OnMonstersTurnStarted()
         {
-            TokenOutline.SetEnabled(false);
+            InteractableOutline.SetEnabled(false);
         }
         
         private InteractionTooltipData OnHoverCreature(IUncontrollableToken creature)
@@ -238,7 +245,7 @@ namespace Gameplay.Tokens
             interactionLine.Disable();
             if (!result.IsValid)
             {
-                ((IToken) this).InvokeOnEndDraggingEvent();
+                ((IToken) this).InvokeEndDraggingEvent();
                 return;
             }
             
@@ -252,7 +259,7 @@ namespace Gameplay.Tokens
                     break;
             }
             
-            ((IToken) this).InvokeOnEndDraggingEvent();
+            ((IToken) this).InvokeEndDraggingEvent();
         }
 
         private void UpdateOutlinesOnDragStart()
@@ -262,15 +269,15 @@ namespace Gameplay.Tokens
                 if(FieldManager.GetCard(pos, out Card card))
                 {
                     if(card.IsOpened)
-                        card.TokenOutline.SetEnabled(!card.IsPlayingHeroesAnimation);
+                        card.InteractableOutline.SetEnabled(!card.IsPlayingHeroesAnimation);
                     else 
-                        card.TokenOutline.SetEnabled(CanInteractWithCards && !card.IsPlayingHeroesAnimation);
+                        card.InteractableOutline.SetEnabled(CanInteractWithCards && !card.IsPlayingHeroesAnimation);
                 }
             });
             if (ActionPoints != 0)
             {
                 if (CanInteractWithCards && Card.HasAvailableAction)
-                    Card.TokenOutline.SetEnabled(true);
+                    Card.InteractableOutline.SetEnabled(true);
                 
                 if(AttackDiceAmount != 0)
                     foreach (Card card in GetCardsInAttackRange()) 
@@ -282,7 +289,7 @@ namespace Gameplay.Tokens
         {
             PatternSearch.IteratePlus(Card.GridPosition, 1,pos =>
             {
-                if(FieldManager.GetCard(pos, out Card card)) card.TokenOutline.SetEnabled(false);
+                if(FieldManager.GetCard(pos, out Card card)) card.InteractableOutline.SetEnabled(false);
             });
             foreach (Card card in GetCardsInAttackRange()) 
                 card.OutlineAttackableCreatures(false);

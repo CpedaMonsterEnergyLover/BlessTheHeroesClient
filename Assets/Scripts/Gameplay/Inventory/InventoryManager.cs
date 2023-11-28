@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using Effects;
 using UI.Tooltips;
 using UnityEngine;
 
@@ -37,16 +39,21 @@ namespace Gameplay.Inventory
             inventoryUI.UpdateInventory(items);
         }
 
-        public void AddItem(Scriptable.Item itemToAdd, int amount)
+        public async UniTask AddItem(Scriptable.Item itemToAdd, Vector3 giveFrom, int amount)
         {
             if (!CanFit(itemToAdd, amount, out int canFit, out Item sameItem))
             {
+                // TODO: Play item destroy animation
                 Debug.Log("Inventory is full");
                 return;
             }
             
             if (sameItem is null) items.Add(new Item(itemToAdd, canFit));
             else sameItem.Amount += canFit;
+
+            await EffectsManager.GetEffect<EffectLoot>()
+                .AnimateGather(giveFrom, itemToAdd);
+            
             inventoryUI.UpdateInventory(items);
         }
 

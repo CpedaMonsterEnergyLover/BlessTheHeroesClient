@@ -3,33 +3,39 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Gameplay.Abilities;
+using Gameplay.Aggro;
+using Gameplay.BuffEffects;
 using Gameplay.Dice;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
-using Gameplay.Tokens.Buffs;
+using TMPro;
 using UI;
 using UI.Elements;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Util;
 using Util.Enums;
-using Util.Interface;
+using Util.Interaction;
 using Util.Patterns;
 using Util.Tokens;
 
 namespace Gameplay.Tokens
 {
     [RequireComponent(typeof(BuffManager))]
-    public abstract partial class Token<T> : MonoBehaviour, 
-        IInteractableOnClick, IToken, IHasHealth, IHasMana, IHasAnimation, IHasTokenDragEvent
+    public abstract partial class Token<T, TJ> : MonoBehaviour, IToken
         where T : Scriptable.Token
+        where TJ : IAggroManager
     {
         [Header("TokenBase Fields")]
         [SerializeField] protected RangedAttackVisualizer rangedAttackVisualizer;
         [SerializeField] private DamageAnimator damageAnimator;
-        [SerializeField] private TokenOutline tokenOutline;
+        [FormerlySerializedAs("tokenOutline")] [SerializeField]
+        protected InteractableOutline interactableOutline;
         [SerializeField] protected SpriteRenderer spriteRenderer;
         [SerializeField] private BuffManager buffManager;
+        [SerializeField] private TMP_Text healthText;
+        [SerializeField] protected TJ aggroManager;
 
         private readonly Ability[] abilities = new Ability[4];
 
@@ -41,9 +47,19 @@ namespace Gameplay.Tokens
         protected int speedBonus;
         protected Tween animationTween;
 
-        public abstract bool CanBeTargeted { get; }
+
+        protected abstract int DefaultActionPoints { get; }
         protected Card Card { get; set; }
+        public abstract bool CanBeTargeted { get; }
         public T Scriptable { get; private set; }
+        public IAggroManager IAggroManager => aggroManager;
+        public bool IsPlayingAnimation => 
+            damageAnimator.IsPlayingAnimation || 
+            (animationTween is not null && animationTween.IsPlaying());
+        public int CurrentHealth { get; protected set; }
+        public int MaxHealth => Scriptable.Health + maxHealthBonus;
+        public int CurrentMana { get; protected set; }
+        public int MaxMana => Scriptable.Mana + maxManaBonus;
 
         
 
@@ -71,15 +87,13 @@ namespace Gameplay.Tokens
             IToken.OnEndDragging -= OnTokenEndDraggingEventInvoked;
             TurnManager.OnPlayersTurnStarted -= OnPlayersTurnStarted;
             TurnManager.OnMonstersTurnStarted -= OnMonstersTurnStarted;
-            OnTokenDestroy?.Invoke(this);
+            OnDestroyed?.Invoke(this);
         }
 
 
         // Class methods
-        protected abstract void OnDeath();
-
+        protected abstract void Die();
         protected virtual void OnPlayersTurnStarted() { }
-
         protected virtual void OnMonstersTurnStarted() { }
 
         
@@ -97,7 +111,9 @@ namespace Gameplay.Tokens
             CurrentHealth = MaxHealth;
             CurrentMana = MaxMana;
             MovementPoints = Speed;
-            tokenOutline.SetOutlineWidth(GlobalDefinitions.TokenOutlineWidth);
+            ActionPoints = DefaultActionPoints;
+            healthText.SetText(CurrentHealth.ToString());
+            interactableOutline.SetOutlineWidth(GlobalDefinitions.TokenOutlineWidth);
             InstantiateAbilities();
             TurnManager.OnPlayersTurnStarted += OnPlayersTurnStarted;
             TurnManager.OnMonstersTurnStarted += OnMonstersTurnStarted;
@@ -117,11 +133,8 @@ namespace Gameplay.Tokens
             Scriptable = scriptable;
             spriteRenderer.sprite = scriptable.Sprite;
         }
-
-        protected void UpdateOutlineByCanInteract() => tokenOutline.SetEnabled(Initialized && 
-                                                                               this is IControllableToken { CanInteract: true });
-
-        protected void InvokeDataChangedEvent() => OnTokenDataChanged?.Invoke(this);
+        
+        protected void InvokeDataChangedEvent() => OnStatsChanged?.Invoke(this);
         
         protected bool ConsumeActionPointForMovement()
         {
@@ -131,38 +144,44 @@ namespace Gameplay.Tokens
             InvokeDataChangedEvent();
             return true;
         }
-
-        private async UniTaskVoid HealAsync(int damage)
-        {
-            ((IHasHealth) this).SetHealth(Mathf.Clamp(CurrentHealth + damage, CurrentHealth, MaxHealth));
-            await damageAnimator.PlayHealing(damage, 200);
-        }
         
-        private async UniTask DamageAsync(int damage, int delayMS, Sprite overrideDamageSprite)
+        private async UniTask DamageAsync(int damage, int absorb, int delayMS, Sprite overrideDamageSprite)
         {
+            if (damage > 0 && absorb > 0)
+            {
+                await damageAnimator.PlayDamage(absorb, delayMS, GlobalDefinitions.DefensedDamageAnimationSprite);
+                if (absorb >= damage)
+                    return;
+                
+                damage -= absorb;
+            }
+
+
             int health = CurrentHealth - damage;
+            OnDamaged?.Invoke(damage);
             
             if (health <= 0)
             {
                 Dead = true;
                 await damageAnimator.PlayDamage(damage, delayMS, overrideDamageSprite);
-                ((IHasHealth) this).SetHealth(health);
-                OnDeath();
-                Despawn().Forget();
+                SetHealth(health);
+                OnDeath?.Invoke(this);
+                Die();
+                await Despawn();
             }
             else
             {
                 await damageAnimator.PlayDamage(damage, delayMS, overrideDamageSprite);
-                ((IHasHealth) this).SetHealth(health);
+                SetHealth(health);
                 
                 if(IToken.DraggedToken is not null) 
-                    tokenOutline.SetEnabled(CanBeTargeted && 
+                    interactableOutline.SetEnabled(CanBeTargeted && 
                                             IToken.DraggedToken.TokenActionPoints != 0 && 
                                             IsInAttackRange(IToken.DraggedToken));
             }
         }
 
-        public async UniTaskVoid Despawn()
+        public virtual async UniTask Despawn()
         {
             Dead = true;
             transform.SetParent(null);
@@ -174,10 +193,16 @@ namespace Gameplay.Tokens
         protected virtual async UniTask Walk(Card card)
         {
             SetMovementPoints(MovementPoints - 1);
+            await Move(card);
+        }
+
+        public async UniTask Move(Card card)
+        {
             Card previous = Card;
+            OnMove?.Invoke(this, card);
             card.AddToken(this, except: true, instantly: false);
             animationTween = transform.DOLocalJump(
-                card.GetLastTokenPosition(this), 0.5f, 1, 0.5f)
+                    card.GetLastTokenPosition(this), 0.5f, 1, 0.5f)
                 .OnComplete(() =>
                 {
                     animationTween = null;
@@ -239,11 +264,9 @@ namespace Gameplay.Tokens
             };
         }
 
-       
-        // IHasTokenDragEvent
-        public virtual void OnTokenStartDraggingEventInvoked(IToken token) => tokenOutline.SetEnabled(false);
+        private void OnTokenStartDraggingEventInvoked(IToken token) => interactableOutline.SetEnabled(false);
 
-        public virtual void OnTokenEndDraggingEventInvoked(IToken token) => UpdateOutlineByCanInteract();
+        private void OnTokenEndDraggingEventInvoked(IToken token) => UpdateOutlineByCanInteract();
 
 
         // IToken
@@ -255,12 +278,15 @@ namespace Gameplay.Tokens
         public abstract int AttackDiceAmount { get; }
         public abstract int DefenseDiceAmount { get; }
         public bool Initialized { private set; get; }
-        public event IToken.TokenEvent OnTokenDestroy;
-        public event IToken.TokenEvent OnTokenDataChanged;
+        public event IToken.TokenEvent OnDestroyed;
+        public event IToken.TokenEvent OnStatsChanged;
+        public event IToken.TokenEvent OnActionsChanged;
+        public event IToken.TokenEvent OnHealthChanged;
+        public event IToken.TokenEvent OnManaChanged;
         public event IToken.TokenAttackEvent OnAttackPerformed;
         public int Speed => Scriptable.Speed + speedBonus;
         public AttackType AttackType => Scriptable.AttackType;
-        public TokenOutline TokenOutline => tokenOutline;
+        public InteractableOutline InteractableOutline => interactableOutline;
         public Card TokenCard => Card;
         Scriptable.Token IToken.ScriptableToken => Scriptable;
         public Transform TokenTransform => transform;
@@ -274,7 +300,7 @@ namespace Gameplay.Tokens
         public int AttackPower => attackPower;
         public int Defense => defense;
         public BuffManager BuffManager => buffManager;
-        
+
         public bool HasAbility(string id, out Ability ability)
         {
             ability = abilities.FirstOrDefault(a => string.Equals(a.Title, id));
@@ -283,27 +309,37 @@ namespace Gameplay.Tokens
         
         public async UniTask Attack(IToken target)
         {
-            bool hit = DiceUtil.CalculateAttackDiceThrow(AttackDiceAmount, AttackDiceSet, 
+            bool hit = DiceUtil.CalculateAttackDiceThrow(AttackDiceAmount, AttackDiceSet, AttackPower,
                 out int damage, out int[] attackSides);
-            bool def = DiceUtil.CalculateDefenseDiceThrow(target.DefenseDiceAmount, target.DefenseDiceSet,
+            bool def = DiceUtil.CalculateDefenseDiceThrow(target.DefenseDiceAmount, target.DefenseDiceSet, target.Defense, 
                 out int defensed, out int[] defenseSides);
-            int[] sides = def && target is HeroToken 
-                ? defenseSides.Concat(attackSides).ToArray() 
-                : attackSides.Concat(defenseSides).ToArray();
-            await DiceManager.ThrowReplay(AttackDiceSet, AttackDiceAmount, sides, 
-                against: target.DefenseDiceSet, againstAmount: target.DefenseDiceAmount);
-
+            
+            if (this is IUncontrollableToken)
+            {
+                await DiceManager.ThrowReplay(
+                    target.DefenseDiceSet, target.DefenseDiceAmount, 
+                    defenseSides.Concat(attackSides).ToArray(),
+                    AttackDiceSet, AttackDiceAmount);
+            } 
+            else if (this is IControllableToken)
+            {
+                await DiceManager.ThrowReplay(
+                    AttackDiceSet, AttackDiceAmount, 
+                    attackSides.Concat(defenseSides).ToArray(),
+                    target.DefenseDiceSet, target.DefenseDiceAmount);
+            }
+            
             Debug.Log($"Hit: {hit}, Damage: {damage}, Defensed: {defensed}");
+            rangedAttackVisualizer.SetActive(false);
             if(!hit)
             {
-                rangedAttackVisualizer.SetActive(false);
+                ((IToken) this).InvokeOnTokenMissGlobal();
                 return;
             }
-            int finalDamage = def ? Mathf.Clamp(damage - defensed, 0, int.MaxValue) : damage;
-            target.Damage(finalDamage);
             
-            rangedAttackVisualizer.SetActive(false);
-            OnAttackPerformed?.Invoke(this, target, this is HeroToken hero ? hero.Scriptable.AttackType : AttackType.Melee, damage, defensed);
+            int finalDamage = def ? Mathf.Clamp(damage - defensed, 0, int.MaxValue) : damage;
+            target.Damage(finalDamage, aggroManager: aggroManager);
+            OnAttackPerformed?.Invoke(this, target, Scriptable.AttackType, damage, defensed);
             await PlayAttackAnimation(target.TokenTransform);
             UpdateOutlineByCanInteract();
         }
@@ -321,30 +357,20 @@ namespace Gameplay.Tokens
             
             return true;
         }
-
         
-        // IInteractableOnClick
+
+        // IInteractable
         public abstract bool CanInteract { get; }
+        public abstract Vector4 OutlineColor { get; }
+        public abstract void UpdateOutlineByCanInteract();
+        public InteractableOutline Outline => interactableOutline;
+
+
+        // IInteractableOnClick
         public abstract bool CanClick { get; }
         public void OnClick(InteractionResult result)
         {
             TokenBrowser.Instance.SelectToken(this);
         }
-        
-        
-        // IHasHealth
-        public int CurrentHealth { get; set; }
-        public int MaxHealth => Scriptable.Health + maxHealthBonus;
-        
-        
-        // IHasMana
-        public int CurrentMana { get; set; }
-        public int MaxMana => Scriptable.Mana + maxManaBonus;
-        
-        
-        // IHasAnimation
-        public bool IsPlayingAnimation => 
-            damageAnimator.IsPlayingAnimation || 
-            (animationTween is not null && animationTween.IsPlaying());
     }
 }

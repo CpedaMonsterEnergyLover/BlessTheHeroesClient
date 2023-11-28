@@ -3,13 +3,16 @@ using System.Linq;
 using CardAPI;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Gameplay.Aggro;
 using Gameplay.Dice;
 using Gameplay.Interaction;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Util;
+using Util.Interaction;
 using Util.Patterns;
 using Util.Tokens;
 
@@ -22,8 +25,9 @@ namespace Gameplay.GameField
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private TokenLayout creaturesLayout;
         [SerializeField] private TokenLayout heroesLayout;
-        [SerializeField] private TokenOutline tokenOutline;
+        [FormerlySerializedAs("tokenOutline")] [SerializeField] private InteractableOutline interactableOutline;
         [SerializeField] private TMP_Text eventText;
+        [SerializeField] private AggroCollector aggroCollector;
         
         private readonly List<IUncontrollableToken> creatures = new(8);
         private readonly List<IControllableToken> heroes = new(8);
@@ -31,14 +35,17 @@ namespace Gameplay.GameField
 #if UNITY_EDITOR
         public Scriptable.Token debug_TokenToSpawn;
 #endif
+
+
         
-        
-        
+        public InteractableOutline Outline => interactableOutline;
+        public AggroCollector AggroCollector => aggroCollector;
         public bool OpenOnStart { get; set; }
         public bool IsOpened { get; private set; }
         public Scriptable.Location Scriptable { get; private set; }
         public Vector2Int GridPosition { get; private set; }
-        public TokenOutline TokenOutline => tokenOutline;
+        public InteractableOutline InteractableOutline => interactableOutline;
+        // TODO: .where(x => !x.Dead)
         public List<IUncontrollableToken> Creatures => creatures.ToList();
         public List<IControllableToken> Heroes => heroes.ToList();
         public int CreaturesAmount => creatures.Count;
@@ -63,12 +70,13 @@ namespace Gameplay.GameField
             transform.rotation = IsOpened 
                 ? Quaternion.Euler(Vector3.zero)
                 : Quaternion.Euler(new Vector3(0, 0, 180));
-            tokenOutline.SetOutlineWidth(GlobalDefinitions.CardOutlineWidth);
+            interactableOutline.SetOutlineWidth(GlobalDefinitions.CardOutlineWidth);
 
             PreInit().Forget();
         }
 
 
+        
         // Class methods
         private async UniTask PreInit()
         {
@@ -78,6 +86,8 @@ namespace Gameplay.GameField
 #endif
             UpdateEventText(false, Scriptable.CardAction is not null);
         }
+        
+        public void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(false);
 
         public void Open()
         {
@@ -132,8 +142,19 @@ namespace Gameplay.GameField
             if(Scriptable.DropTable is null) return;
             var drop = Scriptable.DropTable.Drop;
             InventoryManager.Instance.AddCoins(Scriptable.DropTable.Coins);
-            foreach (Scriptable.Item item in drop) 
-                InventoryManager.Instance.AddItem(item, 1);
+            
+            if(drop.Count != 0) PlayLootAnimation(drop).Forget();
+        }
+
+        private async UniTask PlayLootAnimation(List<Scriptable.Item> drops)
+        {
+            int delay = 1000 / drops.Count;
+
+            foreach (Scriptable.Item drop in drops)
+            {
+                InventoryManager.Instance.AddItem(drop, transform.position, 1).Forget();
+                await UniTask.Delay(delay);
+            }
         }
         
         public bool HasSpaceForHero() => HeroesAmount < 8;
@@ -277,7 +298,7 @@ namespace Gameplay.GameField
         public void OutlineAttackableCreatures(bool isEnabled)
         {
             foreach (IUncontrollableToken token in creatures) 
-                token.TokenOutline.SetEnabled(isEnabled && token.CanBeTargeted);
+                token.InteractableOutline.SetEnabled(isEnabled && token.CanBeTargeted);
         }
 
         public void OnTokenLayoutAnimationEnded(TokenLayout tokenLayout)
@@ -286,7 +307,7 @@ namespace Gameplay.GameField
             {
                 if (IToken.DraggedToken is not null &&
                     PatternSearch.CheckNeighbours(IToken.DraggedToken.TokenCard.GridPosition, GridPosition))
-                    tokenOutline.SetEnabled(true);
+                    interactableOutline.SetEnabled(true);
             }
         }
 
@@ -298,8 +319,16 @@ namespace Gameplay.GameField
         
         
         // IInteractableOnClick
+        public Vector4 OutlineColor => GlobalDefinitions.TokenOutlineGreenColor;
         public bool CanClick => true;
         public bool CanInteract => !IsOpened;
         public void OnClick(InteractionResult result) => Open();
+
+        public void TryClearAggro()
+        {
+            if(CreaturesAmount != 0) return;
+            foreach (IControllableToken token in heroes) 
+                token.AggroManager.ClearAggro();
+        }
     }
 }

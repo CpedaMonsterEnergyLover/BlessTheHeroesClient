@@ -1,4 +1,5 @@
-﻿using Gameplay.Dice;
+﻿using Cysharp.Threading.Tasks;
+using Gameplay.Dice;
 using Gameplay.Inventory;
 using Scriptable;
 using UI;
@@ -9,6 +10,7 @@ namespace Gameplay.Tokens
 {
     public class HeroToken : ControllableToken<Hero>
     {
+        protected override int DefaultActionPoints => 2;
         protected override bool CanInteractWithCards => true;
         public override bool CanClick => true;
         public override int AttackDiceAmount => HasEquipmentInSlot(0) ? ((Weapon) equipment[0]).AttackDiceAmount : 0;
@@ -25,30 +27,29 @@ namespace Gameplay.Tokens
         protected override void Init()
         {
             base.Init();
-            ActionPoints = 2;
             for (var i = 0; i < 4; i++) 
                 if(Scriptable.Equipment[i] is not null)
                     Equip(Scriptable.Equipment[i], i);
             // Resets HP and MP to max after their equipment changes
-            ((IHasHealth) this).SetHealth(MaxHealth);
-            ((IHasMana) this).SetMana(MaxMana);
+            SetHealth(MaxHealth);
+            SetMana(MaxMana);
             TokenBrowser.Instance.SelectFirst(this);
         }
         
-        protected override void OnDeath()
+        protected override void Die()
         {
             Debug.Log("Hero is dead");
         }
-        
+
         public void Equip(Equipment item, int slot)
         {
             if(!item.CanEquipInSlot(slot)) return;
             
             Unequip(slot);
             maxManaBonus += item.Mana;
-            ((IHasMana) this).SetMana(CurrentMana);
+            SetMana(CurrentMana);
             maxHealthBonus += item.Health;
-            ((IHasHealth) this).SetHealth(CurrentHealth);
+            SetHealth(CurrentHealth);
             attackPower += item.AttackPower;
             defense += item.Defense;
             spellPower += item.SpellPower;
@@ -62,11 +63,11 @@ namespace Gameplay.Tokens
             var item = equipment[slot];
             if (item is null) return;
 
-            InventoryManager.Instance.AddItem(equipment[slot], 1);
+            InventoryManager.Instance.AddItem(equipment[slot], transform.position, 1).Forget();
             maxManaBonus -= item.Mana;
-            ((IHasMana) this).SetMana(CurrentMana - item.Mana < 0 ? 1 : CurrentMana - item.Mana);
+            SetMana(CurrentMana - item.Mana < 0 ? 1 : CurrentMana - item.Mana);
             maxHealthBonus -= item.Health;
-            ((IHasHealth) this).SetHealth(CurrentHealth - item.Health < 0 ? 1 : CurrentHealth - item.Health);
+            SetHealth(CurrentHealth - item.Health < 0 ? 1 : CurrentHealth - item.Health);
             attackPower -= item.AttackPower;
             defense -= item.Defense;
             spellPower -= item.SpellPower;
@@ -77,8 +78,8 @@ namespace Gameplay.Tokens
 
         public void ReturnLostHealthAndMana(Equipment unequipped, Equipment equipped)
         {
-            ((IHasHealth) this).SetHealth(CurrentHealth + Mathf.Min(unequipped.Health, equipped.Health));
-            ((IHasMana) this).SetMana(CurrentMana + Mathf.Min(unequipped.Mana, equipped.Mana));
+            SetHealth(CurrentHealth + Mathf.Min(unequipped.Health, equipped.Health));
+            SetMana(CurrentMana + Mathf.Min(unequipped.Mana, equipped.Mana));
         }
         
         public bool HasEquipmentInSlot(int slot) => equipment[slot] is not null;

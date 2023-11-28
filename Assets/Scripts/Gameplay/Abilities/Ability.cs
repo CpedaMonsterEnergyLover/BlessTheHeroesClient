@@ -12,7 +12,7 @@ namespace Gameplay.Abilities
         [SerializeField, TextArea] protected string detailDescription;
         [SerializeField, TextArea] protected string literalDescription;
 
-        protected IToken Caster { get; private set; }
+        public IToken Caster { get; private set; }
         public AbilitySlot AbilitySlot { get; set; }
         public virtual string Title => title;
         public virtual Sprite Icon => icon;
@@ -21,7 +21,7 @@ namespace Gameplay.Abilities
 
 
 
-        protected abstract void OnTokenSet(IToken token);
+        protected virtual void OnTokenSet(IToken token) { }
         
         public void SetToken(IToken token)
         {

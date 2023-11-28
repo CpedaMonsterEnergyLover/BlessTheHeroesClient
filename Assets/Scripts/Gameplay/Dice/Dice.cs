@@ -7,6 +7,7 @@ using Simulation;
 using TMPro;
 using UI.Interaction;
 using UnityEngine;
+using Util.Interaction;
 
 namespace Gameplay.Dice
 {
@@ -16,9 +17,9 @@ namespace Gameplay.Dice
         [SerializeField] private TMP_Text[] texts = new TMP_Text[6];
 
         private bool isReplaying;
-        
 
-        
+
+
         public async UniTask ReplayAsync(DiceRollReplay replay)
         {
             isReplaying = true;
@@ -61,6 +62,11 @@ namespace Gameplay.Dice
         public Transform GetSide(int i) => texts[i].transform;
         
         
+        // IInteractable
+        public InteractableOutline Outline => null;
+        public void UpdateOutlineByCanInteract() { }
+        
+        
         // IInteractableOnDrag
         public bool CanInteract => !isReplaying;
         public void OnDragStart(InteractionResult result)
@@ -93,6 +99,7 @@ namespace Gameplay.Dice
 
         
         // IInteractableOnClick
+        public Vector4 OutlineColor => Vector4.zero;
         public bool CanClick => CanInteract;
         public virtual void OnClick(InteractionResult result)
         {

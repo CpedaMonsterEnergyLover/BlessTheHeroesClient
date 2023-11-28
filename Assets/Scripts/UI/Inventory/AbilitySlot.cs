@@ -3,6 +3,7 @@ using Gameplay.Interaction;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
 using TMPro;
+using UI.Elements;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -14,28 +15,30 @@ namespace UI
     {
         [SerializeField] private Image icon;
         [SerializeField] private Image frameImage;
-        [FormerlySerializedAs("text")] [SerializeField] private TMP_Text manaText;
         [SerializeField] private TMP_Text cooldownText;
-
+        [SerializeField] private AbilityResourceIndicator resourceIndicator;
+        
         private Ability ability;
 
-        public delegate void AbilityCastEvent(Ability ability);
+        public delegate void AbilityCastEvent(ActiveAbility ability);
         public static event AbilityCastEvent OnCastStart;
         public static event AbilityCastEvent OnCastEnd;
         public static event AbilityCastEvent OnCast;
-        
+        public delegate void InstantAbilityHoverEvent(InstantAbility ability);
+        public static event InstantAbilityHoverEvent OnInstantAbilityHoverEnter;
+        public static event InstantAbilityHoverEvent OnInstantAbilityHoverExit;
         
         
         public void SetAbility(Ability target)
         {
-            if(ability == target) return;
+            if (ability == target) return;
             if (ability is not null)
                 ability.AbilitySlot = null;
             
             ability = target;
+            resourceIndicator.SetAbility(ability);
             if (ability is null)
             {
-                manaText.transform.parent.gameObject.SetActive(false);
                 icon.enabled = false;
                 frameImage.enabled = false;
                 icon.color = Color.white;
@@ -44,46 +47,36 @@ namespace UI
             }
 
             ability.AbilitySlot = this;
-            SelfUpdateInteractable();
             
-            if (ability is CastableAbility castable)
-            {
-                manaText.transform.parent.gameObject.SetActive(true);
-                manaText.SetText(castable.Manacost.ToString());
-                UpdateCooldownText(castable.CurrentCooldown);
-            }
-            else
-            {
-                manaText.transform.parent.gameObject.SetActive(false);
-                cooldownText.enabled = false;
-            }
-            
+            UpdateInteractable(ability.Caster);
             icon.sprite = ability.Icon;
             icon.enabled = true;
+
+            if (ability is CastableAbility castable)
+                UpdateCooldownText(castable.CurrentCooldown);
+            else
+                cooldownText.enabled = false;
+
+
             if (ability is PassiveAbility)
             {
                 frameImage.enabled = false;
                 icon.transform.localScale = Vector3.one * 0.9f;
-            }
-            else
-            {
+            } else {
                 frameImage.enabled = true;
                 icon.transform.localScale = Vector3.one;
             }
         }
 
         public void OnManaChanged(IToken token) => UpdateInteractable(token);
-
-        private void SelfUpdateInteractable()
-        {
-            var token = TokenBrowser.Instance.SelectedToken;
-            if(token is not null) 
-                UpdateInteractable(token);
-        }
         
         public void UpdateInteractable(IToken token)
         {
-            if(ability is not CastableAbility castable) return;
+            if(ability is not CastableAbility castable)
+            {
+                icon.color = Color.white;
+                return;
+            }
             
             icon.color = token.TokenActionPoints == 0 || 
                          castable.Manacost > token.CurrentMana ||
@@ -97,44 +90,32 @@ namespace UI
             bool onCooldown = cooldown != 0;
             cooldownText.enabled = onCooldown;
             cooldownText.SetText(cooldown.ToString());
-            SelfUpdateInteractable();
+            UpdateInteractable(ability.Caster);
         }
 
         public void UpdateIcon() => icon.sprite = ability.Icon;
         
-        public void UpdateManacost()
-        {
-            if (ability is CastableAbility castable)
-            {
-                manaText.transform.parent.gameObject.SetActive(true);
-                manaText.SetText(castable.Manacost.ToString());
-            }
-            else
-                manaText.transform.parent.gameObject.SetActive(false);
-        }
+        public void UpdateResourceCost() => resourceIndicator.SetAbility(ability);
 
 
         // IDragHandler
         public void OnBeginDrag(PointerEventData eventData)
         {
             InventoryManager.Instance.AbilityTooltip.SetAbility(null);
-            if(ability is null or not ActiveAbility) return;
-
-            OnCastStart?.Invoke(ability);
+            if(ability is not ActiveAbility active) return;
+            OnCastStart?.Invoke(active);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if(ability is null or not ActiveAbility) return;
-            
-            OnCastEnd?.Invoke(ability);
+            if(ability is not ActiveAbility active) return;
+            OnCastEnd?.Invoke(active);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if(ability is null or not ActiveAbility) return;
-
-            OnCast?.Invoke(ability);
+            if(ability is not ActiveAbility active) return;
+            OnCast?.Invoke(active);
         }
         
         
@@ -143,11 +124,13 @@ namespace UI
         {
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
             InventoryManager.Instance.AbilityTooltip.SetAbility(ability);
+            if(ability is InstantAbility instant) OnInstantAbilityHoverEnter?.Invoke(instant);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+            if(ability is InstantAbility instant) OnInstantAbilityHoverExit?.Invoke(instant);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -155,7 +138,8 @@ namespace UI
             if(ability is not InstantAbility instant) return;
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
             
-            AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, instant);
+            InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+            AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, ability.Caster.TokenCard, instant);
         }
     }
 }

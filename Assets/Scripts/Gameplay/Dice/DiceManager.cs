@@ -34,17 +34,19 @@ namespace Gameplay.Dice
         private DiceManager() => Instance = this;
         
         // Class methods
-        public static async UniTask ThrowReplay(DiceSet diceSet, int amount, int[] sidesToThrow, 
+        public static async UniTask ThrowReplay(
+            DiceSet attacker, int attackerAmount, 
+            int[] toThrow, 
             DiceSet against = null, int againstAmount = 0)
         {
-            var dices = InstantiateDicesOrGetExisting(diceSet, amount);
+            var dices = InstantiateDicesOrGetExisting(attacker, attackerAmount);
             if (against is not null)
                 dices = dices.Concat(InstantiateDicesOrGetExisting(against, againstAmount)).ToArray();
 
-            int sumAmount = amount + againstAmount;
-            PrepareDices(amount, againstAmount, dices, out var initialPositions, out var initialRotations);
+            int sumAmount = attackerAmount + againstAmount;
+            PrepareDices(attackerAmount, againstAmount, dices, out var initialPositions, out var initialRotations);
             
-            var forces = GenerateForces(amount, againstAmount);
+            var forces = GenerateForces(attackerAmount, againstAmount);
             var torques = GenerateTorques(sumAmount);
 
             var replays = SimulationManager.SimulateDiceRoll(dices, sumAmount, forces, torques);
@@ -52,13 +54,13 @@ namespace Gameplay.Dice
             
             ResetDicePositions(sumAmount, dices, initialPositions, initialRotations);
             int[] results = replays.Select(replay => replay.Result).ToArray();
-            RepaintDices(amount, againstAmount, diceSet, against, dices, sidesToThrow, results);
+            RepaintDices(attackerAmount, againstAmount, attacker, against, dices, toThrow, results);
             await ReplayDices(sumAmount, dices, replays);
         }
 
-        private static void PrepareDices(int amount, int againstAmount, Dice[] dices, out Vector3[] positions, out Quaternion[] rotations)
+        private static void PrepareDices(int attackerAmount, int againstAmount, Dice[] dices, out Vector3[] positions, out Quaternion[] rotations)
         {
-            int sumAmount = amount + againstAmount;
+            int sumAmount = attackerAmount + againstAmount;
             for (var i = 0; i < sumAmount; i++) 
                 dices[i].gameObject.SetActive(false);
 
@@ -71,7 +73,7 @@ namespace Gameplay.Dice
             int currentAmount = sumAmount;
             for (var i = 0; i < sumAmount; i++)
             {
-                if (i == amount)
+                if (i == attackerAmount)
                 {
                     spawnPos += new Vector3(0, 0, 7.5f);
                     currentAmount = againstAmount;
@@ -80,27 +82,21 @@ namespace Gameplay.Dice
                 }
                 Dice dice = dices[i];
                 dice.gameObject.SetActive(true);
-                var initialPos = spawnPos + new Vector3((i >= amount ? i - amount : i) * spawnWidth / currentAmount - offset, 0, 0);
+                var initialPos = spawnPos + new Vector3((i >= attackerAmount ? i - attackerAmount : i) * spawnWidth / currentAmount - offset, 0, 0);
                 positions[i] = initialPos;
                 rotations[i] = dice.Rigidbody.rotation;
                 dice.Rigidbody.position = initialPos;
             }
         }
 
-        private static void RepaintDices(int amount, int againstAmount, DiceSet diceSet, DiceSet againstSet, Dice[] dices, int[] sidesToThrow, int[] sidesOnTop)
+        private static void RepaintDices(int attackerAmount, int againstAmount, DiceSet attackerSet, DiceSet againstSet, Dice[] dices, int[] sidesToThrow, int[] sidesOnTop)
         {
-            for (int i = 0; i < amount; i++)
-            {
-                Dice dice = dices[i];
-                dice.Repaint(diceSet, i,sidesToThrow[i] - sidesOnTop[i]);
-            }
-            
+            for (int i = 0; i < attackerAmount; i++) 
+                dices[i].Repaint(attackerSet, i, sidesToThrow[i] - sidesOnTop[i]);
+
             if(againstSet is null) return;
-            for (int i = amount; i < amount + againstAmount; i++)
-            {
-                Dice dice = dices[i];
-                dice.Repaint(againstSet, i - amount,sidesToThrow[i] - sidesOnTop[i]);
-            }
+            for (int i = attackerAmount; i < attackerAmount + againstAmount; i++)
+                dices[i].Repaint(againstSet, i - attackerAmount, sidesToThrow[i] - sidesOnTop[i]);
         }
 
         private static void ResetDicePositions(int amount, Dice[] dices, Vector3[] positions, Quaternion[] rotations)

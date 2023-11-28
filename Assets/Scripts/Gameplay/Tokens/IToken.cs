@@ -1,30 +1,35 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Abilities;
+using Gameplay.Aggro;
+using Gameplay.BuffEffects;
 using Gameplay.GameField;
-using Gameplay.Tokens.Buffs;
+using Gameplay.Interaction;
 using UI.Elements;
 using UnityEngine;
 using Util.Enums;
-using Util.Tokens;
+using Util.Interaction;
 
 namespace Gameplay.Tokens
 {
-    public interface IToken
+    public interface IToken : IInteractableOnClick
     {
         public static IToken DraggedToken { get; private set; }
         
         
         
         // Methods
+        public bool DrainMana(int amount);
         public void SetCard(Card card);
         public UniTask Attack(IToken target);
+        public UniTask Move(Card card);
         public bool Push(Card card);
-        public UniTaskVoid Despawn();
+        public UniTask Despawn();
         public bool IsInAttackRange(IToken attacker);
-        
+        public void InvokeOnTokenMissGlobal() => OnTokenMissGlobal?.Invoke(this);
+
+
         
         // Properties
-        public GameObject GameObject { get; }
         public bool Initialized { get; }
         public int ActionPoints { get; }
         public int MovementPoints { get; }
@@ -37,7 +42,7 @@ namespace Gameplay.Tokens
         public int DefenseDiceAmount { get; }
         public Scriptable.Token ScriptableToken { get; }
         public Transform TokenTransform { get; }
-        public TokenOutline TokenOutline { get; }
+        public InteractableOutline InteractableOutline { get; }
         public Card TokenCard { get; }
         public int TokenActionPoints { get; }
         public int MaxHealth { get; }
@@ -52,11 +57,12 @@ namespace Gameplay.Tokens
         public bool HasAbility(string id, out Ability ability);
         public RangedAttackVisualizer RangedAttackVisualizer { get; }
         public BuffManager BuffManager { get; }
+        public IAggroManager IAggroManager { get; }
         
         
         // API
-        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null);
-        public void Heal(int health);
+        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null, IAggroManager aggroManager = null);
+        public void Heal(int health, IAggroManager aggroManager = null);
         public void ReplenishMana(int mana);
         public void SetActionPoints(int amount);
         public void SetMovementPoints(int amount);
@@ -70,16 +76,32 @@ namespace Gameplay.Tokens
 
 
         // Events
-        public delegate void TokenDragEvent(IToken token);
-        public static event TokenDragEvent OnStartDragging;
-        public static event TokenDragEvent OnEndDragging;
-
         public delegate void TokenEvent(IToken token);
-        public event TokenEvent OnTokenDestroy;
-        public event TokenEvent OnTokenDataChanged;
+        public static event TokenEvent OnStartDragging;
+        public static event TokenEvent OnEndDragging;
+        public static event TokenEvent OnTokenMissGlobal;
+        public event TokenEvent OnDestroyed;
+        public event TokenEvent OnStatsChanged;
+        public event TokenEvent OnDeath;
+        public event TokenEvent OnManaChanged;
+        public event TokenEvent OnHealthChanged;
+        public event TokenEvent OnActionsChanged;
 
         public delegate void TokenAttackEvent(IToken executor, IToken target, AttackType attackType, int damage, int defensed);
         public event TokenAttackEvent OnAttackPerformed;
+
+        public delegate int TokenDamageAbsorbtionEvent(int damage);
+        public event TokenDamageAbsorbtionEvent OnDamageAbsorbed;
+        
+        public delegate void TokenResourceEvent(int amount);
+        public event TokenResourceEvent OnDamaged;
+        public event TokenResourceEvent OnHealed;
+        public event TokenResourceEvent OnManaReplenished;
+
+        
+        public delegate void TokenMoveEvent(IToken t, Card card);
+        public event TokenMoveEvent OnMove;
+
 
         public void InvokeStartDraggingEvent()
         {
@@ -87,7 +109,7 @@ namespace Gameplay.Tokens
             OnStartDragging?.Invoke(this);
         }
 
-        public void InvokeOnEndDraggingEvent()
+        public void InvokeEndDraggingEvent()
         {
             DraggedToken = null;
             OnEndDragging?.Invoke(this);

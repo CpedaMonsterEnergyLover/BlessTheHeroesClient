@@ -80,10 +80,10 @@ namespace Gameplay.GameCycle
             foreach (IUncontrollableToken creature in FieldManager.GetAllCreatures())
             {
                 if(creature.Dead) continue;
-                creature.TokenOutline.SetEnabled(true);
+                creature.InteractableOutline.SetEnabled(true);
                 await creature.MakeTurn();
                 await UniTask.Delay(TimeSpan.FromMilliseconds(200));
-                creature.TokenOutline.SetEnabled(false);
+                creature.InteractableOutline.SetEnabled(false);
             }
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
             NextTurn();

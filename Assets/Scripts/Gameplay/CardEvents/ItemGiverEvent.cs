@@ -1,4 +1,5 @@
-﻿using Gameplay.GameField;
+﻿using Cysharp.Threading.Tasks;
+using Gameplay.GameField;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Gameplay.Events
         
         public override void Execute(Card card, HeroToken executor)
         {
-            InventoryManager.Instance.AddItem(itemToGive, amount);
+            InventoryManager.Instance.AddItem(itemToGive, card.transform.position, amount).Forget();
         }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using Util.Interface;
 
 namespace Scriptable
 {
-    public abstract class Item : ScriptableObject, IInventoryItem
+    public abstract class Item : ScriptableObject
     {
         [Header("Item data")] 
         [SerializeField] private new string name;
@@ -16,10 +15,12 @@ namespace Scriptable
         public string Name => name;
         public Sprite Sprite => sprite;
         
-        // IInventoryItem
+        
+        
+        public abstract bool AllowClick { get; }
+
         public abstract int StackSize { get; }
         public abstract string CategoryName { get; }
-        public abstract bool AllowClick { get; }
         public abstract void OnClick();
     }
 }

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2159d61bcd784f0bab8c5b37954de1a7, type: 3}
+  m_Name: DIANA
+  m_EditorClassIdentifier: 
+  name: DIANA
+  sprite: {fileID: 21300000, guid: d4dd725733b4c37498962b88e27cecfa, type: 3}
+  health: 15
+  mana: 15
+  attackType: 1
+  speed: 3
+  abilities:
+  - {fileID: 8017576215714737572, guid: 143691ef7b9a8484495adc8631f6d76a, type: 3}
+  - {fileID: 288987287467574965, guid: f6371473f088fbe4283ce5a1dae8c5f0, type: 3}
+  - {fileID: 4411539006780623833, guid: 134796cf19ca6f64ba234b3ed098f0b1, type: 3}
+  - {fileID: 3094189498541226771, guid: a61d8d18a3486b44ca617f2dba9329e0, type: 3}
+  armorType: 2
+  equipment:
+  - {fileID: 11400000, guid: 70e9596d947d8794a915ec7a8014a466, type: 2}
+  - {fileID: 11400000, guid: 71b92cd986e518b41886a52909862d97, type: 2}
+  - {fileID: 11400000, guid: 595500d0e93970b409f0c8741b20094e, type: 2}
+  - {fileID: 0}
