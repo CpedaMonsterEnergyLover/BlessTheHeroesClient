@@ -9,8 +9,10 @@ using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Inventory;
+using MyBox;
 using UnityEngine;
 using Util;
+using Util.Enums;
 using Util.Patterns;
 using Util.Tokens;
 using Random = UnityEngine.Random;
@@ -42,13 +44,6 @@ namespace Gameplay.Tokens
             UpdateOutlineByCanInteract();
         }
 
-        public override async UniTask Despawn()
-        {
-            Card card = TokenCard;
-            await base.Despawn();
-            card.TryClearAggro();
-        }
-
         protected override void Die()
         { 
             if(Scriptable.DropTable is null) return;
@@ -69,38 +64,30 @@ namespace Gameplay.Tokens
             }
         }
 
-        private async UniTask<bool> TryMakeAttack()
+        private async UniTask<bool> TryMakeAttack(IControllableToken target)
         {
-            if (AttackDiceAmount == 0 || 
-                ActionPoints == 0 ||  
-                !TryGetAttackTarget(out IToken target)) return false;
+            if (target is null ||
+                AttackDiceAmount == 0 || 
+                ActionPoints == 0 || 
+                !target.IsInAttackRange(this)) return false;
             
             SetActionPoints(ActionPoints - 1);
             await Attack(target);
             await UniTask.WaitUntil(() => !IsPlayingAnimation);
             return true;
         }
-
-        private bool TryGetAttackTarget(out IToken target)
+        
+        private async UniTask<bool> TryWalk(IControllableToken target)
         {
-            target = null;
-            var heroes = Card.Heroes.ToArray();
-            int len = heroes.Length;
-            if (len == 0) return false;
-            if (len == 1)
-            {
-                target = heroes[0];
-                return true;
-            }
-
-            float max = heroes.Max(h => h.AggroManager.AggroLevel);
-            var same = heroes.Where(h => h.AggroManager.AggroLevel >= max).ToArray();
-            target = same[Random.Range(0, same.Length)];
-            return target is not null;
+            if (target is not null)
+                return await TryWalkInAttackRange(target);
+            
+            return await TryWalkInRandomDirection();
         }
 
         private async UniTask<bool> TryWalkInRandomDirection()
         {
+            Debug.Log($"{Scriptable.Name}'s turn *: TryWalkInRandomDirection");
             List<Card> cards = new();
             PatternSearch.IterateNeighbours(Card.GridPosition, pos =>
             {
@@ -116,6 +103,25 @@ namespace Gameplay.Tokens
             return true;
         }
 
+        private async UniTask<bool> TryWalkInAttackRange(IControllableToken target)
+        {
+            Debug.Log($"{Scriptable.Name}'s turn *: TryWalkInAttackRange");
+            if (AttackType is AttackType.Melee)
+            {
+                Card targetCard = target.TokenCard;
+                if (!targetCard.IsOpened || !targetCard.HasSpaceForToken(this)) return false;
+                await Walk(targetCard);
+                return true;
+            }
+
+            if (AttackType is AttackType.Ranged)
+            {
+                return await TryWalkInRandomDirection();
+            }
+
+            return false;
+        }
+
         private async UniTask<bool> TryCastAbility()
         {
             if (!FindAbilityToCast(out AutoAbility ability, out IInteractable target)) return false;
@@ -128,6 +134,36 @@ namespace Gameplay.Tokens
             await ability.Cast(target);
             
             return true;
+        }
+
+        private IControllableToken TryGetAttackTarget()
+        {
+            List<IControllableToken> targets = new();
+
+            switch (AttackType)
+            {
+                case AttackType.Melee:
+                    targets.AddRange(Card.Heroes);
+                    break;
+                case AttackType.Ranged:
+                    PatternSearch.IterateNeighbours(Card.GridPosition, v =>
+                    {
+                        if(FieldManager.GetCard(v, out Card n))
+                            targets.AddRange(n.Heroes);
+                    });
+                    break;
+                case AttackType.Magic:
+                    PatternSearch.IteratePlus(Card.GridPosition, 1, v =>
+                    {
+                        if(FieldManager.GetCard(v, out Card n))
+                            targets.AddRange(n.Heroes);
+                    });
+                    break;
+            }
+
+            return targets.Count == 0 
+                ? null 
+                : targets.MinBy(t => t.CurrentHealth);
         }
 
         private bool FindAbilityToCast(out AutoAbility ability, out IInteractable target)
@@ -157,17 +193,23 @@ namespace Gameplay.Tokens
 
             int actions = ActionPoints;
             int movements = MovementPoints;
-
-            if (actions > 0 && movements > 0 && AggroManager.TryReaggro(out Card redirect)) 
-                await Walk(redirect);
+            bool lockPosition = false;
 
             while ((actions > 0 || movements > 0) 
                    && counter <= 10)
             {
                 counter++;
-                
+
+                IControllableToken aggroTarget = null;
+
                 if (actions > 0)
                 {
+                    Debug.Log($"{Scriptable.Name}'s turn {counter}: GetAggroTarget");
+                    if (!AggroManager.GetAggroTarget(out aggroTarget))
+                    {
+                        Debug.Log($"{Scriptable.Name}'s turn {counter}: TryGetAttackTarget");
+                        aggroTarget = TryGetAttackTarget();
+                    }
                     
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryCastAbility");
                     if(await TryCastAbility())
@@ -175,18 +217,21 @@ namespace Gameplay.Tokens
                         actions--;
                         continue;
                     }
+                    
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryMakeAttack");
-                    if(await TryMakeAttack())
+                    if(await TryMakeAttack(aggroTarget))
                     {
                         actions--;
+                        if(!aggroTarget.Dead) 
+                            lockPosition = true;
                         continue;
                     }
                 }
                 
-                if (Card.HeroesAmount == 0 && movements > 0)
+                if (!lockPosition && movements > 0)
                 {
-                    Debug.Log($"{Scriptable.Name}'s turn {counter}: TryWalkInRandomDirection");
-                    if (await TryWalkInRandomDirection())
+                    Debug.Log($"{Scriptable.Name}'s turn {counter}: TryWalk");
+                    if (await TryWalk(aggroTarget))
                     {
                         movements--;
                         continue;

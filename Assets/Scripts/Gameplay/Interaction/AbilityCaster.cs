@@ -88,7 +88,7 @@ namespace Gameplay.Interaction
             IsDragging = false;
             ability.OnCastEnd();
             var interactionResult = InteractionManager.GetInteractionResult();
-            caster.InteractionLine.SetEnabled(false, interactionResult.IntersectionPoint);
+            caster.InteractionLine.Disable();
             Cast(caster, interactionResult.Target, ability);
             caster = null;
         }

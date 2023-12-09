@@ -1,90 +1,93 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Gameplay.Cards;
-using Gameplay.GameField;
+using Gameplay.Interaction;
 using Gameplay.Tokens;
+using MyBox;
 using UnityEngine;
+using Util.Interaction;
 
 namespace Gameplay.Aggro
 {
-    public class UncontrollableAggroManager : AggroManager<IUncontrollableToken, IControllableToken>
+    public class UncontrollableAggroManager : AggroManager<IControllableToken, IUncontrollableToken>
     {
-        private readonly Dictionary<IControllableToken, float> cluster = new();
+        [SerializeField] private Vector3 gizmosOffset;
 
-
-
-        public bool TryReaggro(out Card redirect)
+        public UncontrollableAggroManager(Vector3 gizmosOffset)
         {
-            redirect = null;
-            Card tokenCard = Token.TokenCard;
-            if (cluster.Count == 0) return false;
-            if (Token.TokenCard.HeroesAmount == 0)
-            {
-                redirect = cluster.OrderByDescending(e => e.Key.AggroManager.AggroLevel).First().Key.TokenCard;
-            }
-            else
-            {
-                var maxFromCluster = cluster.OrderByDescending(e => e.Value).First();
-                var maxFromCard = tokenCard.Heroes.OrderByDescending(h => h.AggroManager.AggroLevel).First();
-                if (maxFromCluster.Value > maxFromCard.AggroManager.AggroLevel)
-                    redirect = maxFromCard.TokenCard;
-            }
+            this.gizmosOffset = gizmosOffset;
+        }
 
-            return redirect is not null && !redirect.Equals(tokenCard) && redirect.HasSpaceForCreature();
+
+        // Unity Methods
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            KeyListener.OnAnyKeyDown += OnAnyKeyDown;
+            KeyListener.OnKeyReleased += OnKeyReleased;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            KeyListener.OnAnyKeyDown -= OnAnyKeyDown;
+            KeyListener.OnKeyReleased -= OnKeyReleased;
+        }
+
+        
+        
+        // Class methods
+#if UNITY_EDITOR
+        protected override Color GizmosColor => Color.red;
+        protected override Vector3 GizmosOffset => new(-0.025f, 0, 0);
+#endif
+        protected override IUncontrollableToken[] GetAllies(Card card) => card.Creatures.Where(c => !c.Dead).ToArray();
+
+        protected override IControllableToken[] GetEnemies(Card card) => card.Heroes.Where(c => !c.Dead).ToArray();
+
+
+        
+        private void OnAnyKeyDown(in HashSet<KeyCode> keyCodes)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftAlt))
+            {
+                ShowAggroTarget();
+                keyCodes.Add(KeyCode.LeftAlt);
+            } else if (Input.GetKeyDown(KeyCode.RightAlt))
+            {
+                ShowAggroTarget();
+                keyCodes.Add(KeyCode.RightAlt);
+            }
+        }
+
+        private void OnKeyReleased(KeyCode keyCode)
+        {
+            if (keyCode is KeyCode.LeftAlt or KeyCode.RightAlt)
+            {
+                Token.InteractionLine.Disable();
+            }
+        }
+
+        private void ShowAggroTarget()
+        {
+            Token.InteractionLine.SetInteractableColor(InteractionState.Abandon);
+            Token.InteractionLine.SetEnabled(GetAggroTarget(out var token), 
+                token is null ? Vector3.zero : token.TokenTransform.position);
         }
         
-        public override void AddAggro(int amount, IControllableToken source)
+        public bool GetAggroTarget(out IControllableToken token)
         {
-            if(amount <= 0) return;
-            
-            Card current = Token.TokenCard;
-            Card target = source.TokenCard;
-            if(current.Equals(target) || (current.GridPosition - target.GridPosition).sqrMagnitude != 1) return;
-            
-            if (cluster.ContainsKey(source))
-                cluster[source] += amount;
-            else
+            if (cluster.Count == 0)
             {
-                cluster.Add(source, amount);
-                source.OnDeath += UnlinkAggro;
-                source.OnMove += OnAggroSourceMove;
+                token = null;
+                return false;
             }
-        }
 
-        public override void ClearAggro()
-        {
-            foreach (var (t, a) in cluster) 
-                t.AggroManager.RemoveAggro(a);
-            cluster.Clear();
-        }
-
-        protected override void OnMove(IToken t, Card card)
-        {
-            ClearAggro();
-        }
-
-        private void OnAggroSourceMove(IToken t, Card c)
-        {
-            UnlinkAggro(t);
-        }
-
-        private void UnlinkAggro(IToken t)
-        {
-            IControllableToken ut = (IControllableToken) t;
-            if (cluster.ContainsKey(ut)) 
-                cluster.Remove(ut);
-            
-            t.OnDeath -= UnlinkAggro;
-            t.OnMove -= OnAggroSourceMove;
-        }
-        
-        private void OnDrawGizmos()
-        {
-            if(Token is null || cluster.Count == 0) return;
-            Vector3 tPos = Token.TokenTransform.position;
-            Gizmos.color = Color.red;
-            foreach (var (t, a) in cluster) 
-                Gizmos.DrawLine(tPos, t.TokenTransform.position);
+            var maxAggro = cluster.Max(e => e.Value);
+            var candidates = cluster.Where(e => e.Value == maxAggro);
+            var leastHealth = candidates.MinBy(e => e.Key.CurrentHealth);
+            token = leastHealth.Key;
+            return true;
         }
     }
 }

@@ -104,7 +104,7 @@ namespace Gameplay.Tokens
         private async UniTaskVoid PreInit()
         {
             transform.localScale = Vector3.zero;
-            await UniTask.WaitUntil(() => Scriptable is not null);
+            await UniTask.WaitUntil(() => Scriptable is not null && Card is not null);
             Init();
             PostInit();
         }
@@ -125,6 +125,7 @@ namespace Gameplay.Tokens
         private void PostInit()
         {
             TokenBrowser.Instance.SelectFirst(this);
+            aggroManager.Activate(this);
             transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.InQuad).OnComplete(() =>
             {
                 Initialized = true;
@@ -149,17 +150,11 @@ namespace Gameplay.Tokens
             return true;
         }
         
-        public async UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroReceiver = null, int delay = 200)
+        public async UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroSource = null, int delay = 200)
         {
             if(Dead) return;
-            Debug.Log($"Damaged for {damage} HP");
             var absorbed = OnDamageAbsorbed?.Invoke(damage);
-            if(aggroReceiver is not null)
-            {
-                aggroReceiver.AddAggro(damage, this);
-                aggroManager.AddAggro(damage, aggroReceiver.IToken);
-            }
-            
+
             int absorb = absorbed ?? 0;
             if (damage > 0 && absorb > 0)
             {
@@ -169,8 +164,10 @@ namespace Gameplay.Tokens
                 
                 damage -= absorb;
             }
-
-
+            
+            if(aggroSource is not null) 
+                IAggroManager.AddAggro(damage, aggroSource.Wearer);
+            
             int health = CurrentHealth - damage;
             OnDamaged?.Invoke(damage);
             
@@ -213,8 +210,8 @@ namespace Gameplay.Tokens
         public async UniTask Move(Card card)
         {
             Card previous = Card;
-            OnMove?.Invoke(this, card);
             card.AddToken(this, except: true, instantly: false);
+            OnMove?.Invoke(this, card);
             movementTween = transform.DOLocalJump(
                     card.GetLastTokenPosition(this), 0.5f, 1, 0.5f)
                 .OnComplete(() =>
@@ -335,7 +332,7 @@ namespace Gameplay.Tokens
             int damage;
             int attackEnergy;
             int[] attackSides;
-            int[] defenseSides = new int[3];
+            int[] defenseSides = Array.Empty<int>();
             int defensed = 0;
             
             DiceSet attackDice = magicAttack ? MagicDiceSet : AttackDiceSet; 
@@ -346,13 +343,15 @@ namespace Gameplay.Tokens
                 : DiceUtil.CalculateAttackDiceThrow(AttackDiceAmount, attackDice, AttackPower,
                 out damage, out attackEnergy, out attackSides);
             
-            bool def = !magicAttack && DiceUtil.CalculateDefenseDiceThrow(target.DefenseDiceAmount, target.DefenseDiceSet, target.Defense, 
-                out defensed, out _, out defenseSides);
+            bool def = !magicAttack && DiceUtil.CalculateDefenseDiceThrow(
+                target.DefenseDiceAmount, target.DefenseDiceSet, target.Defense, 
+                out defensed, out defenseSides);
             
             if (this is IUncontrollableToken)
             {
                 await DiceManager.ThrowReplay(
-                    target.DefenseDiceSet, target.DefenseDiceAmount, 
+                    def ? target.DefenseDiceSet : null, 
+                    def ? target.DefenseDiceAmount : 0, 
                     defenseSides.Concat(attackSides).ToArray(),
                     attackDice, AttackDiceAmount);
             } 
@@ -361,14 +360,15 @@ namespace Gameplay.Tokens
                 await DiceManager.ThrowReplay(
                     attackDice, AttackDiceAmount, 
                     attackSides.Concat(defenseSides).ToArray(),
-                    target.DefenseDiceSet, target.DefenseDiceAmount);
+                    def ? target.DefenseDiceSet : null, 
+                    def ? target.DefenseDiceAmount : 0);
                 EnergyManager.Instance.AddEnergy(this, attackEnergy);
             }
             
             Debug.Log($"Hit: {hit}, Damage: {damage}, Defensed: {defensed}");
-            AttackAnimatorManager.StopAnimation(transform, AttackType);
             if(!hit)
             {
+                AttackAnimatorManager.StopAnimation(transform, AttackType);
                 ((IToken) this).InvokeOnTokenMissGlobal();
                 return;
             }
@@ -376,7 +376,7 @@ namespace Gameplay.Tokens
             int finalDamage = def ? Mathf.Clamp(damage - defensed, 0, int.MaxValue) : damage;
             OnBeforeAttackPerformed?.Invoke(this, target, Scriptable.AttackType, damage, defensed);
             await UniTask.WhenAll(
-                target.Damage(finalDamage, aggroManager: aggroManager), 
+                target.Damage(finalDamage, aggroSource: aggroManager), 
                 AttackAnimatorManager.AnimateAttack(transform, AttackType, target.TokenTransform)
             );
             AttackAnimatorManager.StopAnimation(transform, AttackType);
@@ -394,7 +394,7 @@ namespace Gameplay.Tokens
             previous.RemoveToken(this, instantly: true);
             movementTween = null;
             UpdateOutlineByCanInteract();
-            
+            OnMove?.Invoke(this, card);
             return true;
         }
         

@@ -15,6 +15,7 @@ namespace Util.Animators
         
         public void StartAnimation(Transform self, BaseAttackVariation variation)
         {
+            Debug.Log("Start Attack Animation");
             if(variation is not T casted)
                 Debug.LogWarning($"Expected attack variation of type {typeof(T)}, got {variation.GetType()}. Animation cannot be started.");
             else

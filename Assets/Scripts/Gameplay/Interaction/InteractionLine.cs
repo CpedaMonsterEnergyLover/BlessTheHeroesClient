@@ -21,29 +21,12 @@ namespace Gameplay.Interaction
             lineRenderer.positionCount = segmentsAmount + 1;
             SetInteractableColor(InteractionState.None);
         }
-        
-        
-        
-        // Class methods
-        public void SetEnabled(bool isEnabled, Vector3 endPoint)
-        {
-            if(isActive == isEnabled) return;
-            if (isEnabled)
-            {
-                UpdatePosition(endPoint);
-                lineRenderer.enabled = true;
-                isActive = true;
-            }
-            else
-            {
-                lineRenderer.enabled = false;
-                isActive = false;
-            }
-        }
 
+
+        // Class methods
         public void Enable(Vector3 endPoint) => SetEnabled(true, endPoint);
         public void Disable() => SetEnabled(false, Vector3.zero);
-        
+
         public void SetInteractableColor(InteractionState state) 
             => SetColor(InteractionColor.Get(state));
 
@@ -57,6 +40,22 @@ namespace Gameplay.Interaction
                     step.x, 
                     heightCurve.Evaluate(i / (float) segmentsAmount) * height,
                     step.z));
+            }
+        }
+
+        public void SetEnabled(bool isEnabled, Vector3 endPoint)
+        {
+            if(isActive == isEnabled) return;
+            if (isEnabled)
+            {
+                UpdatePosition(endPoint);
+                lineRenderer.enabled = true;
+                isActive = true;
+            }
+            else
+            {
+                lineRenderer.enabled = false;
+                isActive = false;
             }
         }
 

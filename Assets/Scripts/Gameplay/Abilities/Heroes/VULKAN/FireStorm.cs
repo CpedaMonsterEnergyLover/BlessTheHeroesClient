@@ -60,7 +60,7 @@ namespace Gameplay.Abilities
                 int count = creatures.Length;
                 if(count == 0) return;
                 await UniTask.Delay(TimeSpan.FromSeconds(delay));
-                creatures[0].Damage(1, aggroManager: Caster.IAggroManager, delay: 0);
+                creatures[0].Damage(1, aggroSource: Caster.IAggroManager, delay: 0);
             }
         }
     }

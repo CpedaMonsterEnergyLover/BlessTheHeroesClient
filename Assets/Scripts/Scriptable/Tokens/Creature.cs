@@ -9,9 +9,9 @@ namespace Scriptable
     [CreateAssetMenu(menuName = "Token/Creature")]
     public class Creature : Token
     {
-        [SerializeField] private BaseAttackVariation attackVariation;
         [Separator("Creature fields")]
         [SerializeField] private CreatureType creatureType;
+        [SerializeField] private BaseAttackVariation attackVariation;
         [SerializeField] private bool canAct;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
         [SerializeField, Range(1, 3)] private int defenseDiceAmount;
@@ -28,9 +28,10 @@ namespace Scriptable
         public override DropTable DropTable => dropTable;
         public CreatureType CreatureType => creatureType;
         public float SharedLootDropModifier => sharedLootDropModifier;
-        public BaseAttackVariation AttackVariation { get; set; }
+        public BaseAttackVariation AttackVariation => attackVariation;
 
 
+        
         public bool OverrideAttackDice(out DiceSet overrideSet)
         {
             overrideSet = overrideAttackDice;

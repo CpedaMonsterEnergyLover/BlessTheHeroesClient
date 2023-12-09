@@ -30,7 +30,7 @@ namespace Gameplay.Abilities
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, diceAmount, sides);
             EnergyManager.Instance.AddEnergy(Caster, energy);
             
-            creature.Damage(damage, aggroManager: Caster.IAggroManager);
+            creature.Damage(damage, aggroSource: Caster.IAggroManager);
             creature.BuffManager.ApplyEffect(this, wrathOfTheWitchBuffEffect, buffDuration);
         }
 

@@ -14,7 +14,10 @@ namespace Gameplay.Abilities
 
         public override async UniTask Cast(IInteractable target)
         {
-            Caster.IAggroManager.AddAggro(aggroChange, Caster);
+            if(aggroChange > 0)
+                Caster.IAggroManager.AddAggro(aggroChange, Caster);
+            else 
+                Caster.IAggroManager.RemoveAggro(-aggroChange, Caster);
         }
     }
 }

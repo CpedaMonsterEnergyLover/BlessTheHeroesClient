@@ -68,7 +68,7 @@ namespace Gameplay.Tokens
         
         
         // API
-        public UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroManager = null, int delay = 200);
+        public UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroSource = null, int delay = 200);
         public void Heal(int health, IAggroManager aggroManager = null);
         public void ReplenishMana(int mana);
         public void SetActionPoints(int amount);

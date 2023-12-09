@@ -73,7 +73,7 @@ namespace Gameplay.Abilities
 
                 if (t is IControllableToken)
                     t.Heal(currentDamage, aggroManager: Caster.IAggroManager);
-                else t.Damage(currentDamage, aggroManager: Caster.IAggroManager);
+                else t.Damage(currentDamage, aggroSource: Caster.IAggroManager);
                 currentDamage += damagePerUnit;
             }
             

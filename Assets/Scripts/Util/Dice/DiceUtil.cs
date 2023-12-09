@@ -42,18 +42,16 @@ namespace Util
             return result > 0;
         }
 
-        public static bool CalculateDefenseDiceThrow(int diceAmount, Scriptable.DiceSet diceSet, int defense, out int result, out int energy, out int[] sides)
+        public static bool CalculateDefenseDiceThrow(int diceAmount, Scriptable.DiceSet diceSet, int defense, out int result, out int[] sides)
         {
             diceSet.DistributedBonus = defense;
             sides = new int[diceAmount];
             result = 0;
-            energy = 0;
             for (int i = 0; i < diceAmount; i++)
             {
                 int side = Random.Range(0, 6);
                 sides[i] = side;
                 int sideValue = diceSet.GetDiceValues(i)[side];
-                energy += diceSet.GetDiceEnergy(i)[side];
                 result += sideValue;
             }
 

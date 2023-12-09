@@ -190,7 +190,7 @@ namespace Gameplay.Tokens
         public InteractionTooltipData OnDrag(InteractionResult result)
         {
             bool valid = result.IsValid;
-            InteractionLine.SetEnabled(valid, result.IntersectionPoint);
+            InteractionLine.Enable(result.IntersectionPoint);
             if(!valid)
             {
                 AttackAnimatorManager.StopAnimation(transform, AttackType);

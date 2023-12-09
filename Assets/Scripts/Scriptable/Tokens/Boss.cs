@@ -8,8 +8,8 @@ namespace Scriptable
     [CreateAssetMenu(menuName = "Token/Boss")]
     public class Boss : Token
     {
-        [SerializeField] private MeleeAttackVariation attackVariation;
         [Separator("Boss fields")] 
+        [SerializeField] private BaseAttackVariation attackVariation;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
         [SerializeField, Range(1, 3)] private int defenseDiceAmount;
         [SerializeField] private DiceSet attackDice;
@@ -18,12 +18,12 @@ namespace Scriptable
         [Separator("Drop table")]
         [SerializeField] private DropTable dropTable = new();
 
-        public MeleeAttackVariation AttackVariation => attackVariation;
         public int AttackDiceAmount => attackDiceAmount;
         public int DefenseDiceAmount => defenseDiceAmount;
         public DiceSet AttackDice => attackDice;
         public DiceSet MagicDice => magicDice;
         public DiceSet DefenseDice => defenseDice;
         public override DropTable DropTable => dropTable;
+        public BaseAttackVariation AttackVariation => attackVariation;
     }
 }

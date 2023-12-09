@@ -31,8 +31,8 @@ namespace Gameplay.Abilities
             var enemies = Caster.TokenCard.Creatures.Where(c => !c.Dead);
             foreach (IUncontrollableToken token in enemies)
             {
-                token.Damage(damage, aggroManager: Caster.IAggroManager);
-                Caster.IAggroManager.AddAggro(damage, null);
+                token.Damage(damage, aggroSource: Caster.IAggroManager);
+                token.AggroManager.AddAggro(damage, Caster);
             }
             Caster.BuffManager.ApplyEffect(this, shieldSlamBuffEffect, buffDuration);
         }

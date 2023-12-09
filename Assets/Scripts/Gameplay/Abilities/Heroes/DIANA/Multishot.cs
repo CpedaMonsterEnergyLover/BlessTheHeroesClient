@@ -67,7 +67,7 @@ namespace Gameplay.Abilities
                 arrow.SetPosition(attackAnimator.ArrowPosition);
                 arrow.SetRotation(attackAnimator.GetRotation(target.TokenTransform.position));
                 arrow.Shoot(target.TokenTransform).Forget();
-                target.Damage(arrowDamage, aggroManager: Caster.IAggroManager).Forget();
+                target.Damage(arrowDamage, aggroSource: Caster.IAggroManager).Forget();
             }
             
             UpgradeStage();

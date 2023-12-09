@@ -27,7 +27,6 @@ namespace Gameplay.Cards
         [SerializeField] private TokenLayout heroesLayout;
         [SerializeField] private InteractableOutline interactableOutline;
         [SerializeField] private TMP_Text eventText;
-        [SerializeField] private AggroCollector aggroCollector;
         
         private readonly List<IUncontrollableToken> creatures = new(8);
         private readonly List<IControllableToken> heroes = new(8);
@@ -39,7 +38,6 @@ namespace Gameplay.Cards
 
         
         public InteractableOutline Outline => interactableOutline;
-        public AggroCollector AggroCollector => aggroCollector;
         public bool OpenOnStart { get; set; }
         public bool IsOpened { get; private set; }
         public Scriptable.Location Scriptable { get; private set; }
@@ -323,12 +321,5 @@ namespace Gameplay.Cards
         public bool CanClick => true;
         public bool CanInteract => !IsOpened;
         public void OnClick(InteractionResult result) => Open();
-
-        public void TryClearAggro()
-        {
-            if(CreaturesAmount != 0) return;
-            foreach (IControllableToken token in heroes) 
-                token.AggroManager.ClearAggro();
-        }
     }
 }

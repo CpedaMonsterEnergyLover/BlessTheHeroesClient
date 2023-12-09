@@ -15,7 +15,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             int damage = Mathf.Clamp(Caster.MaxHealth - Caster.CurrentHealth, 0, maxDamage);
-            token.Damage(damage, aggroManager: Caster.IAggroManager);
+            token.Damage(damage, aggroSource: Caster.IAggroManager);
         }
 
         public override void OnCastStart()

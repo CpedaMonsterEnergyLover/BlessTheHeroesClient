@@ -18,7 +18,7 @@ namespace Gameplay.Abilities.Items
         private void OnAfterAttackPerformed(IToken executor, IToken target, AttackType attackType, int dmg,
             int defensed)
         {
-            target.Damage(damage, overrideDamageSprite: GlobalDefinitions.PoisonDamageAnimationSprite, aggroManager: Caster.IAggroManager);
+            target.Damage(damage, overrideDamageSprite: GlobalDefinitions.PoisonDamageAnimationSprite, aggroSource: Caster.IAggroManager);
         }
     }
 }

@@ -39,9 +39,9 @@ namespace Gameplay.Dice
             int[] toThrow, 
             DiceSet against = null, int againstAmount = 0)
         {
-            var dices = InstantiateDicesOrGetExisting(attacker, attackerAmount);
-            if (against is not null)
-                dices = dices.Concat(InstantiateDicesOrGetExisting(against, againstAmount)).ToArray();
+            var dices = new Dice[attackerAmount + againstAmount];
+            dices = InstantiateDicesOrGetExisting(attacker, attackerAmount);
+            dices = dices.Concat(InstantiateDicesOrGetExisting(against, againstAmount)).ToArray();
 
             int sumAmount = attackerAmount + againstAmount;
             PrepareDices(attackerAmount, againstAmount, dices, out var initialPositions, out var initialRotations);
@@ -143,6 +143,8 @@ namespace Gameplay.Dice
         private static Dice[] InstantiateDicesOrGetExisting(DiceSet diceSet, int amount)
         {
             Dice[] dices = new Dice[amount];
+            if (diceSet is null || amount == 0) return dices;
+            
             if (diceDict.ContainsKey(diceSet))
             {
                 var existing = diceDict[diceSet];

@@ -39,7 +39,7 @@ namespace Gameplay.Abilities
             
             // Animate explosion
             AnimateExplosionLight();
-            creature.Damage(damage, aggroManager: Caster.IAggroManager);
+            creature.Damage(damage, aggroSource: Caster.IAggroManager);
             explosionParticles.Play();
             await UniTask.WaitUntil(() => !explosionParticles.isPlaying);
             transform.localPosition = new Vector3(0, 0.5f, 0);

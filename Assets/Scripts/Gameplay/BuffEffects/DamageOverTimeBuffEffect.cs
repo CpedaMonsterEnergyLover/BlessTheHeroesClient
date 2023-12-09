@@ -25,7 +25,7 @@ namespace Gameplay.BuffEffects
             
             Manager.Token.Damage(damagePerTick,
                 overrideDamageSprite: OverrideDamageSprite, 
-                aggroManager: aggroManager);
+                aggroSource: aggroManager);
         }
     }
 }
