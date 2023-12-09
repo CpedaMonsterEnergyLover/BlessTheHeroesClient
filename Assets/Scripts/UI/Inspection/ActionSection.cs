@@ -1,4 +1,4 @@
-﻿using CardAPI;
+﻿using Gameplay.Cards;
 using TMPro;
 using UnityEngine;
 

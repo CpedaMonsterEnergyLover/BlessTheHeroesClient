@@ -1,4 +1,5 @@
 ﻿using Gameplay.Abilities;
+using Gameplay.Dice;
 using Gameplay.Interaction;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
@@ -13,52 +14,43 @@ namespace UI
 {
     public class AbilitySlot : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
-        [SerializeField] private Image icon;
+        [SerializeField] protected Image icon;
         [SerializeField] private Image frameImage;
         [SerializeField] private TMP_Text cooldownText;
         [SerializeField] private AbilityResourceIndicator resourceIndicator;
         
-        private Ability ability;
+        protected Ability Ability { get; private set; }
 
-        public delegate void AbilityCastEvent(ActiveAbility ability);
-        public static event AbilityCastEvent OnCastStart;
-        public static event AbilityCastEvent OnCastEnd;
-        public static event AbilityCastEvent OnCast;
+        public delegate void ActiveAbilityCastEvent(ActiveAbility ability);
+        public static event ActiveAbilityCastEvent OnCastStart;
+        public static event ActiveAbilityCastEvent OnCastEnd;
+        public static event ActiveAbilityCastEvent OnCast;
+        
         public delegate void InstantAbilityHoverEvent(InstantAbility ability);
         public static event InstantAbilityHoverEvent OnInstantAbilityHoverEnter;
         public static event InstantAbilityHoverEvent OnInstantAbilityHoverExit;
         
         
+        
         public void SetAbility(Ability target)
         {
-            if (ability == target) return;
-            if (ability is not null)
-                ability.AbilitySlot = null;
+            if (Ability == target) return;
+            if (Ability is not null) Ability.AbilitySlot = null;
+            Ability = target;
+            resourceIndicator.SetAbility(Ability);
+            target.AbilitySlot = this;
             
-            ability = target;
-            resourceIndicator.SetAbility(ability);
-            if (ability is null)
-            {
-                icon.enabled = false;
-                frameImage.enabled = false;
-                icon.color = Color.white;
-                cooldownText.enabled = false;
-                return;
-            }
-
-            ability.AbilitySlot = this;
-            
-            UpdateInteractable(ability.Caster);
-            icon.sprite = ability.Icon;
+            UpdateInteractable(Ability.Caster);
+            UpdateIcon();
             icon.enabled = true;
 
-            if (ability is CastableAbility castable)
+            if (Ability is CastableAbility castable)
                 UpdateCooldownText(castable.CurrentCooldown);
             else
                 cooldownText.enabled = false;
 
 
-            if (ability is PassiveAbility)
+            if (Ability is PassiveAbility)
             {
                 frameImage.enabled = false;
                 icon.transform.localScale = Vector3.one * 0.9f;
@@ -68,21 +60,49 @@ namespace UI
             }
         }
 
+        public void ClearAbility(Sprite sprite)
+        {
+            if (Ability is not null) Ability.AbilitySlot = null;
+            Ability = null;
+            resourceIndicator.SetAbility(Ability);
+            if (sprite is null) icon.enabled = false;
+            else
+            {
+                icon.enabled = true;
+                icon.sprite = sprite;
+            }
+            frameImage.enabled = false;
+            icon.color = Color.white;
+            cooldownText.enabled = false;
+        }
+
+
         public void OnManaChanged(IToken token) => UpdateInteractable(token);
         
         public void UpdateInteractable(IToken token)
         {
-            if(ability is not CastableAbility castable)
+            if(Ability is not CastableAbility castable)
             {
                 icon.color = Color.white;
                 return;
             }
+
+            if (castable.Energycost > 0)
+            {
+                icon.color = castable.Energycost > EnergyManager.Instance.Energy ||
+                             castable.CurrentCooldown > 0
+                    ? Color.grey
+                    : Color.white;
+            }
+            else
+            {
+                icon.color = token.TokenActionPoints == 0 || 
+                             castable.Manacost > token.CurrentMana ||
+                             castable.CurrentCooldown > 0
+                    ? Color.grey
+                    : Color.white;
+            }
             
-            icon.color = token.TokenActionPoints == 0 || 
-                         castable.Manacost > token.CurrentMana ||
-                         castable.CurrentCooldown > 0
-                ? Color.grey
-                : Color.white;
         }
 
         public void UpdateCooldownText(uint cooldown)
@@ -90,56 +110,63 @@ namespace UI
             bool onCooldown = cooldown != 0;
             cooldownText.enabled = onCooldown;
             cooldownText.SetText(cooldown.ToString());
-            UpdateInteractable(ability.Caster);
+            UpdateInteractable(Ability.Caster);
         }
 
-        public void UpdateIcon() => icon.sprite = ability.Icon;
+        public virtual void UpdateIcon() => icon.sprite = Ability.Icon;
         
-        public void UpdateResourceCost() => resourceIndicator.SetAbility(ability);
+        public void UpdateResourceCost() => resourceIndicator.SetAbility(Ability);
 
 
         // IDragHandler
         public void OnBeginDrag(PointerEventData eventData)
         {
             InventoryManager.Instance.AbilityTooltip.SetAbility(null);
-            if(ability is not ActiveAbility active) return;
+            if(Ability is not ActiveAbility active) return;
             OnCastStart?.Invoke(active);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if(ability is not ActiveAbility active) return;
+            if(Ability is not ActiveAbility active) return;
             OnCastEnd?.Invoke(active);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if(ability is not ActiveAbility active) return;
+            if(Ability is not ActiveAbility active) return;
             OnCast?.Invoke(active);
         }
         
+        protected virtual void UpdateTooltipOnPointerEnter() => InventoryManager.Instance.AbilityTooltip.SetAbility(Ability);
+        protected virtual void UpdateTooltipOnPointerExit() => InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+        protected virtual void UpdateTooltipOnPointerClick() => InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+        
         
         // IPointerHandler
-        public void OnPointerEnter(PointerEventData eventData)
+        public virtual void OnPointerEnter(PointerEventData eventData)
         {
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            InventoryManager.Instance.AbilityTooltip.SetAbility(ability);
-            if(ability is InstantAbility instant) OnInstantAbilityHoverEnter?.Invoke(instant);
+            UpdateTooltipOnPointerEnter();
+            if(Ability is InstantAbility instant) OnInstantAbilityHoverEnter?.Invoke(instant);
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public virtual void OnPointerExit(PointerEventData eventData)
         {
-            InventoryManager.Instance.AbilityTooltip.SetAbility(null);
-            if(ability is InstantAbility instant) OnInstantAbilityHoverExit?.Invoke(instant);
+            UpdateTooltipOnPointerExit();
+            if(Ability is InstantAbility instant) OnInstantAbilityHoverExit?.Invoke(instant);
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public virtual void OnPointerClick(PointerEventData eventData)
         {
-            if(ability is not InstantAbility instant) return;
+            if(Ability is not InstantAbility instant) return;
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            
-            InventoryManager.Instance.AbilityTooltip.SetAbility(null);
-            AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, ability.Caster.TokenCard, instant);
+
+            if (eventData.clickCount == 1)
+            {
+                UpdateTooltipOnPointerClick();
+                AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, Ability.Caster.TokenCard, instant);  
+            }
         }
     }
 }

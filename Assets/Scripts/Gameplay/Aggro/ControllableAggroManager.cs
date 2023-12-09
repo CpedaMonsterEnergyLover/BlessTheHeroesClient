@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
@@ -16,14 +17,14 @@ namespace Gameplay.Aggro
             private set
             {
                 aggro = Mathf.Clamp(value, 0, float.MaxValue);
-                if(aggroText.enabled) ShowAggroText();
+                // if(aggroText.enabled) ShowAggroText();
             }
         }
         
         
         
         // Unity methods
-        protected override void OnEnable()
+        /*protected override void OnEnable()
         {
             base.OnEnable();
             KeyListener.OnAnyKeyDown += OnAnyKeyDown;
@@ -62,17 +63,17 @@ namespace Gameplay.Aggro
             int percent = collectedAggro == 0 
                 ? 0 
                 : Mathf.RoundToInt(AggroLevel / collectedAggro * 100);
-            aggroText.SetText($"{percent}%");*/
+            aggroText.SetText($"{percent}%");#1#
             aggroText.SetText($"{AggroLevel}");
             aggroText.enabled = true;
-        }
+        }*/
 
         public override void AddAggro(int amount, IUncontrollableToken source)
         {
             if(source is not null && (source.TokenCard.GridPosition - Token.TokenCard.GridPosition).sqrMagnitude > 1) 
                 return;
             
-            AggroLevel += amount;
+            AggroLevel = Mathf.Clamp(AggroLevel + amount, 0, int.MaxValue);
         }
 
         public void RemoveAggro(float amount)

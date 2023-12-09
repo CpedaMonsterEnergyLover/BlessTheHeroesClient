@@ -45,11 +45,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Call Of The Pack
-  icon: {fileID: -1255162406, guid: 2471769bca67f9643a1e8f28e5a05bb8, type: 3}
+  icon: {fileID: 21300000, guid: 76e734af5ba442541953a0e0ef6ec84f, type: 3}
   detailDescription: Terrorhowl calls for the pack's help, summoming a wolf on every
     location surrounding him.
   literalDescription: 
+  pattern: 0
+  radius: 0
+  includeCenter: 0
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 2
   priority: 0
   creatureToSpawn: {fileID: 11400000, guid: ca1593d48b15a7549a1f3ce981654f77, type: 2}

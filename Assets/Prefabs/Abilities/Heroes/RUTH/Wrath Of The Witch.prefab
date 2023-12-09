@@ -45,13 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Wraith of the Witch
-  icon: {fileID: 551884603, guid: a2e0205db701a3748bd9297fde5b9e49, type: 3}
+  icon: {fileID: 21300000, guid: 6eba67dde714d064fae070eed95f8ed7, type: 3}
   detailDescription: angry ruth daum girl
   literalDescription: 
   pattern: 5
   radius: 1
   includeCenter: 1
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 1
   diceAmount: 2
   wrathOfTheWitchBuffEffect: {fileID: 758766278594018350, guid: 5536ebd5f39d729449c4d5efdb560f59,

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a05dfe0240a4f6291f36db1b99a0d61, type: 3}
-  m_Name: Terrorhowl
+  m_Name: TERRORHOWL
   m_EditorClassIdentifier: 
-  name: Terrorhowl
+  name: TERRORHOWL
   sprite: {fileID: 21300000, guid: 275d03cd2f755164aa2f7bd631fceaef, type: 3}
   health: 40
   mana: 0
@@ -24,11 +24,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   attackDiceAmount: 3
-  defenseDiceAmount: 2
+  defenseDiceAmount: 1
   attackDice: {fileID: 11400000, guid: da0a0f0ee78e9c34e8f76a1b55cb3415, type: 2}
   magicDice: {fileID: 11400000, guid: b0ab767590b982948a00231f7b51455b, type: 2}
   defenseDice: {fileID: 11400000, guid: 351494d126233bf429afc76f4a0e6b8e, type: 2}
   dropTable:
-    content: []
-    coinsDropRate: 0
-    coins: {x: 0, y: 0}
+    content:
+    - lootTable: {fileID: 11400000, guid: 0fad4e4fbc1d48c45829e8241b270456, type: 2}
+      value: 1
+    coinsDropRate: 1
+    coins: {x: 10, y: 20}

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gameplay.BuffEffects
 {
-    public abstract class RestorationBuffEffect : BuffEffect
+    public class RestorationBuffEffect : BuffEffect
     {
         [SerializeField] private int manaPerTick;
         [SerializeField] private int healthPerTick;

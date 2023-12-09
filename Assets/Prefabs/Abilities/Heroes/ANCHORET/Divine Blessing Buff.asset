@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Divine Blessing Buff
   m_EditorClassIdentifier: 
   name: Divine Blessing
-  icon: {fileID: -560970585, guid: e940f210f4362ae4fb0dc39adf66f5b2, type: 3}
+  icon: {fileID: 21300000, guid: 5564427f422b748488744f5a1f54fcb7, type: 3}
   effectType: 2
   effectDirection: 0
   dispellable: 1

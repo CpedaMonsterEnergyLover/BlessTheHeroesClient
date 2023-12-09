@@ -6,6 +6,9 @@
         Beast,
         Elemental,
         Demon,
+        Undead,
+        Floraborn,
+        Arcaneborn,
         Unclassified
     }
 }

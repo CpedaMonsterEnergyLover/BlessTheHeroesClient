@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Gameplay.Abilities;
+using Gameplay.Dice;
 using Gameplay.Tokens;
 using UI;
 using UnityEngine;
@@ -112,16 +113,21 @@ namespace Gameplay.Interaction
         {
             if (!castable.ApproveCast(caster) || 
                 !TargetsCache.Contains(target)) return;
-            
-            if (castable.Manacost > 0 && 
-                !caster.DrainMana(castable.Manacost)) return;
+
+            if (castable.Energycost > 0)
+            {
+                if (!EnergyManager.Instance.TryDrainEnergy(castable.Energycost)) return;
+            } 
+            else if (castable.Manacost > 0 && !caster.DrainMana(castable.Manacost)) return;
+
 
             if (castable.Healthcost > 0)
                 caster.Damage(castable.Healthcost);
             
             castable.SetOnCooldown();
             castable.Cast(target);
-            if (castable.RequiresAct) caster.SetActionPoints(caster.ActionPoints - 1);
+            if (castable.Energycost == 0 && castable.RequiresAct) 
+                caster.SetActionPoints(caster.ActionPoints - 1);
         }
     }
 }

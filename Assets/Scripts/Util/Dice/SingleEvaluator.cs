@@ -2,11 +2,11 @@
 
 namespace Util.Dice
 {
-    [System.Serializable]
-    public class SingleEvaluator : EvaluatorBase
+    [CreateAssetMenu(menuName = "Evaluator/Single")]
+    public class SingleEvaluator : BaseEvaluator
     {
         [Header("Single Evaluator")]
-        [SerializeField] private int targetRoll;
+        [SerializeField, Range(1, 6)] private int targetRoll;
         
         public override bool Evaluate(int roll, out int result)
         {

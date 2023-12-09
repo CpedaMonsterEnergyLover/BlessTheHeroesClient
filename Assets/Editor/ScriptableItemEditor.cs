@@ -17,7 +17,6 @@ namespace Editor
 
             Texture2D texture = AssetPreview.GetAssetPreview(item.Sprite);
             GUILayout.Label("", GUILayout.Height(100), GUILayout.Width(100));
-            if(texture is null) return;
             
             GUI.DrawTexture(GUILayoutUtility.GetLastRect(), texture);
         }

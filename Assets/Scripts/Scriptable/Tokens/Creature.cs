@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using MyBox;
+using Scriptable.AttackVariations;
+using UnityEngine;
 using Util.Enums;
 using Util.LootTables;
 
@@ -7,7 +9,8 @@ namespace Scriptable
     [CreateAssetMenu(menuName = "Token/Creature")]
     public class Creature : Token
     {
-        [Header("Creature fields")] 
+        [SerializeField] private BaseAttackVariation attackVariation;
+        [Separator("Creature fields")]
         [SerializeField] private CreatureType creatureType;
         [SerializeField] private bool canAct;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
@@ -15,6 +18,8 @@ namespace Scriptable
         [SerializeField] private DiceSet overrideAttackDice;
         [SerializeField] private DiceSet overrideMagicDice;
         [SerializeField] private DiceSet overrideDefenseDice;
+        [Separator("Drop table")]
+        [SerializeField, Range(0, 1)] private float sharedLootDropModifier;
         [SerializeField] private DropTable dropTable = new();
 
         public bool CanAct => canAct;
@@ -22,9 +27,10 @@ namespace Scriptable
         public int DefenseDiceAmount => defenseDiceAmount;
         public override DropTable DropTable => dropTable;
         public CreatureType CreatureType => creatureType;
-        
-        
-        
+        public float SharedLootDropModifier => sharedLootDropModifier;
+        public BaseAttackVariation AttackVariation { get; set; }
+
+
         public bool OverrideAttackDice(out DiceSet overrideSet)
         {
             overrideSet = overrideAttackDice;

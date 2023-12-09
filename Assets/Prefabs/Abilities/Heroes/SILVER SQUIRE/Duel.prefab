@@ -45,10 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: DUEL
-  icon: {fileID: 776360214, guid: b1815b7eb7014e242b527eec5ccc928a, type: 3}
+  icon: {fileID: 21300000, guid: ed7d20ce095fd0c46ae0e8f2f6340440, type: 3}
   detailDescription: Duels an enemy
   literalDescription: 
+  pattern: 0
+  radius: 0
+  includeCenter: 0
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 0
   duelBuffEffect: {fileID: 7191125252375753419, guid: 7ddeb567f6b4f1f42b9f1d7f4e6f759b,
     type: 3}

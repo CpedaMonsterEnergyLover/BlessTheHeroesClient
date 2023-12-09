@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Battle Cry Buff
   m_EditorClassIdentifier: 
   name: Battle Cry
-  icon: {fileID: -82022440, guid: 5126c4203f7ac8e4b8e148bfccfbe2b3, type: 3}
+  icon: {fileID: 21300000, guid: 8e0d589a6a18c73429bdcb68187cee75, type: 3}
   effectType: 2
   effectDirection: 0
   dispellable: 1

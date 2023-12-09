@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Silver Inspiration Debuff
   m_EditorClassIdentifier: 
   name: Silver Inspiration
-  icon: {fileID: 159626092, guid: 14370596ec680244991d4a281373f170, type: 3}
+  icon: {fileID: 21300000, guid: b41abe8229174c741ad66ebb6d5d20a7, type: 3}
   effectType: 2
   effectDirection: 1
   dispellable: 0

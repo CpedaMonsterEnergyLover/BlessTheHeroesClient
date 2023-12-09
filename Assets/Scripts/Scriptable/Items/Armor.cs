@@ -28,24 +28,10 @@ namespace Scriptable
         }
         
         public override bool CanEquipInSlot(int slot) => slot == 1;
-        
+        public override int Slot => 1;
+
         public override bool AllowClick 
             => TokenBrowser.Instance.SelectedToken is HeroToken {ActionPoints: > 0} hero &&
                (int) hero.Scriptable.ArmorType >= (int) armorType;
-        
-        public override void OnClick()
-        {
-            HeroToken hero = (HeroToken) TokenBrowser.Instance.SelectedToken;
-            InventoryManager.Instance.RemoveItem(this, 1);
-
-            Equipment unequipped = null;
-            if(hero.HasEquipmentInSlot(1))
-            {
-                unequipped = hero.GetEquipmentAt(1);
-                hero.Unequip(1);
-            }
-            hero.Equip(this, 1);
-            if(unequipped) hero.ReturnLostHealthAndMana(unequipped, this);
-        }
     }
 }

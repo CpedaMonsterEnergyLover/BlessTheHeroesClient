@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Gameplay.Abilities;
 using Gameplay.Aggro;
+using Gameplay.Cards;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
@@ -27,7 +28,8 @@ namespace Gameplay.Tokens
         public override Vector4 OutlineColor => TurnManager.CurrentStage is TurnStage.PlayersTurn
             ? GlobalDefinitions.TokenOutlineGreenColor
             : GlobalDefinitions.TokenOutlineRedColor;
-
+        protected abstract float SharedLootDropModifier { get; }
+        
 
 
         public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(false);
@@ -50,8 +52,9 @@ namespace Gameplay.Tokens
         protected override void Die()
         { 
             if(Scriptable.DropTable is null) return;
-            var drops = Scriptable.DropTable.Drop;
-            InventoryManager.Instance.AddCoins(Scriptable.DropTable.Coins);
+            var drops = Scriptable.DropTable.DropLoot();
+            drops.AddRange(FieldManager.InstantiatedFloor.DropSharedLoot(SharedLootDropModifier));
+            InventoryManager.Instance.AddCoins(Scriptable.DropTable.DropCoins());
             if(drops.Count != 0) DropItemsOnDeath(transform.position, drops).Forget();
         }
  
@@ -179,8 +182,7 @@ namespace Gameplay.Tokens
                         continue;
                     }
                 }
-
- 
+                
                 if (Card.HeroesAmount == 0 && movements > 0)
                 {
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryWalkInRandomDirection");

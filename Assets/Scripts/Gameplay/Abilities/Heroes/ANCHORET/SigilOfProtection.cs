@@ -1,6 +1,6 @@
 ﻿namespace Gameplay.Abilities
 {
-    public class SigilOfProtection : TargetBuffAbility<SigilOfProtectionBuffEffect>
+    public class SigilOfProtection : TargetBuffAbility
     {
         
     }

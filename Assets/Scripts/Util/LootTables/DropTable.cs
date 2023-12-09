@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Util.LootTables
@@ -12,26 +13,21 @@ namespace Util.LootTables
 
         
         
-        public int Coins
+        public int DropCoins()
         {
-            get
-            {
-                if (coinsDropRate == 0 || Random.value > coinsDropRate) return 0;
-                return Random.Range(coins.x, coins.y + 1);
-            }
+            if (coinsDropRate == 0 || Random.value > coinsDropRate) return 0;
+            return Random.Range(coins.x, coins.y + 1);
         }
 
-        public List<Scriptable.Item> Drop 
+        public List<Scriptable.Item> DropLoot(float modifier = 1)
         {
-            get {
-                List<Scriptable.Item> items = new();
-                foreach (DropTableElement element in content)
-                {
-                    if (element.DropItem(out Scriptable.Item item))
-                        items.Add(item);
-                }
-                return items;
+            List<Scriptable.Item> items = new();
+            foreach (DropTableElement element in content)
+            {
+                if (element.DropItem(out Scriptable.Item item, modifier))
+                    items.Add(item);
             }
+            return items;
         }
     }
 }

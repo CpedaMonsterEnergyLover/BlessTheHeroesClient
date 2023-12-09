@@ -1,4 +1,6 @@
 ﻿using Gameplay.Tokens;
+using MyBox;
+using Scriptable.AttackVariations;
 using UnityEngine;
 
 namespace Util
@@ -8,21 +10,26 @@ namespace Util
         private static GlobalDefinitions Instance { get; set; }
         GlobalDefinitions() => Instance = this;
 
+        [SerializeField] private BaseAttackVariation defaultAttackVariation;
+        [Separator("Prefabs")]
         [SerializeField] private HeroToken heroTokenPrefab;
         [SerializeField] private CompanionToken companionTokenPrefab;
         [SerializeField] private CreatureToken creatureTokenPrefab;
         [SerializeField] private BossToken bossTokenPrefab;
-        [SerializeField] private Vector3 tokenOutlineWidth;
-        [SerializeField] private Vector3 cardOutlineWidth;
+        [Separator("Damage Sprites")]
         [SerializeField] private Sprite damageAnimationSprite;
         [SerializeField] private Sprite poisonDamageAnimationSprite;
         [SerializeField] private Sprite defensedDamageAnimationSprite;
         [SerializeField] private Sprite healingAnimationSprite;
-
+        [Separator("Outlines")]
+        [SerializeField] private Vector3 tokenOutlineWidth;
+        [SerializeField] private Vector3 cardOutlineWidth;
         [SerializeField, ColorUsage(true, true)] private Color tokenOutlineGreenColor;
         [SerializeField, ColorUsage(true, true)] private Color tokenOutlineYellowColor;
         [SerializeField, ColorUsage(true, true)] private Color tokenOutlineRedColor;
         
+        
+        public static BaseAttackVariation BaseAttackVariation => Instance.defaultAttackVariation;
         public static Vector3 TokenOutlineWidth => Instance.tokenOutlineWidth;
         public static Vector3 CardOutlineWidth => Instance.cardOutlineWidth;
         public static Vector4 TokenOutlineGreenColor => Instance.tokenOutlineGreenColor;

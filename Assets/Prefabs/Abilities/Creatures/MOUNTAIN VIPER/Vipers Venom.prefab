@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Vipes Venom
-  icon: {fileID: -101369164, guid: a2e0205db701a3748bd9297fde5b9e49, type: 3}
+  icon: {fileID: 21300000, guid: addd0a6ed4e41044094d72aa59ce6219, type: 3}
   detailDescription: Mountain Viper's attacks inject deadly venom that deals damage
     over time
   literalDescription: 

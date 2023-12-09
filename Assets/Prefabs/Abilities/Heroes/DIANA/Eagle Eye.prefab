@@ -45,11 +45,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Eagle Eye
-  icon: {fileID: -486419617, guid: 0fb91064579f7db49b88a1c16830633c, type: 3}
+  icon: {fileID: 21300000, guid: 11dacfbbe2b48a240be934b949e48dfc, type: 3}
   detailDescription: Opens any closed card on the field.
   literalDescription: 
   pattern: 8
   radius: 2
   includeCenter: 1
   manacost: 1
+  energycost: 0
+  healthcost: 0
   cooldown: 1

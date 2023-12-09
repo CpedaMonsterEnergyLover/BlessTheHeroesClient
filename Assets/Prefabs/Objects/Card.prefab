@@ -100,7 +100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '!'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 83beb5799aae7bf4b942b4f6da15c326, type: 2}
   m_sharedMaterial: {fileID: -9129877317717093473, guid: 83beb5799aae7bf4b942b4f6da15c326,
@@ -224,7 +224,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 2867057023367244586}
   creaturesLayout: {fileID: 6300275195528982082}
   heroesLayout: {fileID: 1667439364564034225}
-  tokenOutline: {fileID: 7624368474232867309}
+  interactableOutline: {fileID: 7624368474232867309}
   eventText: {fileID: 4047672134410262727}
   aggroCollector: {fileID: 1800567923823336422}
   debug_TokenToSpawn: {fileID: 0}

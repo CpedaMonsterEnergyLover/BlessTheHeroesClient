@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Gameplay.Aggro;
+using Gameplay.Cards;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
@@ -19,10 +20,8 @@ namespace Gameplay.Tokens
         IControllableToken, IInteractableOnDrag
         where T : Scriptable.Token
     {
-        [SerializeField] private InteractionLine interactionLine;
         public ControllableAggroManager AggroManager => aggroManager;
-        public InteractionLine InteractionLine => interactionLine;
-        
+
         public override bool CanInteract => 
             TurnManager.CurrentStage is TurnStage.PlayersTurn &&
             !Dead &&
@@ -128,7 +127,7 @@ namespace Gameplay.Tokens
                 !creature.IsInAttackRange(this) ||
                 AttackDiceAmount == 0)
             {
-                rangedAttackVisualizer.SetActive(false);
+                AttackAnimatorManager.StopAnimation(transform, AttackType);
                 return;
             }
             
@@ -176,31 +175,13 @@ namespace Gameplay.Tokens
             SetActionPoints(ActionPoints - 1);
         }
         
-        private List<Card> GetCardsInAttackRange()
-        {
-            switch (AttackType)
-            {
-                case AttackType.Melee:
-                    return new List<Card> { Card };
-                case AttackType.Ranged:
-                {
-                    List<Card> cards = new();
-                    PatternSearch.IterateNeighbours(Card.GridPosition, pos => {
-                        if(FieldManager.GetCard(pos, out Card card)) cards.Add(card);
-                    });
-                    return cards;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
         
 
         // IInteractableOnDrag
         public virtual void OnDragStart(InteractionResult result)
         {
             ((IToken) this).InvokeStartDraggingEvent();
-            interactionLine.Enable(result.IntersectionPoint);
+            InteractionLine.Enable(result.IntersectionPoint);
             TokenBrowser.Instance.SelectToken(this);
             
             UpdateOutlinesOnDragStart();
@@ -209,10 +190,10 @@ namespace Gameplay.Tokens
         public InteractionTooltipData OnDrag(InteractionResult result)
         {
             bool valid = result.IsValid;
-            interactionLine.SetEnabled(valid, result.IntersectionPoint);
+            InteractionLine.SetEnabled(valid, result.IntersectionPoint);
             if(!valid)
             {
-                rangedAttackVisualizer.SetActive(false);
+                AttackAnimatorManager.StopAnimation(transform, AttackType);
                 return null;
             }
 
@@ -220,21 +201,21 @@ namespace Gameplay.Tokens
             switch (result.Target)
             {
                 case IUncontrollableToken creature:
-                    rangedAttackVisualizer.SetActive(AttackType is AttackType.Ranged, result.IntersectionPoint);
+                    AttackAnimatorManager.StartAnimation(transform, AttackType, AttackVariation, result.IntersectionPoint);
                     tooltipData = OnHoverCreature(creature);
                     break;
                 case Card card:
-                    rangedAttackVisualizer.SetActive(false);
+                    AttackAnimatorManager.StopAnimation(transform, AttackType);
                     tooltipData = OnHoverCard(card);
                     break;
                 default:
-                    rangedAttackVisualizer.SetActive(false);
+                    AttackAnimatorManager.StopAnimation(transform, AttackType);
                     tooltipData = new InteractionTooltipData();
                     break;
             }
             
-            interactionLine.UpdatePosition(result.IntersectionPoint);
-            interactionLine.SetInteractableColor(tooltipData.State);
+            InteractionLine.UpdatePosition(result.IntersectionPoint);
+            InteractionLine.SetInteractableColor(tooltipData.State);
             return tooltipData;
         }
 
@@ -242,7 +223,7 @@ namespace Gameplay.Tokens
         {
             UpdateOutlinesOnDragEnd();
             
-            interactionLine.Disable();
+            InteractionLine.Disable();
             if (!result.IsValid)
             {
                 ((IToken) this).InvokeEndDraggingEvent();

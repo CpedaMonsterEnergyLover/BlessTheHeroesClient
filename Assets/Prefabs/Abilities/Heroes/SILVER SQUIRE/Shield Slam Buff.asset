@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Shield Slam Buff
   m_EditorClassIdentifier: 
   name: Shield Slam
-  icon: {fileID: -1742530631, guid: a2e0205db701a3748bd9297fde5b9e49, type: 3}
+  icon: {fileID: 21300000, guid: 6f0101c9f551faf4ea5e7ab5ce811cbd, type: 3}
   effectType: 2
   effectDirection: 0
   dispellable: 1

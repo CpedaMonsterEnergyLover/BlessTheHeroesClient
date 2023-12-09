@@ -23,8 +23,11 @@ namespace Gameplay.Abilities
             AnimateCast(true);
 
             // Throw dice
-            Util.DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, Caster.MagicDiceSet, Caster.SpellPower, out int damage, out int[] sides);
+            Util.DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, Caster.MagicDiceSet, Caster.SpellPower,
+                out int damage, out int energy, out int[] sides);
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, attackDiceAmount, sides);
+            if(Caster is HeroToken) EnergyManager.Instance.AddEnergy(Caster, energy);
+
             
             // Animate fireball
             var tween = transform

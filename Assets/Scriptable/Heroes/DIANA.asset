@@ -25,7 +25,7 @@ MonoBehaviour:
   - {fileID: 3094189498541226771, guid: a61d8d18a3486b44ca617f2dba9329e0, type: 3}
   armorType: 2
   equipment:
-  - {fileID: 11400000, guid: 70e9596d947d8794a915ec7a8014a466, type: 2}
-  - {fileID: 11400000, guid: 71b92cd986e518b41886a52909862d97, type: 2}
-  - {fileID: 11400000, guid: 595500d0e93970b409f0c8741b20094e, type: 2}
+  - {fileID: 11400000, guid: d88d6075bbdf9df4d98b026cbc1318a5, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}

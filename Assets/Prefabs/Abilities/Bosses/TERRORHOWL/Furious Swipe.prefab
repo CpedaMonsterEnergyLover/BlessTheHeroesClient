@@ -45,10 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Furious Swipe
-  icon: {fileID: -701217284, guid: b8495984982ebde47a890611d7bb21bc, type: 3}
+  icon: {fileID: 21300000, guid: d85644b63a9beb143b4547695d6bd0c0, type: 3}
   detailDescription: Terrorhowl performs a powerful swipe attack, damaging all enemies
     on the the same location as Terrorhowl.
   literalDescription: 
+  pattern: 0
+  radius: 0
+  includeCenter: 0
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 2
   priority: 1

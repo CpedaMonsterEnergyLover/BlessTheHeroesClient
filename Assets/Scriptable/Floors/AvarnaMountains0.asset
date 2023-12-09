@@ -37,3 +37,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ee089dfd7f0fc8141ae1b26b97d31438, type: 2}
   - {fileID: 11400000, guid: 3d4cd4c9a8148c44a80caeca85ebfe59, type: 2}
   - {fileID: 11400000, guid: fffb8445e102cfd488a2260c258fca2d, type: 2}
+  sharedLootTable:
+    content:
+    - lootTable: {fileID: 11400000, guid: eb70f86cf27dd4f40964e47d63b43d94, type: 2}
+      value: 0.056
+    - lootTable: {fileID: 11400000, guid: 2a1eca430617ce1468ca9cc29cf09dac, type: 2}
+      value: 0.084
+    coinsDropRate: 0
+    coins: {x: 0, y: 0}

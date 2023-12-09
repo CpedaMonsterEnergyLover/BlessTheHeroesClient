@@ -19,7 +19,7 @@ namespace Scriptable
         public DiceType DiceType => diceType;
         public Gameplay.Dice.Dice Prefab => prefab;
 
-
+        
 
         public int DistributedBonus { get; set; }
         public int[] GetDiceValues(int index)

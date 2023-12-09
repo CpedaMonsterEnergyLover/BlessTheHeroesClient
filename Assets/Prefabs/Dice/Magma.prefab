@@ -1287,7 +1287,6 @@ MonoBehaviour:
   - {fileID: 3532157313033602334}
   - {fileID: 916147064223321163}
   - {fileID: 7557482022698460977}
-  burstParticles: {fileID: 882622896860299203}
   sparkParticles: {fileID: 4667455804830155074}
 --- !u!54 &2130091248491014888
 Rigidbody:
@@ -16001,6 +16000,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
       propertyPath: m_fontColor.b
       value: 0
       objectReference: {fileID: 0}
@@ -16170,6 +16174,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
       propertyPath: m_fontColor.b
       value: 0
       objectReference: {fileID: 0}
@@ -16331,6 +16340,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}
@@ -16585,6 +16599,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
       propertyPath: m_fontColor.b
       value: 0
       objectReference: {fileID: 0}
@@ -16741,6 +16760,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Side1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}
@@ -16905,6 +16929,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 2.05
       objectReference: {fileID: 0}
     - target: {fileID: 1919836111219647549, guid: 7d5f452aadd18264c84e90bfead52eba,
         type: 3}

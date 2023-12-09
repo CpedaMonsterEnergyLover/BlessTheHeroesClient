@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace Gameplay.Aggro
         
         public override void AddAggro(int amount, IControllableToken source)
         {
-            if(amount == 0) return;
+            if(amount <= 0) return;
             
             Card current = Token.TokenCard;
             Card target = source.TokenCard;

@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Divine Blessing
-  icon: {fileID: -560970585, guid: e940f210f4362ae4fb0dc39adf66f5b2, type: 3}
+  icon: {fileID: 21300000, guid: 5564427f422b748488744f5a1f54fcb7, type: 3}
   detailDescription: Buffs all friendly targets on the same location as priest with
     divine blessing that increases maximum health and restores mana each turn.
   literalDescription: 
@@ -54,6 +54,8 @@ MonoBehaviour:
   radius: 0
   includeCenter: 0
   manacost: 6
+  energycost: 0
+  healthcost: 0
   cooldown: 6
   divineBlessingBuffEffect: {fileID: 2860274090626725342, guid: e2b5bb5375d57164b9393036c6610c6f,
     type: 3}

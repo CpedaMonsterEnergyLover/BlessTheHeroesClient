@@ -18,7 +18,6 @@ namespace Scriptable
         
         
         public abstract bool AllowClick { get; }
-
         public abstract int StackSize { get; }
         public abstract string CategoryName { get; }
         public abstract void OnClick();

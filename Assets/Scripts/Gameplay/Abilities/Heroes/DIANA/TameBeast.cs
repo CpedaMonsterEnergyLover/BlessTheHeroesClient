@@ -21,10 +21,7 @@ namespace Gameplay.Abilities
             CurrentCompanion is null
                 ? new StringBuilder()
                     .Append(detailDescription)
-                    .Append("<i><color=magenta><br>")
-                    .Append(
-                        $"- Tamed beast gains +{healthBonus} health, +{defenseBonus} defense, +{attackPowerBonus} attack power and +{speedBonus} speed.")
-                    .Append("</i></color>")
+                    .Append($"<br>- Tamed beast gains +{healthBonus} health, +{defenseBonus} defense, +{attackPowerBonus} attack power and +{speedBonus} speed.")
                     .ToString()
                 : "Hunter frees his companion, making it again agressive against him.";
 

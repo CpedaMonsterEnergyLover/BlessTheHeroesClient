@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Gameplay.Cards;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
@@ -20,13 +21,13 @@ namespace Gameplay.Abilities
         [SerializeField, ConditionalField(nameof(pattern), true, Pattern.Single, Pattern.Neighbours)] 
         private bool includeCenter;
         [Separator("Ability Settings")]
-        [SerializeField] protected int manacost;
+        [SerializeField, ConditionalField(nameof(energycost), false, 0)] protected int manacost;
+        [SerializeField, ConditionalField(nameof(manacost), false, 0)] protected int energycost;
         [SerializeField] protected int healthcost;
-        [SerializeField] protected int energycost;
         [SerializeField] private uint cooldown;
 
 
-        public virtual bool RequiresAct => true;
+        public virtual bool RequiresAct => energycost == 0;
         public virtual int Manacost => manacost;
         public virtual int Healthcost => healthcost;
         public virtual int Energycost => energycost;

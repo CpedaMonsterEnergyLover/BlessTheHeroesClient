@@ -5053,10 +5053,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Light Wave
-  icon: {fileID: 1155983085, guid: e940f210f4362ae4fb0dc39adf66f5b2, type: 3}
+  icon: {fileID: 21300000, guid: b0fc80c2e200b9549802da3ee361a51c, type: 3}
   detailDescription: dazzzle!
   literalDescription: 
+  pattern: 0
+  radius: 0
+  includeCenter: 0
   manacost: 3
+  energycost: 0
+  healthcost: 0
   cooldown: 1
   startingDamage: 1
   damagePerUnit: 1

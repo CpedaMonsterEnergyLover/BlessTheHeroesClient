@@ -2,6 +2,7 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Effects;
+using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
@@ -18,8 +19,6 @@ namespace Gameplay.Abilities
         [SerializeField] private ParticleSystem waveParticles;
         [SerializeField] private LineRenderer lineRenderer;
         [SerializeField] private ParticleSystemLineRenderer particleSystemLineRenderer;
-
-        public override bool RequiresAct => false;
 
         public override async UniTask Cast(IInteractable target)
         {

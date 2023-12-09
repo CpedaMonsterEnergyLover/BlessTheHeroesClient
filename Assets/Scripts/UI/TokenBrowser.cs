@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Gameplay.Abilities;
 using Gameplay.BuffEffects;
 using Gameplay.Tokens;
 using TMPro;
@@ -113,25 +114,34 @@ namespace UI
         public void UpdateEquipment(HeroToken heroToken)
         {
             if(!ReferenceEquals(heroToken, SelectedToken)) return;
-            
+            var abilities = heroToken.EquipmentAbilities;
             for (int i = 0; i < 4; i++)
             {
                 var equip = heroToken.GetEquipmentAt(i);
-                equipmentSlots[i].SetItem(equip);
+                if(equip is null)
+                    equipmentSlots[i].ClearItem();
+                else
+                    equipmentSlots[i].SetItem(equip, abilities[i]);
             }
         }
 
         private void ClearEquipment()
         {
-            for (var i = 0; i < equipmentSlots.Length; i++) 
-                equipmentSlots[i].SetItem(null);
+            foreach (var slot in equipmentSlots)
+                slot.ClearItem();
         }
 
         private void UpdateAbilities(IToken token)
         {
             var abilities = token.Abilities;
-            for (int i = 0; i < 4; i++) 
-                abilitySlots[i].SetAbility(abilities[i]);
+            for (int i = 0; i < 4; i++)
+            {
+                Ability ability = abilities[i];
+                if (ability is null)
+                    abilitySlots[i].ClearAbility(null);
+                else
+                    abilitySlots[i].SetAbility(ability);
+            }
         }
 
         private void UpdateBuffs(IToken token)

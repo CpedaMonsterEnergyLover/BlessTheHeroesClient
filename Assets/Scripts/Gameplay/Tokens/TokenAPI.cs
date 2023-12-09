@@ -59,19 +59,6 @@ namespace Gameplay.Tokens
             speedBonus += amount;
             InvokeDataChangedEvent();
         }
-
-        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null, IAggroManager aggroReceiver = null)
-        {
-            if(Dead) return;
-            var absorbed = OnDamageAbsorbed?.Invoke(damage);
-            if(aggroReceiver is not null)
-            {
-                aggroReceiver.AddAggro(damage, this);
-                aggroManager.AddAggro(damage, aggroReceiver.IToken);
-            }
-
-            DamageAsync(damage,absorbed ?? 0, delayMS, overrideDamageSprite).Forget();
-        }
         
         public void Heal(int health, IAggroManager aggroReceiver = null)
         {
@@ -80,7 +67,7 @@ namespace Gameplay.Tokens
             int clamped = Mathf.Clamp(raw, CurrentHealth, MaxHealth);
             if(aggroReceiver is not null) aggroReceiver.AddAggro(health - (raw - clamped), this);
             SetHealth(clamped);
-            damageAnimator.PlayHealing(health, 200).Forget();
+            damageAnimator.PlayHealing(health).Forget();
             OnHealed?.Invoke(health);
         }
 

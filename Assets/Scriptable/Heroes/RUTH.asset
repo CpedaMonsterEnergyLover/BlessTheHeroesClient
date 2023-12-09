@@ -16,16 +16,16 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 824cedc3894ff0041b737c438946231a, type: 3}
   health: 8
   mana: 20
-  attackType: 0
   speed: 2
   abilities:
   - {fileID: 5870875586087897761, guid: 6e251a04b69c2924dba52da44dc2fe63, type: 3}
   - {fileID: 3840336933402278231, guid: 4ac277ff0541ee34a80ec05255831f8d, type: 3}
   - {fileID: 6862914754142208385, guid: 4037bb1c3d1db5145bc6db7cc96fb1c5, type: 3}
   - {fileID: 2582124822637291442, guid: 7e42d2c8bbba3144199032dc172e710b, type: 3}
+  attackType: 2
   armorType: 1
   equipment:
-  - {fileID: 11400000, guid: 9a24b6d94bdc8094ebfca1360138babb, type: 2}
-  - {fileID: 11400000, guid: e19d11ba728434c4c90a8061cf2a6af9, type: 2}
-  - {fileID: 11400000, guid: 8606483993bae5d43928acef567cea73, type: 2}
+  - {fileID: 11400000, guid: 5d4f65421878fea47a9927ac3ccebc8a, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}

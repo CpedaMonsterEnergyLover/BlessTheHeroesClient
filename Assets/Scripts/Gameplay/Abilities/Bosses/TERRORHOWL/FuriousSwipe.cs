@@ -4,6 +4,7 @@ using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using System.Linq;
+using Gameplay.Cards;
 
 namespace Gameplay.Abilities
 {

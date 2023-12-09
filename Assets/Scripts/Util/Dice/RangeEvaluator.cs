@@ -2,12 +2,12 @@
 
 namespace Util.Dice
 {
-    [System.Serializable]
-    public class RangeEvaluator : EvaluatorBase
+    [CreateAssetMenu(menuName = "Evaluator/Range")]
+    public class RangeEvaluator : BaseEvaluator
     {
         [Header("Range Evaluator")]
-        [SerializeField] private int from;
-        [SerializeField] private int to;
+        [SerializeField, Range(1, 6)] private int from;
+        [SerializeField, Range(1, 6)] private int to;
 
 
         

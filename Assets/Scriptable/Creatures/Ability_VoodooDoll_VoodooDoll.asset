@@ -16,19 +16,22 @@ MonoBehaviour:
   sprite: {fileID: 415489161, guid: 5126c4203f7ac8e4b8e148bfccfbe2b3, type: 3}
   health: 1
   mana: 1
-  attackType: 0
   speed: 0
   abilities:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  attackType: 0
+  attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
   creatureType: 4
+  canAct: 0
   attackDiceAmount: 0
   defenseDiceAmount: 0
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}
   overrideDefenseDice: {fileID: 0}
+  sharedLootDropModifier: 0
   dropTable:
     content: []
     coinsDropRate: 0

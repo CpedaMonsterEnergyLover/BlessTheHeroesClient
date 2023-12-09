@@ -1,5 +1,6 @@
 ﻿using System.Text;
-using CardAPI;
+using Gameplay.Cards;
+using MyBox;
 using UnityEngine;
 using Util.Dice;
 using Util.Enums;
@@ -16,8 +17,13 @@ namespace Scriptable
         [SerializeField] private Sprite sprite;
         [SerializeField] private string description;
         [SerializeField] private DropTable dropTable = new();
-        [SerializeReference] private CardAction cardAction;
-        [SerializeReference] private EvaluatorSet evaluatorSet;
+        [SerializeField] private bool hasCardAction;
+        [SerializeField, ConditionalField(nameof(hasCardAction), false, true)]
+        private CardAction cardAction;
+        [SerializeField] private bool hasOpeningEvent;
+        [SerializeField, ConditionalField(nameof(hasOpeningEvent), false, true)] 
+        private EvaluatorSet openingEvaluator = new();
+
 
         
         public string DetailDescription
@@ -25,32 +31,24 @@ namespace Scriptable
             get
             {
                 StringBuilder sb = new StringBuilder();
-                if (evaluatorSet is not null)
+                if (hasOpeningEvent)
                 {
                     sb.Append("Throw an <b>Event</b> dice when opening this card:\n")
-                        .Append(evaluatorSet.Description);
+                        .Append(openingEvaluator.Description);
                 }
                 return sb.ToString();
             }
         }
 
         public string LiteralDescription => description;
-
         public Sprite Sprite => sprite;
         public DropTable DropTable => dropTable;
         public bool Unique => unique;
         public string Name => name;
         public LocationRarity Rarity => rarity;
-        public EvaluatorSet EvaluatorSet
-        {
-            get => evaluatorSet;
-            set => evaluatorSet = value;
-        }
-
-        public CardAction CardAction
-        {
-            get => cardAction;
-            set => cardAction = value;
-        }
+        public bool HasAction => hasCardAction;
+        public CardAction CardAction => cardAction;
+        public bool HasOpeningEvent => hasOpeningEvent;
+        public EvaluatorSet OpeningEvaluator => openingEvaluator;
     }
 }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Duel Buff
   m_EditorClassIdentifier: 
   name: Duel
-  icon: {fileID: 776360214, guid: b1815b7eb7014e242b527eec5ccc928a, type: 3}
+  icon: {fileID: 21300000, guid: ed7d20ce095fd0c46ae0e8f2f6340440, type: 3}
   effectType: 2
   effectDirection: 0
   dispellable: 0

@@ -1,11 +1,15 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Gameplay.Abilities;
 using Gameplay.Aggro;
 using Gameplay.BuffEffects;
+using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Interaction;
+using Scriptable.AttackVariations;
 using UI.Elements;
 using UnityEngine;
+using Util.Animators;
 using Util.Enums;
 using Util.Interaction;
 
@@ -18,6 +22,7 @@ namespace Gameplay.Tokens
         
         
         // Methods
+        public List<Card> GetCardsInAttackRange();
         public bool DrainMana(int amount);
         public void SetCard(Card card);
         public UniTask Attack(IToken target);
@@ -30,6 +35,7 @@ namespace Gameplay.Tokens
 
         
         // Properties
+        public InteractionLine InteractionLine { get; }
         public bool Initialized { get; }
         public int ActionPoints { get; }
         public int MovementPoints { get; }
@@ -55,13 +61,14 @@ namespace Gameplay.Tokens
         public bool Dead { get; }
         public Ability[] Abilities { get; }
         public bool HasAbility(string id, out Ability ability);
-        public RangedAttackVisualizer RangedAttackVisualizer { get; }
+        public AttackAnimatorManager AttackAnimatorManager { get; }
         public BuffManager BuffManager { get; }
         public IAggroManager IAggroManager { get; }
+        public BaseAttackVariation AttackVariation { get; }
         
         
         // API
-        public void Damage(int damage, int delayMS = 200, Sprite overrideDamageSprite = null, IAggroManager aggroManager = null);
+        public UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroManager = null, int delay = 200);
         public void Heal(int health, IAggroManager aggroManager = null);
         public void ReplenishMana(int mana);
         public void SetActionPoints(int amount);
@@ -88,7 +95,8 @@ namespace Gameplay.Tokens
         public event TokenEvent OnActionsChanged;
 
         public delegate void TokenAttackEvent(IToken executor, IToken target, AttackType attackType, int damage, int defensed);
-        public event TokenAttackEvent OnAttackPerformed;
+        public event TokenAttackEvent OnBeforeAttackPerformed;
+        public event TokenAttackEvent OnAfterAttackPerformed;
 
         public delegate int TokenDamageAbsorbtionEvent(int damage);
         public event TokenDamageAbsorbtionEvent OnDamageAbsorbed;

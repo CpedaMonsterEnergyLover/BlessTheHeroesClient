@@ -3,8 +3,13 @@
     public enum BuffEffectType
     {
         Curse,
-        Venom,
+        Poison,
         Magic,
-        Disease
+        Disease,
+        Hypothermia,
+        Hyperthermia,
+        Burning,
+        Bleeding,
+        Blindness
     }
 }

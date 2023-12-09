@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Silver Inspiration
-  icon: {fileID: 159626092, guid: 14370596ec680244991d4a281373f170, type: 3}
+  icon: {fileID: 21300000, guid: b41abe8229174c741ad66ebb6d5d20a7, type: 3}
   detailDescription: When your hero misses, he restores mana and gains 1 ACT
   literalDescription: 
   manaReplenishAmount: 1

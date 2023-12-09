@@ -1,10 +1,12 @@
 ﻿using System.Linq;
 using Cysharp.Threading.Tasks;
 using Effects;
+using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Tokens;
 using UI.Elements;
 using UnityEngine;
+using Util.Animators;
 using Util.Enums;
 
 namespace Gameplay.Abilities
@@ -13,6 +15,7 @@ namespace Gameplay.Abilities
     {
         [SerializeField] private Sprite secondIcon;
         [SerializeField] private Sprite thirdIcon;
+        [SerializeField] private int arrowDamage = 1;
 
         private readonly Sprite[] spriteToStage = new Sprite[3];
         private int stage;
@@ -24,22 +27,22 @@ namespace Gameplay.Abilities
         // Unity methods
         private void Awake()
         {
-            spriteToStage[0] = secondIcon;
-            spriteToStage[1] = thirdIcon;
-            spriteToStage[2] = icon;
+            spriteToStage[0] = icon;
+            spriteToStage[1] = secondIcon;
+            spriteToStage[2] = thirdIcon;
         }
         
         
         // Class methods
         protected override void OnTokenSet(IToken token)
         {
-            Caster.OnAttackPerformed += OnAttackPerformed;
+            Caster.OnBeforeAttackPerformed += BeforeAttackPerformed;
         }
 
-        private void OnDisable() => Caster.OnAttackPerformed -= OnAttackPerformed;
+        private void OnDisable() => Caster.OnBeforeAttackPerformed -= BeforeAttackPerformed;
 
 
-        private void OnAttackPerformed(IToken token, IToken attackTarget, AttackType attackType, int damage, int _)
+        private void BeforeAttackPerformed(IToken token, IToken attackTarget, AttackType attackType, int damage, int _)
         {
             if(token is not HeroToken ||
                attackTarget is not CreatureToken creatureToken ||
@@ -55,19 +58,18 @@ namespace Gameplay.Abilities
                 return;
             }
 
-            RangedAttackVisualizer attackVisualizer = token.RangedAttackVisualizer;
-            for (int i = 0; i < targets.Length; i++)
+            RangedAttackAnimator attackAnimator = token.AttackAnimatorManager.Ranged;
+            int targetsAmount = targets.Length;
+            for (int i = 0; i < targetsAmount; i++)
             {
-                int arrowDamage = Mathf.Clamp(damage - (i + 1), 0, int.MaxValue);
-                if(arrowDamage == 0) continue;
-
                 var target = targets[i];
                 var arrow = EffectsManager.GetEffect<EffectArrow>();
-                arrow.SetPosition(attackVisualizer.ArrowPosition);
-                arrow.SetRotation(attackVisualizer.GetRotation(target.TokenTransform.position));
+                arrow.SetPosition(attackAnimator.ArrowPosition);
+                arrow.SetRotation(attackAnimator.GetRotation(target.TokenTransform.position));
                 arrow.Shoot(target.TokenTransform).Forget();
-                target.Damage(arrowDamage, aggroManager: Caster.IAggroManager);
+                target.Damage(arrowDamage, aggroManager: Caster.IAggroManager).Forget();
             }
+            
             UpgradeStage();
         }
 

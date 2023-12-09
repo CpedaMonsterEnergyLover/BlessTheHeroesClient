@@ -58,11 +58,10 @@ namespace Gameplay.BuffEffects
         
         private void Tick()
         {
+            OnTick();
             Duration--;
             OnDurationChanged?.Invoke(this);
-            if (Duration == 0) 
-                Manager.RemoveExact(this);
-            else OnTick();
+            if (Duration == 0) Manager.RemoveExact(this);
         }
     }
 }

@@ -2,9 +2,11 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Gameplay.Cards;
 using Gameplay.Dice;
 using Gameplay.GameField;
 using Gameplay.Interaction;
+using Gameplay.Tokens;
 using UnityEngine;
 using Util;
 using Random = UnityEngine.Random;
@@ -27,7 +29,9 @@ namespace Gameplay.Abilities
             AnimateCast(true);
             
             // Throw dice
-            DiceUtil.CaclulateMagicDiceThrow(diceAmount, Caster.MagicDiceSet, Caster.SpellPower, out int damage, out int[] sides);
+            DiceUtil.CaclulateMagicDiceThrow(diceAmount, Caster.MagicDiceSet, Caster.SpellPower, 
+                out int damage, out int energy, out int[] sides);
+            if(Caster is HeroToken) EnergyManager.Instance.AddEnergy(Caster, energy);
             damage = Mathf.Clamp(damage, 1, 10);
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, diceAmount, sides);
             AnimateCast(false);
@@ -56,7 +60,7 @@ namespace Gameplay.Abilities
                 int count = creatures.Length;
                 if(count == 0) return;
                 await UniTask.Delay(TimeSpan.FromSeconds(delay));
-                creatures[0].Damage(1, delayMS: 0, aggroManager: Caster.IAggroManager);
+                creatures[0].Damage(1, aggroManager: Caster.IAggroManager, delay: 0);
             }
         }
     }

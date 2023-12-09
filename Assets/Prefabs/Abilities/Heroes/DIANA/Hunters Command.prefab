@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Hunter's Command
-  icon: {fileID: -554670527, guid: 0fb91064579f7db49b88a1c16830633c, type: 3}
+  icon: {fileID: 21300000, guid: d0d5163532577704182d10c63e52157c, type: 3}
   detailDescription: Hunter performs a common attack on his target and calls his
     tamed companion to assist him with that attack, if his companion is on the same
     location as target.
@@ -54,4 +54,6 @@ MonoBehaviour:
   radius: 0
   includeCenter: 0
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 0

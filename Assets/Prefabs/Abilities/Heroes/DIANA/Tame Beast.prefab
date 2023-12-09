@@ -45,18 +45,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Tame Beast
-  icon: {fileID: -767848895, guid: b8495984982ebde47a890611d7bb21bc, type: 3}
+  icon: {fileID: 21300000, guid: d3e6daf09d590074fbaf225035ce4448, type: 3}
   detailDescription: Select a beast on the same location as hunter. Throw an event
     dice in attempt to tame that beast. If 6 is rolled, hunter fails and will be
-    attacked by that beast. Otherwise, a beast will become hunter's companion.<i><color=magenta><br>-
+    attacked by that beast. Otherwise, a beast will become hunter's companion.<i><color=#ff00ffff><br>-
     Hunter cannot tame beasts that are higher level then himself.<br>- Only one beast
     can be tamed at a time.<br>- Tamed beast will keep its dice sets.<br>- Hunter
-    can free tamed beast anytime he wants, but it will again become aggressive.</color></i>
+    can free tamed beast anytime he wants, but it will again become aggressive.
   literalDescription: A wide knowledge of beast taming allows hunter to become a
     friend to any animal.
+  pattern: 0
+  radius: 0
+  includeCenter: 0
   manacost: 5
+  energycost: 0
+  healthcost: 0
   cooldown: 0
-  freeIcon: {fileID: 1622387741, guid: b8495984982ebde47a890611d7bb21bc, type: 3}
+  freeIcon: {fileID: 21300000, guid: 69453930298fd1a4bb9c409f95b9fa48, type: 3}
   healthBonus: 3
   defenseBonus: 3
   attackPowerBonus: 6

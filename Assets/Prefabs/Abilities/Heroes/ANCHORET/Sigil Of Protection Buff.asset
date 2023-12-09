@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sigil Of Protection Buff
   m_EditorClassIdentifier: 
   name: Sigil Of Protection
-  icon: {fileID: -644298697, guid: e940f210f4362ae4fb0dc39adf66f5b2, type: 3}
+  icon: {fileID: 21300000, guid: b64f88c2f2fe57646a5314a6fdae3a2f, type: 3}
   effectType: 2
   effectDirection: 0
   dispellable: 1

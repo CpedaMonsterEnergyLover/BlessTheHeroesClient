@@ -20,6 +20,8 @@ namespace Gameplay.Abilities
         public virtual string LiteralDescription => literalDescription;
 
 
+        
+        
 
         protected virtual void OnTokenSet(IToken token) { }
         

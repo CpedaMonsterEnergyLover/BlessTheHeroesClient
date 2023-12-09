@@ -46,15 +46,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: Mass Dispel
-  icon: {fileID: -1084170567, guid: e940f210f4362ae4fb0dc39adf66f5b2, type: 3}
+  icon: {fileID: 21300000, guid: 3538a4946a4aa5e4099bd748a9d4068f, type: 3}
   detailDescription: Removes all magic and curse debuffs from allies on the selected
     location, and all pos magic buffs from foes.
   literalDescription: 
-  manacost: 5
-  cooldown: 3
   pattern: 8
   radius: 1
   includeCenter: 1
+  manacost: 5
+  energycost: 0
+  healthcost: 0
+  cooldown: 3
   particles: {fileID: 7577867854042557018}
 --- !u!1 &7494135132397399274
 GameObject:

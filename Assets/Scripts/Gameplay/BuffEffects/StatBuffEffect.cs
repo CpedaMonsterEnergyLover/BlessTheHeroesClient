@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Gameplay.BuffEffects
 {
-    public abstract class StatBuffEffect : BuffEffect
+    public class StatBuffEffect : BuffEffect
     {
         [SerializeField] private int defense;
         [SerializeField] private int speed;

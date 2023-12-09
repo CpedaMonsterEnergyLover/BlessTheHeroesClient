@@ -1,6 +1,6 @@
 ﻿namespace Gameplay.Abilities
 {
-    public class VipersVenom : AttackBuffEffectPassiveAbility<VipersVenomBuffEffect>
+    public class VipersVenom : AttackBuffEffectPassiveAbility
     {
         
     }

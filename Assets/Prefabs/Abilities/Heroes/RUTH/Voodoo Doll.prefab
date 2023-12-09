@@ -45,13 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: VOODOO DOLL
-  icon: {fileID: 415489161, guid: 5126c4203f7ac8e4b8e148bfccfbe2b3, type: 3}
+  icon: {fileID: 21300000, guid: 8e596d3993c057c4791371d480248199, type: 3}
   detailDescription: Creates a voodoo doll of selected token
   literalDescription: 
   pattern: 5
   radius: 1
   includeCenter: 1
   manacost: 0
+  energycost: 0
+  healthcost: 0
   cooldown: 0
   tokenToSpawn: {fileID: 11400000, guid: 1b83ab31ebbf5d144a55533f8dd164e5, type: 2}
   voodooDollBuffEffect: {fileID: 1081656893922295299, guid: 1c54bf15992d36442bf9144ce17c8cbb,

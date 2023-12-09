@@ -32,6 +32,11 @@ namespace Gameplay.BuffEffects
             return found is not null;
         }
 
+        public BuffEffect[] FindEffectsOfType(BuffEffectType type)
+        {
+            return effects.Values.Where(e => e.Scriptable.EffectType == type).ToArray();
+        }
+
         public void ApplyEffect(IEffectApplier applier, BuffEffect buff, int duration)
         {
             var scriptable = buff.Scriptable;

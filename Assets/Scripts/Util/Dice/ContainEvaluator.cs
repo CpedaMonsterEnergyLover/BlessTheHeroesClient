@@ -2,8 +2,8 @@
 
 namespace Util.Dice
 {
-    [System.Serializable]
-    public class ContainEvaluator : EvaluatorBase
+    [CreateAssetMenu(menuName = "Evaluator/Contain")]
+    public class ContainEvaluator : BaseEvaluator
     {
         [Header("Contain Evaluator")]
         [SerializeField, Range(1, 6)] private int step;

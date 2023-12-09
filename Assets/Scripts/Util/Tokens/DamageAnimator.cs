@@ -30,24 +30,24 @@ namespace Util.Tokens
         }
 
         // Class methods
-        public async UniTask PlayDamage(int damage, int delayMS, Sprite overrideDamageSprite)
+        public async UniTask PlayDamage(int damage, Sprite overrideDamageSprite, int delay)
         {
-            if(cts is not null) cts.Cancel();
+            cts?.Cancel();
             cts = new CancellationTokenSource();
             overrideDamageSprite = damage == 0
                 ? GlobalDefinitions.DefensedDamageAnimationSprite
                 : overrideDamageSprite;
-            await AnimationTask(damage, delayMS, cts.Token, -1, overrideDamageSprite);
+            await AnimationTask(damage, cts.Token, -1, overrideDamageSprite, delay);
         }
 
-        public async UniTask PlayHealing(int healing, int delayMS)
+        public async UniTask PlayHealing(int healing, int delay = 200)
         {
             if(cts is not null) cts.Cancel();
             cts = new CancellationTokenSource();
-            await AnimationTask(healing, delayMS, cts.Token, 1);
+            await AnimationTask(healing, cts.Token, 1, delay: delay);
         }
 
-        private async UniTask AnimationTask(int damage, int delayMS, CancellationToken token, int direction, Sprite overrideDamageSprite = null)
+        private async UniTask AnimationTask(int damage, CancellationToken token, int direction, Sprite overrideDamageSprite = null, int delay = 200)
         {
             if (currentSequence is not null)
             {
@@ -79,7 +79,7 @@ namespace Util.Tokens
             gameObject.SetActive(true);
 
             // Wait until attack animation hits the token
-            await UniTask.Delay(TimeSpan.FromMilliseconds(delayMS), cancellationToken: token);
+            await UniTask.Delay(TimeSpan.FromMilliseconds(delay), cancellationToken: token);
             
             currentSequence = DOTween.Sequence()
                 // Sprite

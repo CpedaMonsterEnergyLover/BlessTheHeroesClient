@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Camera;
 using Cysharp.Threading.Tasks;
+using Gameplay.Cards;
 using Gameplay.Tokens;
 using UnityEngine;
 using Util.Analytics;
@@ -20,7 +21,7 @@ namespace Gameplay.GameField
         [SerializeField] private List<Scriptable.Hero> heroesToSpawn = new();
         [SerializeField] private AnimationCurve storyProbabilityCurve = new();
         
-        private static Scriptable.Floor InstantiatedFloor { get; set; }
+        public static Scriptable.Floor InstantiatedFloor { get; private set; }
         private static int storyProgress;
         private static int fieldSize;
         private static readonly Dictionary<Vector2Int, Card> Cards = new();

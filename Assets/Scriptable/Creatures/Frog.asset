@@ -13,16 +13,17 @@ MonoBehaviour:
   m_Name: Frog
   m_EditorClassIdentifier: 
   name: Frog
-  sprite: {fileID: -2135882137, guid: f3f70c43fd81d7944a91c9311ea92fb0, type: 3}
+  sprite: {fileID: 21300000, guid: 5b5d515974039d8488707f0dcbcefc77, type: 3}
   health: 1
   mana: 0
-  attackType: 0
   speed: 1
   abilities:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  attackType: 0
+  attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
   creatureType: 1
   canAct: 1
   attackDiceAmount: 1
@@ -30,9 +31,8 @@ MonoBehaviour:
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}
   overrideDefenseDice: {fileID: 0}
+  sharedLootDropModifier: 0
   dropTable:
-    content:
-    - lootTable: {fileID: 11400000, guid: 7be298e069b02d44c881979a9883ec61, type: 2}
-      value: 1
+    content: []
     coinsDropRate: 0
     coins: {x: 0, y: 0}

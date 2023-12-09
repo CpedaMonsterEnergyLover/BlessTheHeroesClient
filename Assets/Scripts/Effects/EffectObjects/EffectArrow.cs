@@ -1,6 +1,10 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Gameplay.Aggro;
+using Gameplay.Tokens;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Effects
 {
@@ -36,7 +40,7 @@ namespace Effects
             transform.SetParent(target);
             transform.Rotate(new Vector3(1, 0, 0), 15);
             tween = transform.DOShakeRotation(0.6f, strength, vibratio, randomness);
-            await tween.AsyncWaitForKill();
+            await tween.AsyncWaitForKill().AsUniTask();
             trail.enabled = false;
             tween = null;
         }

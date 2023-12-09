@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Wrath Of The Witch Debuff
   m_EditorClassIdentifier: 
   name: Curse of the Witch
-  icon: {fileID: 551884603, guid: a2e0205db701a3748bd9297fde5b9e49, type: 3}
+  icon: {fileID: 21300000, guid: 6eba67dde714d064fae070eed95f8ed7, type: 3}
   effectType: 0
   effectDirection: 1
   dispellable: 1

@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace Gameplay.Abilities
 {
-    public abstract class TargetBuffAbility<T> : ActiveAbility, IEffectApplier
-    where T : BuffEffect
+    public class TargetBuffAbility : ActiveAbility, IEffectApplier
     {
-        [SerializeField] private T effectToApply;
+        [SerializeField] private BuffEffect effectToApply;
         [SerializeField] private int effectDuration;
         [SerializeField] private ParticleSystem applyParticles;
         [SerializeField] private bool friendly;
@@ -26,10 +25,13 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             token.BuffManager.ApplyEffect(this, effectToApply, effectDuration);
-
-            applyParticles.transform.position = token.TokenTransform.position;
-            applyParticles.Play();
-            await UniTask.WaitUntil(() => !applyParticles.isPlaying);
+            
+            if (applyParticles is not null)
+            {
+                applyParticles.transform.position = token.TokenTransform.position;
+                applyParticles.Play();
+                await UniTask.WaitUntil(() => !applyParticles.isPlaying);
+            }
         }
 
         public override bool ValidateTarget(IInteractable target)

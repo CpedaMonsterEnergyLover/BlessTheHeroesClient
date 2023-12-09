@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Camera;
 using Cysharp.Threading.Tasks;
 using Gameplay.Interaction;
@@ -8,6 +9,7 @@ using TMPro;
 using UI.Interaction;
 using UnityEngine;
 using Util.Interaction;
+using Random = UnityEngine.Random;
 
 namespace Gameplay.Dice
 {
@@ -17,6 +19,7 @@ namespace Gameplay.Dice
         [SerializeField] private TMP_Text[] texts = new TMP_Text[6];
 
         private bool isReplaying;
+        private static readonly TimeSpan delay = TimeSpan.FromMilliseconds(1000 / 60f);
 
 
 
@@ -30,7 +33,7 @@ namespace Gameplay.Dice
             {
                 transform.position = replay.Positions[frame];
                 transform.rotation = replay.Rotations[frame];
-                await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+                await UniTask.Delay(delay * Time.deltaTime);
             }
 
             rigidbody.constraints = RigidbodyConstraints.None;

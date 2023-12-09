@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CardAPI;
+using Gameplay.Cards;
 using UnityEngine;
 
 namespace Util.Dice
@@ -9,28 +9,16 @@ namespace Util.Dice
     [Serializable]
     public class EvaluatorSet
     {
-        [SerializeReference] private List<EvaluatorBase> evaluators = new();
-        [SerializeReference] private List<CardAction> actions = new ();
+        [SerializeField] private List<EvaluatorPair> evaluators = new();
         
-        public void AddEvaluator(EvaluatorBase evaluatorBase) => evaluators.Add(evaluatorBase);
-        public void AddAction(CardAction action) => actions.Add(action);
+        
 
         public string Description
         {
             get
             {
                 StringBuilder sb = new StringBuilder();
-                for (var i = 0; i < evaluators.Count; i++)
-                {
-                    sb
-                        .Append("<b>")
-                        .Append(evaluators[i].Description)
-                        .Append("</b>")
-                        .Append(": ")
-                        .Append(actions[i].Description)
-                        .Append("\n");
-                }
-
+                foreach (var e in evaluators) sb.Append(e.Description);
                 return sb.ToString();
             }
         }
@@ -39,14 +27,13 @@ namespace Util.Dice
         {
             result = -1;
             action = null;
-            for (var i = 0; i < evaluators.Count; i++)
+            foreach (var pair in evaluators)
             {
-                if (evaluators[i].Evaluate(roll, out result))
-                {
-                    action = i > actions.Count ? null : actions[i];
-                    return action is not null;
-                }
+                if (!pair.Evaluator.Evaluate(roll, out result)) continue;
+                action = pair.Action;
+                return true;
             }
+            
             return false;
         }
     }

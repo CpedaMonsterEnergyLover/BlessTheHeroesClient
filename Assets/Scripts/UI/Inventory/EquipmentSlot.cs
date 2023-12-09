@@ -1,47 +1,64 @@
-﻿using Gameplay.Interaction;
+﻿using Gameplay.Abilities;
+using Gameplay.Interaction;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace UI
 {
-    public class EquipmentSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+    public class EquipmentSlot : AbilitySlot
     {
-        [SerializeField] private Image icon;
         [SerializeField] private Sprite defaultSprite;
         [SerializeField] private int index;
 
-        public Scriptable.Equipment Equipment { get; private set; }
+        private Scriptable.Equipment Equipment { get; set; }
+
         
-        public void SetItem(Scriptable.Equipment equipment)
+
+        public override void UpdateIcon() => icon.sprite = Equipment.Sprite;
+
+        public void SetItem(Scriptable.Equipment equipment, Ability ability)
         {
-            icon.sprite = equipment is null ? defaultSprite : equipment.Sprite;
             Equipment = equipment;
+            if(equipment.HasAbility)
+                SetAbility(ability);
+            else
+                ClearAbility(equipment.Sprite);
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        public void ClearItem()
         {
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            InventoryManager.Instance.EquipmentTooltip.SetItem(Equipment);
+            Equipment = null;
+            ClearAbility(defaultSprite);
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+
+        protected override void UpdateTooltipOnPointerEnter()
         {
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            InventoryManager.Instance.EquipmentTooltip.SetItem(null);
+            InventoryManager.Instance.EquipmentTooltip.SetItem(Equipment, Ability);
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        protected override void UpdateTooltipOnPointerExit()
         {
+            InventoryManager.Instance.EquipmentTooltip.SetItem(null, null);
+        }
+
+        protected override void UpdateTooltipOnPointerClick()
+        {
+            InventoryManager.Instance.EquipmentTooltip.SetItem(null, null);
+        }
+
+        public override void OnPointerClick(PointerEventData eventData)
+        {
+            base.OnPointerClick(eventData);
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
             if (Equipment is not null && 
                 eventData.clickCount == 2 && 
                 TokenBrowser.Instance.SelectedToken is HeroToken heroToken)
             {
                 heroToken.Unequip(index);
-                InventoryManager.Instance.EquipmentTooltip.SetItem(Equipment);
+                UpdateTooltipOnPointerClick();
             }
         }
     }

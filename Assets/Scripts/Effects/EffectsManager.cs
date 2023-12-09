@@ -9,7 +9,7 @@ namespace Effects
         private static IEffectsPool[] pools;
 
         
-        
+     
         private void Awake()
         {
             pools = GetComponents<IEffectsPool>();
