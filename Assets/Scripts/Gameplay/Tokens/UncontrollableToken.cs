@@ -8,13 +8,11 @@ using Gameplay.Cards;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
-using Gameplay.Inventory;
 using MyBox;
 using UnityEngine;
 using Util;
 using Util.Enums;
 using Util.Patterns;
-using Util.Tokens;
 using Random = UnityEngine.Random;
 
 namespace Gameplay.Tokens
@@ -36,31 +34,29 @@ namespace Gameplay.Tokens
 
         public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(false);
         
-        protected override void OnPlayersTurnStarted()
-        {
-            ActionPoints = DefaultActionPoints;
-            MovementPoints = Scriptable.Speed;
-            InvokeDataChangedEvent();
-            UpdateOutlineByCanInteract();
-        }
-
         protected override void Die()
         { 
             if(Scriptable.DropTable is null) return;
             var drops = Scriptable.DropTable.DropLoot();
             drops.AddRange(FieldManager.InstantiatedFloor.DropSharedLoot(SharedLootDropModifier));
-            InventoryManager.Instance.AddCoins(Scriptable.DropTable.DropCoins());
-            if(drops.Count != 0) DropItemsOnDeath(transform.position, drops).Forget();
-        }
- 
-        private async UniTask DropItemsOnDeath(Vector3 pos, List<Scriptable.Item> drops)
-        {
-            int delay = 1000 / drops.Count;
+            if(drops.Count == 0) return;
 
-            foreach (Scriptable.Item drop in drops)
+            IToken attacker = null;
+            // Если смерть от рук героя, выдать предметы ему, а если не получилось ему, то на карту
+            if (attacker is HeroToken hero)
             {
-                InventoryManager.Instance.AddItem(drop, pos, 1).Forget();
-                await UniTask.Delay(delay);
+                foreach (Scriptable.Item drop in drops)
+                {
+                    hero.InventoryManager.AddItem(drop, 1, out int left);
+                    if(left > 0) Card.AddItemDrop(drop);
+                }
+                hero.InventoryManager.AddCoins(Scriptable.DropTable.DropCoins());
+            }
+            // Если смерть не от рук героя, положить предметы на карту
+            else
+            {
+                Card.AddCoinDrop(Scriptable.DropTable.DropCoins());
+                Card.AddItemDrops(drops);
             }
         }
 

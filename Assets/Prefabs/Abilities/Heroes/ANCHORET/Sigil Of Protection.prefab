@@ -4844,6 +4844,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8052108964969310462}
+  - {fileID: 8889116762522197759}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4861,8 +4862,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: Sigil Of Protection
   icon: {fileID: 21300000, guid: b64f88c2f2fe57646a5314a6fdae3a2f, type: 3}
-  detailDescription: 
-  literalDescription: 
+  statDescription: 
+  description: 
   pattern: 5
   radius: 1
   includeCenter: 1
@@ -4873,5 +4874,88 @@ MonoBehaviour:
   effectToApply: {fileID: 7266638375040007269, guid: 7d51edf0d14cba846816c4d18628d177,
     type: 3}
   effectDuration: 3
-  applyParticles: {fileID: 2888618035788610721}
   friendly: 1
+  castParticles: {fileID: 8270084422258353427}
+--- !u!1001 &2121499788614515356
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 2
+    m_TransformParent: {fileID: 6734991601581662215}
+    m_Modifications:
+    - target: {fileID: 6671045444723273673, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_Name
+      value: HolySpellCastParticles
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_AddedGameObjects: []
+  m_SourcePrefab: {fileID: 100100000, guid: d6013fa3be9029b41936bf155a32c81a, type: 3}
+--- !u!198 &8270084422258353427 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8049103678551646095, guid: d6013fa3be9029b41936bf155a32c81a,
+    type: 3}
+  m_PrefabInstance: {fileID: 2121499788614515356}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8889116762522197759 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7362655624778490979, guid: d6013fa3be9029b41936bf155a32c81a,
+    type: 3}
+  m_PrefabInstance: {fileID: 2121499788614515356}
+  m_PrefabAsset: {fileID: 0}

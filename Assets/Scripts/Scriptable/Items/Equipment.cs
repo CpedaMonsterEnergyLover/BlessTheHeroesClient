@@ -1,9 +1,8 @@
 ﻿using System.Text;
 using Gameplay.Abilities;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
 using MyBox;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 
 namespace Scriptable
@@ -47,15 +46,13 @@ namespace Scriptable
             if (attackPower > 0) sb.Append($"+{attackPower} ATK\n");
             if (defense > 0) sb.Append($"+{defense} DEF\n");
             if (sb.Length > 0) sb.Insert(0, "When equipped, gives\n");
-            if (hasAbility)
-                sb.Append(sb.Length > 0 ? "and grants new ability:" : "When equipped, grants new ability:");
             return sb;
         }
         
-        public override void OnClick()
+        public override void OnClickFromInventorySlot()
         {
-            HeroToken hero = (HeroToken) TokenBrowser.Instance.SelectedToken;
-            InventoryManager.Instance.RemoveItem(this, 1);
+            if(TokenBrowser.SelectedToken is not HeroToken hero) return;
+            hero.InventoryManager.RemoveItem(this, 1);
             
             Equipment unequipped = null;
             if(hero.HasEquipmentInSlot(Slot))

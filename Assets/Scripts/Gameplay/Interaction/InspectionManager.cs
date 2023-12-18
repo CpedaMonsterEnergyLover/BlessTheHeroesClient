@@ -1,6 +1,5 @@
 ﻿using Camera;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using UI.Inspection;
 using UnityEngine;
 using UnityEngine.EventSystems;

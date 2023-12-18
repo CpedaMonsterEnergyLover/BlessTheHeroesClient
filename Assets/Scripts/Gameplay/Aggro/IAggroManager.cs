@@ -7,6 +7,7 @@ namespace Gameplay.Aggro
         public void Activate(IToken wearer);
         public void AddAggro(int amount, IToken source, bool mirrored = false);
         public void RemoveAggro(int amount, IToken source, bool mirrored = false);
-        public IToken Wearer { get; }
+        public void ChangeClusterAggro(int amount);
+        public IToken Bearer { get; }
     }
 }

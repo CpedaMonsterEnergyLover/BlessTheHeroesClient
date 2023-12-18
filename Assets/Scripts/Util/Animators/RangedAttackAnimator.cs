@@ -61,7 +61,7 @@ namespace Util.Animators
         public override async UniTask AnimateAttack(Transform self, Transform target)
         {
             SetArrowActive(false);
-            var arrow = EffectsManager.GetEffect<EffectArrow>();
+            var arrow = PoolManager.GetEffect<EffectArrow>();
             arrow.SetPosition(ArrowPosition);
             arrow.SetRotation(GetRotation(target.position));
             await arrow.Shoot(target);

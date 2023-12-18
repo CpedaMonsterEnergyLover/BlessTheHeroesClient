@@ -1,9 +1,7 @@
-﻿using Cysharp.Threading.Tasks;
-using DG.Tweening;
+﻿using DG.Tweening;
 using Gameplay.Abilities;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UI.Tooltips
 {
@@ -39,18 +37,7 @@ namespace UI.Tooltips
             priceText.SetText($"Sell Price: {price}g");
             descriptionText.SetText(item.Description.Equals(string.Empty) ? "No description" : item.Description);
             gameObject.SetActive(true);
-            statsText.GetComponent<ContentSizeFitter>().SetLayoutVertical();
-            descriptionText.GetComponent<ContentSizeFitter>().SetLayoutVertical();
             PlayAnimation();
-            UpdatePivotPosition().Forget();
-        }
-
-        private async UniTaskVoid UpdatePivotPosition()
-        {
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            Vector3 pos = pivot.localPosition;
-            pivot.localPosition = new Vector3(pos.x, pivot.sizeDelta.y / 2f, pos.z);
         }
         
         private void PlayAnimation()

@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
+using Effects;
 using Gameplay.Aggro;
 using Gameplay.Cards;
+using Gameplay.Dice;
 using Gameplay.GameCycle;
 using Gameplay.GameField;
 using Gameplay.Interaction;
-using UI;
 using UI.Interaction;
+using UI.Browsers;
 using UnityEngine;
 using Util;
-using Util.Enums;
 using Util.Interaction;
 using Util.Patterns;
+using Random = UnityEngine.Random;
 
 namespace Gameplay.Tokens
 {
@@ -25,8 +25,8 @@ namespace Gameplay.Tokens
         public override bool CanInteract => 
             TurnManager.CurrentStage is TurnStage.PlayersTurn &&
             !Dead &&
-            IToken.DraggedToken is null &&
-            !IsPlayingAnimation &&
+            // IToken.DraggedToken is null &&
+            // !IsPlayingAnimation &&
             (ActionPoints > 0 || MovementPoints > 0);
 
         public override Vector4 OutlineColor => ActionPoints == 0
@@ -40,12 +40,10 @@ namespace Gameplay.Tokens
         
         public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(Initialized && CanInteract);
 
-        protected override void OnPlayersTurnStarted()
+        protected override void Init()
         {
-            ActionPoints = DefaultActionPoints;
-            MovementPoints = Speed;
-            UpdateOutlineByCanInteract();
-            InvokeDataChangedEvent();
+            base.Init();
+            PoolManager.GetEffect<PartyFrame>().SetToken(this);
         }
 
         protected override void OnMonstersTurnStarted()
@@ -150,9 +148,33 @@ namespace Gameplay.Tokens
             if (card.IsOpened &&
                 card.HasSpaceForToken(this) &&
                 (MovementPoints > 0 || ConsumeActionPointForMovement()))
-                Walk(card).Forget();
+            {
+                TryWalk(card).Forget();
+            }
             else
                 OpenCard(card);
+        }
+
+        private async UniTask TryWalk(Card card)
+        {
+            int creaturesAmount = Card.CreaturesAmount;
+            if (creaturesAmount == 0 || Speed > creaturesAmount)
+            {
+                await Walk(card);
+                return;
+            } 
+            
+            int roll = Random.Range(0, 6);
+            await DiceManager.ThrowReplay(DiceManager.EventDiceSet, 1, new[] { roll });
+            // TODO: ADD SPEED BONUS TEXT ANIMATION
+            roll += Speed;
+            if (roll <= creaturesAmount)
+            {
+                SetMovementPoints(MovementPoints - 1);
+                return;
+            }
+
+            await Walk(card);
         }
         
         private void OpenCard(Card card)
@@ -182,7 +204,7 @@ namespace Gameplay.Tokens
         {
             ((IToken) this).InvokeStartDraggingEvent();
             InteractionLine.Enable(result.IntersectionPoint);
-            TokenBrowser.Instance.SelectToken(this);
+            TokenBrowser.SelectToken(this);
             
             UpdateOutlinesOnDragStart();
         }

@@ -1,6 +1,7 @@
 ﻿using Gameplay.Tokens;
 using UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Gameplay.Abilities
 {
@@ -9,15 +10,15 @@ namespace Gameplay.Abilities
         [Header("BaseAbility Fields")]
         [SerializeField] protected string title;
         [SerializeField] protected Sprite icon;
-        [SerializeField, TextArea] protected string detailDescription;
-        [SerializeField, TextArea] protected string literalDescription;
+        [FormerlySerializedAs("detailDescription")] [SerializeField, TextArea] protected string statDescription;
+        [FormerlySerializedAs("literalDescription")] [SerializeField, TextArea] protected string description;
 
         public IToken Caster { get; private set; }
         public AbilitySlot AbilitySlot { get; set; }
         public virtual string Title => title;
         public virtual Sprite Icon => icon;
-        public virtual string DetailDescription => detailDescription;
-        public virtual string LiteralDescription => literalDescription;
+        public virtual string StatDescription => statDescription;
+        public virtual string Description => description;
 
 
         

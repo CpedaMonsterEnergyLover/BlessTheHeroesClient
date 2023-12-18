@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using MyBox;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,9 @@ namespace UI.Elements
     public class ProgressBar : MonoBehaviour
     {
         [SerializeField] private Image fillImage;
-        [SerializeField] private TMP_Text valueText;
+        [SerializeField] private bool hasValueText = true;
+        [SerializeField, ConditionalField(nameof(hasValueText), false, true)]
+        private TMP_Text valueText;
 
         private float maxValue;
         private float currentValue;
@@ -15,7 +18,7 @@ namespace UI.Elements
 
         public void SetActive(bool isActive) => gameObject.SetActive(isActive);
 
-        public void UpdateValues(float current, float max)
+        public void UpdateValue(float current, float max)
         {
             currentValue = current;
             maxValue = max;
@@ -25,6 +28,10 @@ namespace UI.Elements
 
         private void UpdateImage() => fillImage.fillAmount = Mathf.Clamp01(currentValue / maxValue);
 
-        private void UpdateText() => valueText.SetText($"{currentValue}/{maxValue}");
+        private void UpdateText()
+        {
+            if(!hasValueText) return;
+            valueText.SetText($"{currentValue}/{maxValue}");
+        }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using System.Linq;
 using Gameplay.Cards;
+using Util;
 
 namespace Gameplay.Abilities
 {
@@ -23,7 +23,7 @@ namespace Gameplay.Abilities
             
             foreach (IControllableToken hero in card.Heroes)
             {
-                hero.Damage(3);
+                hero.Damage(GlobalDefinitions.PhysicalDamageType,3);
             }
         }
 

@@ -10,28 +10,25 @@ namespace Gameplay.Abilities
     {
         [SerializeField] private BuffEffect effectToApply;
         [SerializeField] private int effectDuration;
-        [SerializeField] private ParticleSystem applyParticles;
         [SerializeField] private bool friendly;
 
+        protected virtual ParticleSystem CastParticles => null;
+        
         public override void OnCastStart()
         {
+            if(CastParticles is not null) CastParticles.Play();
         }
 
         public override void OnCastEnd()
         {
+            if(CastParticles is not null) CastParticles.Stop();
         }
 
-        public override async UniTask Cast(IInteractable target)
+        public override UniTask Cast(IInteractable target)
         {
-            if(target is not IToken token) return;
+            if(target is not IToken token) return default;
             token.BuffManager.ApplyEffect(this, effectToApply, effectDuration);
-            
-            if (applyParticles is not null)
-            {
-                applyParticles.transform.position = token.TokenTransform.position;
-                applyParticles.Play();
-                await UniTask.WaitUntil(() => !applyParticles.isPlaying);
-            }
+            return default;
         }
 
         public override bool ValidateTarget(IInteractable target)

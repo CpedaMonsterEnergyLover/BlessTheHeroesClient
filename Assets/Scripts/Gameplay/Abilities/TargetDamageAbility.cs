@@ -1,12 +1,14 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
+using Scriptable;
 using UnityEngine;
 
 namespace Gameplay.Abilities
 {
     public class TargetDamageAbility : ActiveAbility
     {
+        [SerializeField] private DamageType damageType;
         [SerializeField] private int damage;
         
         public override bool ValidateTarget(IInteractable target) => ValidateEnemy(target);
@@ -15,7 +17,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             
-            await token.Damage(damage, aggroSource: Caster.IAggroManager);
+            await token.Damage(damageType, damage, aggroReceiver: Caster.IAggroManager);
         }
 
         public override void OnCastStart()

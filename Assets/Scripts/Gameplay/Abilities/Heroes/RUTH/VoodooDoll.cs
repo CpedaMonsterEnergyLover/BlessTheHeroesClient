@@ -3,7 +3,6 @@ using Gameplay.BuffEffects;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Util;
 
 namespace Gameplay.Abilities

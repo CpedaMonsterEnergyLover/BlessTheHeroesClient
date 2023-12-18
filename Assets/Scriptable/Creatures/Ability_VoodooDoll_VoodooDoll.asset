@@ -13,21 +13,18 @@ MonoBehaviour:
   m_Name: Ability_VoodooDoll_VoodooDoll
   m_EditorClassIdentifier: 
   name: Voodoo Doll
-  sprite: {fileID: 415489161, guid: 5126c4203f7ac8e4b8e148bfccfbe2b3, type: 3}
+  creatureType: {fileID: 11400000, guid: 98bc472e79fdc084c92fa26af21cca0c, type: 2}
+  sprite: {fileID: 21300000, guid: 8e596d3993c057c4791371d480248199, type: 3}
   health: 1
   mana: 1
   speed: 0
-  abilities:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  abilities: []
   attackType: 0
+  armorType: 0
+  damageType: {fileID: 11400000, guid: 4026f66ee129e2645a232fc16d330c85, type: 2}
   attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
-  creatureType: 4
   canAct: 0
   attackDiceAmount: 0
-  defenseDiceAmount: 0
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}
   overrideDefenseDice: {fileID: 0}

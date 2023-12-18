@@ -4,6 +4,7 @@ using Gameplay.Dice;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
+using Util;
 
 namespace Gameplay.Abilities
 {
@@ -39,7 +40,7 @@ namespace Gameplay.Abilities
             
             // Animate explosion
             AnimateExplosionLight();
-            creature.Damage(damage, aggroSource: Caster.IAggroManager);
+            creature.Damage(GlobalDefinitions.FireDamageType, damage, aggroReceiver: Caster.IAggroManager);
             explosionParticles.Play();
             await UniTask.WaitUntil(() => !explosionParticles.isPlaying);
             transform.localPosition = new Vector3(0, 0.5f, 0);

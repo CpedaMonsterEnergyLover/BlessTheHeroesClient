@@ -1,106 +1,62 @@
-﻿using System;
-using System.Threading;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
-using TMPro;
+using Effects;
+using Scriptable;
 using UnityEngine;
+using Util.Enums;
 
 namespace Util.Tokens
 {
     public class DamageAnimator : MonoBehaviour
     {
-        [SerializeField] private SpriteRenderer sprite;
-        [SerializeField] private TMP_Text text;
+        [SerializeField] private ParticleSystem fireParticles;
+        [SerializeField] private ParticleSystem natureParticles;
+        [SerializeField] private ParticleSystem poisonParticles;
+        [SerializeField] private ParticleSystem physicalParticles;
+        [SerializeField] private ParticleSystem shadowParticles;
+        [SerializeField] private ParticleSystem bloodParticles;
+        [SerializeField] private ParticleSystem waterParticles;
+        [SerializeField] private ParticleSystem arcaneParticles;
+        [SerializeField] private ParticleSystem coldParticles;
+        [SerializeField] private ParticleSystem holyParticles;
+        [SerializeField] private ParticleSystem earthParticles;
+        [SerializeField] private ParticleSystem airParticles;
+
+        private readonly Dictionary<DamageType, ParticleSystem> damageToParticles = new();
+
+        private void Start()
+        {
+            damageToParticles[GlobalDefinitions.FireDamageType] = fireParticles;
+            damageToParticles[GlobalDefinitions.NatureDamageType] = natureParticles;
+            damageToParticles[GlobalDefinitions.PoisonDamageType] = poisonParticles;
+            damageToParticles[GlobalDefinitions.PhysicalDamageType] = physicalParticles;
+            damageToParticles[GlobalDefinitions.ShadowDamageType] = shadowParticles;
+            damageToParticles[GlobalDefinitions.BloodDamageType] = bloodParticles;
+            damageToParticles[GlobalDefinitions.WaterDamageType] = waterParticles;
+            damageToParticles[GlobalDefinitions.ArcaneDamageType] = arcaneParticles;
+            damageToParticles[GlobalDefinitions.ColdDamageType] = coldParticles;
+            damageToParticles[GlobalDefinitions.HolyDamageType] = holyParticles;
+            damageToParticles[GlobalDefinitions.AirDamageType] = airParticles;
+            damageToParticles[GlobalDefinitions.EarthDamageType] = earthParticles;
+        }
+
+
+        public void PlayDamage(int damage, DamageType damageType, DamageImpact impact, Transform sourceTransform = null)
+            => PlayDamageAsync(damage, damageType, impact, sourceTransform).Forget();
+
+        public void PlayHealing(int healing, DamageType damageType, DamageImpact impact, Transform sourceTransform = null)
+            => PlayHealingAsync(healing, damageType, impact, sourceTransform).Forget();
         
-        private Sequence currentSequence;
-        private CancellationTokenSource cts = new();
-        private bool isPlayingAnimation;
-        public bool IsPlayingAnimation => isPlayingAnimation;
-
-        
-
-        private void OnDestroy()
+        public async UniTask PlayDamageAsync(int damage, DamageType damageType, DamageImpact impact, Transform sourceTransform = null)
         {
-            if (cts is not null)
-            {
-                cts.Cancel();
-                cts.Dispose();
-                cts = null;
-            }
+            if(damageToParticles.ContainsKey(damageType)) damageToParticles[damageType].Play();
+            await PoolManager.GetEffect<EffectText>().PlayDamage(transform, damage, damageType, impact, sourceTransform);
         }
 
-        // Class methods
-        public async UniTask PlayDamage(int damage, Sprite overrideDamageSprite, int delay)
+        public async UniTask PlayHealingAsync(int healing, DamageType damageType, DamageImpact impact, Transform sourceTransform = null)
         {
-            cts?.Cancel();
-            cts = new CancellationTokenSource();
-            overrideDamageSprite = damage == 0
-                ? GlobalDefinitions.DefensedDamageAnimationSprite
-                : overrideDamageSprite;
-            await AnimationTask(damage, cts.Token, -1, overrideDamageSprite, delay);
-        }
-
-        public async UniTask PlayHealing(int healing, int delay = 200)
-        {
-            if(cts is not null) cts.Cancel();
-            cts = new CancellationTokenSource();
-            await AnimationTask(healing, cts.Token, 1, delay: delay);
-        }
-
-        private async UniTask AnimationTask(int damage, CancellationToken token, int direction, Sprite overrideDamageSprite = null, int delay = 200)
-        {
-            if (currentSequence is not null)
-            {
-                currentSequence.Kill();
-                currentSequence = null;
-            }
-
-            if (direction < 0)
-            {
-                text.SetText($"-{damage}");
-                text.color = Color.yellow;
-                sprite.sprite = overrideDamageSprite is not null 
-                    ? overrideDamageSprite 
-                    : GlobalDefinitions.DamageAnimationSprite;
-            } 
-            else if (direction > 0)
-            {
-                text.SetText($"+{damage}");
-                text.color = Color.green;
-                sprite.sprite = GlobalDefinitions.HealingAnimationSprite;
-            }
-            
-            isPlayingAnimation = true;
-            Transform spriteTransform = sprite.transform;
-            Transform textTransform = text.transform;
-            spriteTransform.localScale = Vector3.zero;
-            textTransform.localScale = Vector3.zero;
-            sprite.color = Color.white;
-            gameObject.SetActive(true);
-
-            // Wait until attack animation hits the token
-            await UniTask.Delay(TimeSpan.FromMilliseconds(delay), cancellationToken: token);
-            
-            currentSequence = DOTween.Sequence()
-                // Sprite
-                .Append(spriteTransform.DOScale(Vector3.one * 1.25f, 0.2f))
-                .Append(spriteTransform.DOScale(Vector3.one, 0.05f))
-                .AppendInterval(0.5f)
-                .Append(spriteTransform.DOScale(Vector3.one * 1.65f, 0.25f))
-                .Insert(0.75f, sprite.DOColor(new Color(1, 1, 1, 0f), 0.25f))
-                
-                // Text
-                .Insert(0, textTransform.DOScale(Vector3.one, 0.25f))
-                .Insert(0.75f, textTransform.DOScale(Vector3.one * 1.5f, 0.25f))
-                .Insert(0.75f, text.DOFade(0, 0.25f));
-            
-            await currentSequence.AsyncWaitForKill().AsUniTask().AttachExternalCancellation(token);
-            
-            currentSequence = null;
-            gameObject.SetActive(false);
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, cancellationToken: token);
-            cts = null;
-            isPlayingAnimation = false;
+            if(damageToParticles.ContainsKey(damageType)) damageToParticles[damageType].Play();
+            await PoolManager.GetEffect<EffectText>().PlayHealing(transform, healing, damageType, impact, sourceTransform);
         }
     }
 }

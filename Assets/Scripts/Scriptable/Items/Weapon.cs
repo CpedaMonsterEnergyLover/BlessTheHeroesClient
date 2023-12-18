@@ -1,9 +1,7 @@
 ﻿using System.Text;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
-using MyBox;
 using Scriptable.AttackVariations;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 using Util.Enums;
 
@@ -14,11 +12,13 @@ namespace Scriptable
     {
         [Header("Weapon data")]
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
-        [SerializeField] private BaseAttackVariation attackVariation;
         [SerializeField] private AttackType attackType;
+        [SerializeField] private BaseAttackVariation attackVariation;
+        [SerializeField] private DamageType damageType;
 
-        public override string CategoryName => $"{AttackType} Weapon";
+        public override string CategoryName => $"{damageType.ColoredTitle} {AttackType} Weapon";
         public int AttackDiceAmount => attackDiceAmount;
+        public DamageType DamageType => damageType;
         public virtual AttackType AttackType => attackType;
         public BaseAttackVariation AttackVariation => attackVariation;
 
@@ -35,7 +35,7 @@ namespace Scriptable
         }
         
         public override bool AllowClick 
-            => TokenBrowser.Instance.SelectedToken is HeroToken {ActionPoints: > 0} hero &&
+            => TokenBrowser.SelectedToken is HeroToken {ActionPoints: > 0} hero &&
                hero.Scriptable.AttackType == AttackType;
     }
 }

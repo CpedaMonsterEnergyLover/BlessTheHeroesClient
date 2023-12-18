@@ -2,15 +2,12 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Gameplay.Aggro;
 using Gameplay.Dice;
 using Gameplay.GameField;
 using Gameplay.Interaction;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Util;
 using Util.Interaction;
 using Util.Patterns;
@@ -19,7 +16,7 @@ using Util.Tokens;
 
 namespace Gameplay.Cards
 {
-    public class Card : MonoBehaviour, 
+    public partial class Card : MonoBehaviour, 
         IInteractableOnClick
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -107,7 +104,7 @@ namespace Gameplay.Cards
         
             await animationSequence.AsyncWaitForKill();
             UpdateEventText(false, Scriptable.HasAction);
-            DropResources();
+            AddResourceDrops();
             await ExecuteOpeningEvent();
             animationSequence = null;
         }
@@ -135,26 +132,14 @@ namespace Gameplay.Cards
                 action.Execute(this, null, result);
         }
 
-        private void DropResources()
+        private void AddResourceDrops()
         {
             if(Scriptable.DropTable is null) return;
-            var drop = Scriptable.DropTable.DropLoot();
-            InventoryManager.Instance.AddCoins(Scriptable.DropTable.DropCoins());
-            
-            if(drop.Count != 0) PlayLootAnimation(drop).Forget();
+            var drops = Scriptable.DropTable.DropLoot();
+            inventoryManager.AddCoins(Scriptable.DropTable.DropCoins());
+            if (drops.Count != 0) AddItemDrops(drops);
         }
 
-        private async UniTask PlayLootAnimation(List<Scriptable.Item> drops)
-        {
-            int delay = 1000 / drops.Count;
-
-            foreach (Scriptable.Item drop in drops)
-            {
-                InventoryManager.Instance.AddItem(drop, transform.position, 1).Forget();
-                await UniTask.Delay(delay);
-            }
-        }
-        
         public bool HasSpaceForHero() => HeroesAmount < 8;
         public bool HasSpaceForBoss() => !HasBoss;
         public bool HasSpaceForCreature() => CreaturesAmount < 8 && !HasBoss;

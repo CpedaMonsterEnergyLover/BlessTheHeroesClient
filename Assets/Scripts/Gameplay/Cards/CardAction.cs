@@ -1,6 +1,5 @@
 ﻿using Gameplay.Tokens;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Gameplay.Cards
 {

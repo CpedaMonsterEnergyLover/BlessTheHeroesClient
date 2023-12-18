@@ -14,7 +14,7 @@ namespace Editor
             DrawDefaultInspector();
 
             if (GUILayout.Button("Update mesh")) 
-                manager.UpdateMesh();
+                manager.UpdateMesh(manager.GetComponent<ParticleSystem>());
 
         }
     }

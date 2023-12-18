@@ -4,10 +4,9 @@ using Gameplay.Abilities;
 using Gameplay.Aggro;
 using Gameplay.BuffEffects;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using Gameplay.Interaction;
+using Scriptable;
 using Scriptable.AttackVariations;
-using UI.Elements;
 using UnityEngine;
 using Util.Animators;
 using Util.Enums;
@@ -31,7 +30,20 @@ namespace Gameplay.Tokens
         public UniTask Despawn();
         public bool IsInAttackRange(IToken attacker);
         public void InvokeOnTokenMissGlobal() => OnTokenMissGlobal?.Invoke(this);
-
+        
+        
+        // API
+        public UniTask Damage(DamageType damageType, int damage, IAggroManager aggroReceiver = null, int delay = 200);
+        public void Heal(int health, IAggroManager aggroReceiver = null);
+        public void ReplenishMana(int mana);
+        public void SetActionPoints(int amount);
+        public void SetMovementPoints(int amount);
+        public void AddSpellPower(int amount);
+        public void AddSpeed(int amount);
+        public void AddDefense(int amount);
+        public void AddAttackPower(int amount);
+        public void AddMaxMana(int amount);
+        public void AddMaxHealth(int amount);
 
         
         // Properties
@@ -40,10 +52,12 @@ namespace Gameplay.Tokens
         public int ActionPoints { get; }
         public int MovementPoints { get; }
         public AttackType AttackType { get; }
+        public ArmorType ArmorType { get; }
         public int Speed { get; }
         public Scriptable.DiceSet AttackDiceSet { get; }
         public Scriptable.DiceSet MagicDiceSet { get; }
         public Scriptable.DiceSet DefenseDiceSet { get; }
+        public Scriptable.DamageType DamageType { get; }
         public int AttackDiceAmount { get; }
         public int DefenseDiceAmount { get; }
         public Scriptable.Token ScriptableToken { get; }
@@ -66,21 +80,6 @@ namespace Gameplay.Tokens
         public IAggroManager IAggroManager { get; }
         public BaseAttackVariation AttackVariation { get; }
         
-        
-        // API
-        public UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroSource = null, int delay = 200);
-        public void Heal(int health, IAggroManager aggroManager = null);
-        public void ReplenishMana(int mana);
-        public void SetActionPoints(int amount);
-        public void SetMovementPoints(int amount);
-        public void AddSpellPower(int amount);
-        public void AddSpeed(int amount);
-        public void AddDefense(int amount);
-        public void AddAttackPower(int amount);
-        public void AddMaxMana(int amount);
-        public void AddMaxHealth(int amount);
-
-
 
         // Events
         public delegate void TokenEvent(IToken token);
@@ -93,6 +92,8 @@ namespace Gameplay.Tokens
         public event TokenEvent OnManaChanged;
         public event TokenEvent OnHealthChanged;
         public event TokenEvent OnActionsChanged;
+        public event TokenEvent OnMovementPointsChanged;
+        
 
         public delegate void TokenAttackEvent(IToken executor, IToken target, AttackType attackType, int damage, int defensed);
         public event TokenAttackEvent OnBeforeAttackPerformed;
@@ -100,9 +101,11 @@ namespace Gameplay.Tokens
 
         public delegate int TokenDamageAbsorbtionEvent(int damage);
         public event TokenDamageAbsorbtionEvent OnDamageAbsorbed;
-        
+
+        public delegate void TokenDamageEvent(DamageType damageType, int damage);
+        public event TokenDamageEvent OnDamaged;
+
         public delegate void TokenResourceEvent(int amount);
-        public event TokenResourceEvent OnDamaged;
         public event TokenResourceEvent OnHealed;
         public event TokenResourceEvent OnManaReplenished;
 

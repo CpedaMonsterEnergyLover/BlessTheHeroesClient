@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 using Util.Enums;
 
@@ -31,7 +30,7 @@ namespace Scriptable
         public override int Slot => 1;
 
         public override bool AllowClick 
-            => TokenBrowser.Instance.SelectedToken is HeroToken {ActionPoints: > 0} hero &&
+            => TokenBrowser.SelectedToken is HeroToken {ActionPoints: > 0} hero &&
                (int) hero.Scriptable.ArmorType >= (int) armorType;
     }
 }

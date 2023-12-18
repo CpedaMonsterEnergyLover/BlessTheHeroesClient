@@ -1,5 +1,6 @@
-﻿using Gameplay.BuffEffects;
-using Gameplay.Tokens;
+﻿using Gameplay.Tokens;
+using Scriptable;
+using BuffEffect = Gameplay.BuffEffects.BuffEffect;
 
 namespace Gameplay.Abilities
 {
@@ -7,7 +8,7 @@ namespace Gameplay.Abilities
     {
         private IToken target;
         
-        private void OnDamaged(int damage) => target?.Damage(damage);
+        private void OnDamaged(DamageType damageType, int damage) => target?.Damage(damageType, damage);
         private void OnHealed(int heal) => target?.Heal(heal);
         private void OnManaReplenished(int mana) => target?.ReplenishMana(mana);
 

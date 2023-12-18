@@ -7,8 +7,9 @@ namespace Gameplay.Tokens
     public class CreatureToken : UncontrollableToken<Creature>
     {
         protected override int DefaultActionPoints => Scriptable.CanAct ? 1 : 0;
+        public override DamageType DamageType => Scriptable.DamageType;
         public override int AttackDiceAmount => Scriptable.AttackDiceAmount;
-        public override int DefenseDiceAmount => Scriptable.DefenseDiceAmount;
+        public override int DefenseDiceAmount => (int)Scriptable.ArmorType;
         public override BaseAttackVariation AttackVariation => Scriptable.AttackVariation;
         public override DiceSet AttackDiceSet => Scriptable.OverrideAttackDice(out DiceSet dice) ? dice : FieldManager.MonsterAttackDice;
         public override DiceSet MagicDiceSet => Scriptable.OverrideMagicDice(out DiceSet dice) ? dice : FieldManager.MonsterMagicDice;

@@ -1,60 +1,49 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Threading.Tasks;
-using Effects;
-using UI.Tooltips;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Gameplay.Inventory
 {
     public class InventoryManager : MonoBehaviour
     {
-        public static InventoryManager Instance { get; private set; }
+        [FormerlySerializedAs("slotsAmount")] 
+        [SerializeField] private int capacity;
+
+        private /*readonly */List<Item> items = new();
+
+        public int Coins { get; private set; }
+        public int Capacity => capacity;
+        public Item[] Items => items.ToArray();
+        public bool IsEmpty => items.Count == 0;
         
-        [SerializeField] private UI.Inventory inventoryUI;
-        [SerializeField] private int slotsAmount;
-        [SerializeField] private List<Item> itemsOnStart = new();
-        [Header("Tooltips")] 
-        [SerializeField] private InventoryTooltip inventoryTooltip;
-        [SerializeField] private EquipmentTooltip equipmentTooltip;
-        [SerializeField] private AbilityTooltip abilityTooltip;
+#if UNITY_EDITOR
         [Header("Debug")]
         public Scriptable.Item debug_ItemToAdd;
         public int debug_ToAddAmount;
-        
-        private List<Item> items = new();
-        public InventoryTooltip InventoryTooltip => Instance.inventoryTooltip;
-        public EquipmentTooltip EquipmentTooltip => Instance.equipmentTooltip;
-        public AbilityTooltip AbilityTooltip => Instance.abilityTooltip;
-        public int Coins { get; private set; }
+#endif
 
+        public delegate void InventoryItemsUpdateEvent(Item[] items);
+        public event InventoryItemsUpdateEvent OnItemsUpdate;
+        public delegate void InventoryCoinsUpdateEvent(int coins);
+        public event InventoryCoinsUpdateEvent OnCoinsUpdate;
         
         
-        private InventoryManager() => Instance = this; 
-        
-        private void Start()
+
+        public void AddItem(Scriptable.Item itemToAdd,/* Vector3 giveFrom, */int amount, out int leftAmount)
         {
-            inventoryUI.CreateInventorySlots(slotsAmount);
-            items = itemsOnStart.ToList();
-            inventoryUI.UpdateInventory(items);
-        }
+            leftAmount = amount;
+            if (!CanFit(itemToAdd, amount, out int canFit, out Item sameItem)) return;
 
-        public async UniTask AddItem(Scriptable.Item itemToAdd, Vector3 giveFrom, int amount)
-        {
-            if (!CanFit(itemToAdd, amount, out int canFit, out Item sameItem))
-            {
-                // TODO: Play item destroy animation
-                Debug.Log("Inventory is full");
-                return;
-            }
-            
-            if (sameItem is null) items.Add(new Item(itemToAdd, canFit));
-            else sameItem.Amount += canFit;
+            if (sameItem is null) 
+                items.Add(new Item(itemToAdd, canFit));
+            else 
+                sameItem.Amount += canFit;
 
-            await EffectsManager.GetEffect<EffectLoot>()
-                .AnimateGather(giveFrom, itemToAdd);
+            leftAmount = amount - canFit;
+            /*await EffectsManager.GetEffect<EffectLoot>().AnimateGather(giveFrom, itemToAdd);*/
             
-            inventoryUI.UpdateInventory(items);
+            OnItemsUpdate?.Invoke(Items);
         }
 
         public void RemoveItem(Scriptable.Item itemToRemove, int amount)
@@ -63,7 +52,8 @@ namespace Gameplay.Inventory
             if(item is null) return;
             item.Amount -= amount;
             if (item.Amount <= 0) items.Remove(item);
-            inventoryUI.UpdateInventory(items);
+            
+            OnItemsUpdate?.Invoke(Items);
         }
 
         private bool CanFit(Scriptable.Item itemToAdd, int amount, out int canFit, out Item sameItem)
@@ -85,7 +75,7 @@ namespace Gameplay.Inventory
             }
 
             int possibleMaximumAmount;
-            int emptySlots = slotsAmount - fullSlots;
+            int emptySlots = capacity - fullSlots;
             if (sameItem is null)
                 possibleMaximumAmount = emptySlots * itemToAdd.StackSize;
             else
@@ -101,7 +91,7 @@ namespace Gameplay.Inventory
         public void Clear()
         {
             items.Clear();
-            inventoryUI.UpdateInventory(items);
+            OnItemsUpdate?.Invoke(Items);
         }
         
         public bool CanAfford(int amount) => amount <= Coins;
@@ -110,14 +100,14 @@ namespace Gameplay.Inventory
         {
             if(amount <= 0) return;
             Coins += amount;
-            inventoryUI.UpdateCoinsText(Coins);
+            OnCoinsUpdate?.Invoke(Coins);
         }
 
         public void RemoveCoins(int amount)
         {
             if(amount <= 0) return;
             Coins = Mathf.Clamp(Coins - amount, 0, int.MaxValue);
-            inventoryUI.UpdateCoinsText(Coins);
+            OnCoinsUpdate?.Invoke(Coins);
         }
     }
 }

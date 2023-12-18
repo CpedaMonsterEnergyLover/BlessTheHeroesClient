@@ -1,7 +1,6 @@
 ﻿using MyBox;
 using Scriptable.AttackVariations;
 using UnityEngine;
-using Util.Enums;
 using Util.LootTables;
 
 namespace Scriptable
@@ -10,23 +9,21 @@ namespace Scriptable
     public class Creature : Token
     {
         [Separator("Creature fields")]
-        [SerializeField] private CreatureType creatureType;
+        [SerializeField] private DamageType damageType;
         [SerializeField] private BaseAttackVariation attackVariation;
         [SerializeField] private bool canAct;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
-        [SerializeField, Range(1, 3)] private int defenseDiceAmount;
         [SerializeField] private DiceSet overrideAttackDice;
         [SerializeField] private DiceSet overrideMagicDice;
         [SerializeField] private DiceSet overrideDefenseDice;
         [Separator("Drop table")]
         [SerializeField, Range(0, 1)] private float sharedLootDropModifier;
         [SerializeField] private DropTable dropTable = new();
-
+        
+        public DamageType DamageType => damageType;
         public bool CanAct => canAct;
         public int AttackDiceAmount => attackDiceAmount;
-        public int DefenseDiceAmount => defenseDiceAmount;
         public override DropTable DropTable => dropTable;
-        public CreatureType CreatureType => creatureType;
         public float SharedLootDropModifier => sharedLootDropModifier;
         public BaseAttackVariation AttackVariation => attackVariation;
 

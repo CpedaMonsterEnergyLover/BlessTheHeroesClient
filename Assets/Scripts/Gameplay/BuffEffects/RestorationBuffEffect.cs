@@ -23,7 +23,7 @@ namespace Gameplay.BuffEffects
             IToken token = Manager.Token;
             IAggroManager aggroManager = Applier is Ability ability ? ability.Caster.IAggroManager : null;
             
-            if (healthPerTick > 0) token.Heal(healthPerTick, aggroManager: aggroManager);
+            if (healthPerTick > 0) token.Heal(healthPerTick, aggroReceiver: aggroManager);
             if (manaPerTick > 0) token.ReplenishMana(manaPerTick);
         }
     }

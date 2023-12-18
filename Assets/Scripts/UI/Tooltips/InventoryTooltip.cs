@@ -1,9 +1,8 @@
-﻿using Cysharp.Threading.Tasks;
-using DG.Tweening;
+﻿using DG.Tweening;
 using Gameplay.Tokens;
 using TMPro;
+using UI.Browsers;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UI.Tooltips
 {
@@ -35,7 +34,7 @@ namespace UI.Tooltips
                 abilityTooltip.SetAbility(equipment.HasAbility ? equipment.Ability : null, false);
 
                 statsText.SetText(equipment.GetStatsStringBuilder());
-                if (TokenBrowser.Instance.SelectedToken is HeroToken heroToken)
+                if (TokenBrowser.SelectedToken is HeroToken heroToken)
                 {
                     bool trinket = equipment is Scriptable.Trinket;
                     actionText.SetText(equipment is Scriptable.Weapon weapon && heroToken.Scriptable.AttackType == weapon.AttackType ||
@@ -43,17 +42,17 @@ namespace UI.Tooltips
                                        trinket
                         ? heroToken.ActionPoints > 0 
                             ? trinket 
-                                ? "<color=green>Double click to equip (hold shift to equip in second slot)" 
-                                : "<color=green>Double click to equip (costs 1 ACT)" 
+                                ? "<color=green>Double click to equip \n(shift - equip in second slot)" 
+                                : "<color=green>Double click to equip \n(costs 1 ACT)" 
                             : "<color=red>Not enough ACT to equip"
                         : "<color=red>Selected hero cannot equip this" );
                     actionText.gameObject.SetActive(true);
                 } else actionText.gameObject.SetActive(false);
             } else if (item is Scriptable.Consumable && 
-                       TokenBrowser.Instance.SelectedToken is HeroToken heroToken)
+                       TokenBrowser.SelectedToken is HeroToken heroToken)
             {
                 actionText.SetText(heroToken.ActionPoints > 0 
-                    ? "<color=green>Double click to use (costs 1 ACT)" 
+                    ? "<color=green>Double click to use \n(costs 1 ACT)" 
                     : "<color=red>Not enough ACT to use");
                 actionText.gameObject.SetActive(true);
             }
@@ -69,21 +68,8 @@ namespace UI.Tooltips
             priceText.SetText(amount == 1 ? $"Sell price: {price}g" : $"Sell price: {price}g ({price * amount}g)");
             descriptionText.SetText(item.Description.Equals(string.Empty) ? "No description" : item.Description);
             gameObject.SetActive(true);
-            statsText.GetComponent<ContentSizeFitter>().SetLayoutVertical();
-            descriptionText.GetComponent<ContentSizeFitter>().SetLayoutVertical();
             PlayAnimation();
-            // UpdatePivotPosition().Forget();
         }
-
-        /*
-        private async UniTaskVoid UpdatePivotPosition()
-        {
-            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);/*
-            Vector3 pos = pivot.localPosition;
-            pivot.localPosition = new Vector3(pos.x, pivot.sizeDelta.y / 2f, pos.z);#1#
-            abilityTooltip.GetComponent<ContentSizeFitter>().SetLayoutVertical();
-
-        }*/
         
         private void PlayAnimation()
         {

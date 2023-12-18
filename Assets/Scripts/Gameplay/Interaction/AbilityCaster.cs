@@ -4,8 +4,8 @@ using Gameplay.Dice;
 using Gameplay.Tokens;
 using UI;
 using UnityEngine;
+using Util;
 using Util.Interaction;
-using Util.Tokens;
 
 namespace Gameplay.Interaction
 {
@@ -104,6 +104,7 @@ namespace Gameplay.Interaction
 
         private void OnInstantAbilityHoverExit(InstantAbility instant)
         {
+            // Invoke
             instant.Caster.InvokeEndDraggingEvent();
             foreach (IInteractable target in TargetsCache) 
                 target.UpdateOutlineByCanInteract();
@@ -122,7 +123,7 @@ namespace Gameplay.Interaction
 
 
             if (castable.Healthcost > 0)
-                caster.Damage(castable.Healthcost);
+                caster.Damage(GlobalDefinitions.BloodDamageType, castable.Healthcost);
             
             castable.SetOnCooldown();
             castable.Cast(target);

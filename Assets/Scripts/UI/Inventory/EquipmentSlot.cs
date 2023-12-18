@@ -1,7 +1,8 @@
 ﻿using Gameplay.Abilities;
 using Gameplay.Interaction;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
+using UI.Browsers;
+using UI.Tooltips;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -36,17 +37,17 @@ namespace UI
 
         protected override void UpdateTooltipOnPointerEnter()
         {
-            InventoryManager.Instance.EquipmentTooltip.SetItem(Equipment, Ability);
+            TooltipManager.EquipmentTooltip.SetItem(Equipment, Ability);
         }
 
         protected override void UpdateTooltipOnPointerExit()
         {
-            InventoryManager.Instance.EquipmentTooltip.SetItem(null, null);
+            TooltipManager.EquipmentTooltip.SetItem(null, null);
         }
 
         protected override void UpdateTooltipOnPointerClick()
         {
-            InventoryManager.Instance.EquipmentTooltip.SetItem(null, null);
+            TooltipManager.EquipmentTooltip.SetItem(null, null);
         }
 
         public override void OnPointerClick(PointerEventData eventData)
@@ -55,7 +56,7 @@ namespace UI
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
             if (Equipment is not null && 
                 eventData.clickCount == 2 && 
-                TokenBrowser.Instance.SelectedToken is HeroToken heroToken)
+                TokenBrowser.SelectedToken is HeroToken heroToken)
             {
                 heroToken.Unequip(index);
                 UpdateTooltipOnPointerClick();

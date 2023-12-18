@@ -4,6 +4,7 @@ using Gameplay.Dice;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
+using Util;
 
 namespace Gameplay.Abilities
 {
@@ -30,7 +31,7 @@ namespace Gameplay.Abilities
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, diceAmount, sides);
             EnergyManager.Instance.AddEnergy(Caster, energy);
             
-            creature.Damage(damage, aggroSource: Caster.IAggroManager);
+            creature.Damage(GlobalDefinitions.ShadowDamageType, damage, aggroReceiver: Caster.IAggroManager);
             creature.BuffManager.ApplyEffect(this, wrathOfTheWitchBuffEffect, buffDuration);
         }
 

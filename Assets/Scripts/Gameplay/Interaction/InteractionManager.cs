@@ -71,6 +71,7 @@ namespace Gameplay.Interaction
             if (clickedInteractable is IInteractableOnDrag {CanInteract: true} interactableOnDrag)
             {
                 interactableOnDrag.OnDragStart(GetInteractionResult());
+                // Invoke
                 Interacting = true;
             }
             else
@@ -100,6 +101,7 @@ namespace Gameplay.Interaction
             else if(clickedInteractable is IInteractableOnDrag interactableOnDrag)
             {
                 interactableOnDrag.OnDragEnd(GetInteractionResult());
+                // Invoke
                 interactionTooltip.Show(null);
             }
 

@@ -2,10 +2,10 @@
 using Cysharp.Threading.Tasks;
 using Gameplay.BuffEffects;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
+using Util;
 
 namespace Gameplay.Abilities
 {
@@ -31,7 +31,7 @@ namespace Gameplay.Abilities
             var enemies = Caster.TokenCard.Creatures.Where(c => !c.Dead);
             foreach (IUncontrollableToken token in enemies)
             {
-                token.Damage(damage, aggroSource: Caster.IAggroManager);
+                token.Damage(GlobalDefinitions.PhysicalDamageType, damage, aggroReceiver: Caster.IAggroManager);
                 token.AggroManager.AddAggro(damage, Caster);
             }
             Caster.BuffManager.ApplyEffect(this, shieldSlamBuffEffect, buffDuration);

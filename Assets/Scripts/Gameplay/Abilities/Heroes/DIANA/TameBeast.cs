@@ -4,8 +4,6 @@ using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
 using Util;
-using Util.Enums;
-using Util.Tokens;
 
 namespace Gameplay.Abilities
 {
@@ -17,15 +15,15 @@ namespace Gameplay.Abilities
         [SerializeField] private int attackPowerBonus;
         [SerializeField] private int speedBonus;
 
-        public override string DetailDescription =>
+        public override string StatDescription =>
             CurrentCompanion is null
                 ? new StringBuilder()
-                    .Append(detailDescription)
+                    .Append(statDescription)
                     .Append($"<br>- Tamed beast gains +{healthBonus} health, +{defenseBonus} defense, +{attackPowerBonus} attack power and +{speedBonus} speed.")
                     .ToString()
                 : "Hunter frees his companion, making it again agressive against him.";
 
-        public override string LiteralDescription => CurrentCompanion is null ? literalDescription : string.Empty;
+        public override string Description => CurrentCompanion is null ? description : string.Empty;
 
         public override Sprite Icon => CurrentCompanion is null ? icon : freeIcon;
 
@@ -106,7 +104,7 @@ namespace Gameplay.Abilities
         {
             return CurrentCompanion is null 
                 ? target is CreatureToken {CanBeTargeted: true} creature && 
-                  creature.Scriptable.CreatureType is CreatureType.Beast && 
+                  // creature.Scriptable.CreatureType is CreatureType.Beast && 
                   creature.TokenCard == Caster.TokenCard && 
                   Caster.TokenCard.HasSpaceForHero()
                 : ReferenceEquals(target, CurrentCompanion) && 

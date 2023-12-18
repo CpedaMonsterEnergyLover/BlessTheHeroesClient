@@ -1,5 +1,6 @@
 ﻿using Gameplay.Abilities;
 using Gameplay.Aggro;
+using Scriptable;
 using UnityEngine;
 
 namespace Gameplay.BuffEffects
@@ -7,6 +8,7 @@ namespace Gameplay.BuffEffects
     public abstract class DamageOverTimeBuffEffect : BuffEffect
     {
         [SerializeField] private int damagePerTick;
+        [SerializeField] private DamageType damageType;
 
 
         protected abstract Sprite OverrideDamageSprite { get; }
@@ -23,9 +25,8 @@ namespace Gameplay.BuffEffects
         {
             IAggroManager aggroManager = Applier is Ability ability ? ability.Caster.IAggroManager : null;
             
-            Manager.Token.Damage(damagePerTick,
-                overrideDamageSprite: OverrideDamageSprite, 
-                aggroSource: aggroManager);
+            Manager.Token.Damage(damageType, damagePerTick, 
+                aggroReceiver: aggroManager);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using Gameplay.Interaction;
 using UnityEngine;
 
@@ -14,10 +13,7 @@ namespace Gameplay.Abilities
 
         public override async UniTask Cast(IInteractable target)
         {
-            if(aggroChange > 0)
-                Caster.IAggroManager.AddAggro(aggroChange, Caster);
-            else 
-                Caster.IAggroManager.RemoveAggro(-aggroChange, Caster);
+            Caster.IAggroManager.ChangeClusterAggro(aggroChange);
         }
     }
 }

@@ -1,22 +1,13 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Aggro;
-using UI;
 using UnityEngine;
-using Util.Tokens;
+using Util;
+using Util.Enums;
 
 namespace Gameplay.Tokens
 {
     public abstract partial class Token<T, TJ>
     {
-        public event IToken.TokenResourceEvent OnDamaged;
-        public event IToken.TokenResourceEvent OnHealed;
-        public event IToken.TokenResourceEvent OnManaReplenished;
-        public event IToken.TokenEvent OnDeath;
-        public event IToken.TokenMoveEvent OnMove;
-        public event IToken.TokenDamageAbsorbtionEvent OnDamageAbsorbed;
-
-        
-        
         public void AddMaxHealth(int amount)
         {
             if(amount == 0) return;
@@ -65,9 +56,15 @@ namespace Gameplay.Tokens
             if(Dead) return;
             int raw = CurrentHealth + health;
             int clamped = Mathf.Clamp(raw, CurrentHealth, MaxHealth);
-            if(aggroReceiver is not null) aggroReceiver.AddAggro(health - (raw - clamped), this);
+            if(aggroReceiver is not null)
+            {
+                int aggro = health - (raw - clamped);
+                foreach (var creature in Card.Creatures) 
+                    aggroReceiver.AddAggro(aggro, creature);
+            }
             SetHealth(clamped);
-            damageAnimator.PlayHealing(health).Forget();
+            damageAnimator.PlayHealingAsync(health, GlobalDefinitions.HolyDamageType, DamageImpact.Normal,
+                 aggroReceiver is null ? null : aggroReceiver.Bearer.TokenTransform).Forget();
             OnHealed?.Invoke(health);
         }
 
@@ -81,14 +78,15 @@ namespace Gameplay.Tokens
         public void SetMovementPoints(int amount)
         {
             MovementPoints = Mathf.Clamp(amount, 0, int.MaxValue);
-            InvokeDataChangedEvent();
+            OnMovementPointsChanged?.Invoke(this);
+            UpdateOutlineByCanInteract();
         }
 
         public void SetActionPoints(int amount)
         {
-            ActionPoints = Mathf.Clamp(amount, 0, int.MaxValue);
-            InvokeDataChangedEvent();
+            ActionPoints = Mathf.Clamp(amount, 0, 4);
             OnActionsChanged?.Invoke(this);
+            UpdateOutlineByCanInteract();
         }
         
         public bool DrainMana(int amount)
@@ -105,7 +103,7 @@ namespace Gameplay.Tokens
             OnHealthChanged?.Invoke(this);
         }
 
-        public void SetMana(int value)
+        protected void SetMana(int value)
         {
             CurrentMana = value;
             OnManaChanged?.Invoke(this);

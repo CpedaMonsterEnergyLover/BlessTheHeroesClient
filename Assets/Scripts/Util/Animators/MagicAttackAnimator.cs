@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Scriptable.AttackVariations;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Util.Animators
 {
@@ -13,13 +12,14 @@ namespace Util.Animators
         [SerializeField] protected ParticleSystem impactParticles;
         [SerializeField] protected ParticleSystem trailParticles;
         [SerializeField] protected ParticleSystem sparksParticles;
-        [FormerlySerializedAs("castballlight")] [SerializeField] protected new Light light;
+        [SerializeField] protected new Light light;
         [SerializeField] protected float castballDefaultIntensity;
 
         private Tween lightTween;
         private CancellationTokenSource cancellationToken;
 
 
+        
         protected override void StartAnimation(Transform self)
         {
             transform.localPosition = new Vector3(0, 0.35f, 0);
@@ -36,8 +36,8 @@ namespace Util.Animators
             // Animate castball
             trailParticles.Play();
             var tween = transform
-                .DOMove(target.position + new Vector3(0, 0.11f, 0), 7.5f)
-                .SetSpeedBased(true)
+                .DOMove(target.position + new Vector3(0, 0.11f, 0), 0.25f)
+                // .SetSpeedBased(true)
                 .SetEase(Ease.Flash);
             await tween.AsyncWaitForKill();
             AnimateCast(false);

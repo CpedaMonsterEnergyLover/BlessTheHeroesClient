@@ -1,6 +1,4 @@
-﻿using Gameplay.GameCycle;
-using Gameplay.Interaction;
-using Gameplay.Tokens;
+﻿using Gameplay.Interaction;
 using UnityEngine;
 
 namespace Util.Interaction
@@ -15,20 +13,23 @@ namespace Util.Interaction
         private static readonly int PropertyOutlineWidth = Shader.PropertyToID("_OutlineWidth");
 
         private Vector4 currentColor = Vector4.zero;
-        private IInteractable interactable;
+        protected IInteractable Interactable { get; private set; }
 
         
         
-        private void Awake()
+        protected virtual void Awake()
         {
             materialPropertyBlock = new MaterialPropertyBlock();
-            if (!TryGetComponent(out interactable))
+            if (!TryGetComponent(out IInteractable interactable))
             {
-                Debug.LogError($"TokenOutline on GO {gameObject.name} couldn't find IInteractable component. Outline is disabled");
+                Debug.LogError($"InteractableOutline on GO {gameObject.name} couldn't find IInteractable component. Outline is disabled.");
                 var single = meshRenderer.materials[0];
                 meshRenderer.materials = new[] { single };
                 enabled = false;
+                return;
             }
+
+            Interactable = interactable;
         }
 
         public void SetOutlineWidth(Vector3 width)
@@ -39,7 +40,7 @@ namespace Util.Interaction
 
         public void SetEnabled(bool isEnabled)
         {
-            SetColor(interactable.OutlineColor);
+            SetColor(Interactable.OutlineColor);
             materialPropertyBlock.SetFloat(PropertyOutlineEnabled, isEnabled ? 1f : 0f);
             meshRenderer.SetPropertyBlock(materialPropertyBlock, 1);
         }

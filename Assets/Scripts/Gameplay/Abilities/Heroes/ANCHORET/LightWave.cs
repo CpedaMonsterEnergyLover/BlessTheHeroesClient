@@ -7,6 +7,7 @@ using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
+using Util;
 using Util.Patterns;
 
 namespace Gameplay.Abilities
@@ -16,9 +17,11 @@ namespace Gameplay.Abilities
         [SerializeField] private int startingDamage;
         [SerializeField] private int damagePerUnit;
         [SerializeField] private int numberOfUnits;
+        [SerializeField] private ParticleSystem castParticles;
         [SerializeField] private ParticleSystem waveParticles;
+        [SerializeField] private ParticleSystem fogParticles;
         [SerializeField] private LineRenderer lineRenderer;
-        [SerializeField] private ParticleSystemLineRenderer particleSystemLineRenderer;
+        [SerializeField] private ParticleSystemLineRenderer sparksLineRenderer;
 
         public override async UniTask Cast(IInteractable target)
         {
@@ -72,12 +75,13 @@ namespace Gameplay.Abilities
                 lineRenderer.SetPosition(i, pos);
 
                 if (t is IControllableToken)
-                    t.Heal(currentDamage, aggroManager: Caster.IAggroManager);
-                else t.Damage(currentDamage, aggroSource: Caster.IAggroManager);
+                    t.Heal(currentDamage, aggroReceiver: Caster.IAggroManager);
+                else t.Damage(GlobalDefinitions.HolyDamageType, currentDamage, aggroReceiver: Caster.IAggroManager, delay: 0);
                 currentDamage += damagePerUnit;
             }
             
-            particleSystemLineRenderer.UpdateMesh();
+            Mesh m = sparksLineRenderer.UpdateMesh(waveParticles);
+            sparksLineRenderer.UpdateMesh(fogParticles, m);
             waveParticles.Play();
 
             await UniTask.WaitUntil(() => !waveParticles.isPlaying);
@@ -85,10 +89,12 @@ namespace Gameplay.Abilities
 
         public override void OnCastStart()
         {
+            castParticles.Play();
         }
 
         public override void OnCastEnd()
         {
+            castParticles.Stop();
         }
 
         public override bool ValidateTarget(IInteractable target)

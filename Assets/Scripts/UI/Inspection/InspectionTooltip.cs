@@ -1,6 +1,5 @@
 ﻿using DG.Tweening;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using UnityEngine;
 
 namespace UI.Inspection

@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Gameplay.GameField;
 using Gameplay.Tokens;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 
 namespace Gameplay.GameCycle

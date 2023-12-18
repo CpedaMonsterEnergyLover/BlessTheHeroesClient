@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Gameplay.BuffEffects;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -13,13 +12,18 @@ namespace Gameplay.Abilities
     public class MassDispel : ActiveAbility
     {
         [SerializeField] private ParticleSystem particles;
+        [SerializeField] private ParticleSystem castParticles;
+
+        
         
         public override void OnCastStart()
         {
+            castParticles.Play();
         }
 
         public override void OnCastEnd()
         {
+            castParticles.Stop();
         }
 
         public override async UniTask Cast(IInteractable target)

@@ -1,5 +1,5 @@
 ﻿using Gameplay.Tokens;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 
 namespace Scriptable
@@ -7,13 +7,13 @@ namespace Scriptable
     [CreateAssetMenu(menuName = "Items/Consumable")]
     public class Consumable : Item
     {
-        public override bool AllowClick => TokenBrowser.Instance.SelectedToken is HeroToken {ActionPoints: > 0};
+        public override bool AllowClick => TokenBrowser.SelectedToken is HeroToken {ActionPoints: > 0};
         public override int StackSize => 10;
         public override string CategoryName => "Consumable";
 
         
         
-        public override void OnClick()
+        public override void OnClickFromInventorySlot()
         {
             Debug.Log($"Consumed {name}");
         }

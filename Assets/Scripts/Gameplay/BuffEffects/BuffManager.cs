@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Gameplay.Tokens;
-using UI;
 using UnityEngine;
 using Util.Enums;
 
@@ -14,6 +13,10 @@ namespace Gameplay.BuffEffects
 
         private readonly Dictionary<Scriptable.BuffEffect, BuffEffect> effects = new();
         private Transform buffsTransform;
+
+        public delegate void EffectEvent(IToken token, BuffEffect effect);
+        public event EffectEvent OnEffectApplied;
+        
         
 
         private void Awake()
@@ -55,8 +58,7 @@ namespace Gameplay.BuffEffects
                 effects.Add(buff.Scriptable, effect);
             }
 
-            if (ReferenceEquals(TokenBrowser.Instance.SelectedToken, Token))
-                TokenBrowser.Instance.UpdateEffectsChanges(Token, buff);
+            OnEffectApplied?.Invoke(Token, buff);
         }
         
         public void RemoveEffect(Scriptable.BuffEffect buff)

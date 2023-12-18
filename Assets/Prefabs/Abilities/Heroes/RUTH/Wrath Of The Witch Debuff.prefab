@@ -46,3 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scriptable: {fileID: 11400000, guid: ddc593d8b7ecd3d41a31ac9c56c1dafb, type: 2}
   damagePerTick: 1
+  damageType: {fileID: 11400000, guid: b9446e989fb4fa5499b7cdf474c4f8ce, type: 2}

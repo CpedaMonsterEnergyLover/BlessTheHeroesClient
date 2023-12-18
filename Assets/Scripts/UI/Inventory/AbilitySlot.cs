@@ -1,13 +1,13 @@
 ﻿using Gameplay.Abilities;
 using Gameplay.Dice;
 using Gameplay.Interaction;
-using Gameplay.Inventory;
 using Gameplay.Tokens;
 using TMPro;
+using UI.Browsers;
 using UI.Elements;
+using UI.Tooltips;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
@@ -121,7 +121,7 @@ namespace UI
         // IDragHandler
         public void OnBeginDrag(PointerEventData eventData)
         {
-            InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+            TooltipManager.AbilityTooltip.SetAbility(null);
             if(Ability is not ActiveAbility active) return;
             OnCastStart?.Invoke(active);
         }
@@ -138,9 +138,9 @@ namespace UI
             OnCast?.Invoke(active);
         }
         
-        protected virtual void UpdateTooltipOnPointerEnter() => InventoryManager.Instance.AbilityTooltip.SetAbility(Ability);
-        protected virtual void UpdateTooltipOnPointerExit() => InventoryManager.Instance.AbilityTooltip.SetAbility(null);
-        protected virtual void UpdateTooltipOnPointerClick() => InventoryManager.Instance.AbilityTooltip.SetAbility(null);
+        protected virtual void UpdateTooltipOnPointerEnter() => TooltipManager.AbilityTooltip.SetAbility(Ability);
+        protected virtual void UpdateTooltipOnPointerExit() => TooltipManager.AbilityTooltip.SetAbility(null);
+        protected virtual void UpdateTooltipOnPointerClick() => TooltipManager.AbilityTooltip.SetAbility(null);
         
         
         // IPointerHandler
@@ -165,7 +165,7 @@ namespace UI
             if (eventData.clickCount == 1)
             {
                 UpdateTooltipOnPointerClick();
-                AbilityCaster.Cast(TokenBrowser.Instance.SelectedToken, Ability.Caster.TokenCard, instant);  
+                AbilityCaster.Cast(TokenBrowser.SelectedToken, Ability.Caster.TokenCard, instant);  
             }
         }
     }

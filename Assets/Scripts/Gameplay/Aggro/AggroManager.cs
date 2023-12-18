@@ -12,8 +12,8 @@ namespace Gameplay.Aggro
     where TJ : IToken
     {
         protected TJ Token { get; private set; }
-        public IToken Wearer => Token;
         protected Dictionary<T, int> cluster;
+        public IToken Bearer => Token;
 
 
 
@@ -63,11 +63,10 @@ namespace Gameplay.Aggro
         {
             if (cluster.ContainsKey(source))
                 cluster[source] += amount;
-            else
-            {
+            else 
                 cluster.Add(source, amount);
-                if(!mirrored) source.IAggroManager.AddAggro(amount, Token, true);
-            }
+            
+            if(!mirrored) source.IAggroManager.AddAggro(amount, Token, true);
         }
 
         private void RemoveAggro(int amount, T source, bool mirrored)
@@ -75,9 +74,9 @@ namespace Gameplay.Aggro
             if(!cluster.ContainsKey(source)) return;
 
             cluster[source] -= amount;
+            if (cluster[source] <= 0) cluster.Remove(source);
+            
             if(!mirrored) source.IAggroManager.RemoveAggro(amount, Token, true);
-            if (cluster[source] <= 0) 
-                cluster.Remove(source);
         }
         
         public void AddAggro(int amount, IToken source, bool mirrored = false)
@@ -88,6 +87,16 @@ namespace Gameplay.Aggro
         public void RemoveAggro(int amount, IToken source, bool mirrored = false)
         {
             if(source is T ss) RemoveAggro(amount, ss, mirrored);
+        }
+
+        public void ChangeClusterAggro(int amount)
+        {
+            if(amount == 0) return;
+            var tmp = cluster.ToArray();
+            if(amount > 0)
+                foreach (var pair in tmp) pair.Key.IAggroManager.AddAggro(amount, Token);
+            else
+                foreach (var pair in tmp) pair.Key.IAggroManager.RemoveAggro(-amount, Token);
         }
         
         private bool OutOfAggroRange(Card target)

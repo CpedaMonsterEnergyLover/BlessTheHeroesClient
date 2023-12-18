@@ -1,6 +1,7 @@
 ﻿using Gameplay.Interaction;
 using Gameplay.Inventory;
 using TMPro;
+using UI.Tooltips;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -37,13 +38,13 @@ namespace UI
         public void OnPointerEnter(PointerEventData eventData)
         {
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            InventoryManager.Instance.InventoryTooltip.SetItem(Item, Amount);
+            TooltipManager.InventoryTooltip.SetItem(Item, Amount);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            InventoryManager.Instance.InventoryTooltip.SetItem(null, 0);
+            TooltipManager.InventoryTooltip.SetItem(null, 0);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -52,8 +53,8 @@ namespace UI
             if(Item is null) return;
             if (eventData.clickCount == 2 && Item.AllowClick)
             {
-                Item.OnClick();
-                InventoryManager.Instance.InventoryTooltip.SetItem(Item, Amount);
+                Item.OnClickFromInventorySlot();
+                TooltipManager.InventoryTooltip.SetItem(Item, Amount);
             }
         }
     }

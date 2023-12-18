@@ -1,20 +1,22 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Cards;
-using Gameplay.GameField;
+using Scriptable;
 using Scriptable.AttackVariations;
 
 
 namespace Gameplay.Tokens
 {
-    public class BossToken : UncontrollableToken<Scriptable.Boss>
+    public class BossToken : UncontrollableToken<Boss>
     {
         protected override int DefaultActionPoints => 2;
-        public override Scriptable.DiceSet AttackDiceSet => Scriptable.AttackDice;
-        public override Scriptable.DiceSet MagicDiceSet => Scriptable.MagicDice;
-        public override Scriptable.DiceSet DefenseDiceSet => Scriptable.DefenseDice;
+        public override DiceSet AttackDiceSet => Scriptable.AttackDice;
+        public override DiceSet MagicDiceSet => Scriptable.MagicDice;
+        public override DiceSet DefenseDiceSet => Scriptable.DefenseDice;
         public override int AttackDiceAmount => Scriptable.AttackDiceAmount;
-        public override int DefenseDiceAmount => Scriptable.DefenseDiceAmount;
+        public override int DefenseDiceAmount => (int)Scriptable.ArmorType;
         public override BaseAttackVariation AttackVariation => Scriptable.AttackVariation;
+        public override DamageType DamageType => Scriptable.DamageType;
+
 
 
         

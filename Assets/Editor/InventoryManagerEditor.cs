@@ -13,9 +13,9 @@ namespace Editor
             if (manager == null) return;
             
             DrawDefaultInspector();
-            
+
             if (GUILayout.Button("Add item"))
-                manager.AddItem(manager.debug_ItemToAdd, Vector3.zero, manager.debug_ToAddAmount).Forget();
+                manager.AddItem(manager.debug_ItemToAdd, manager.debug_ToAddAmount, out int leftAmount);
             if (GUILayout.Button("Clear"))
                 manager.Clear();
         }

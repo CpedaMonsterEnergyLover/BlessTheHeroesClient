@@ -2,6 +2,7 @@
 using Gameplay.Interaction;
 using Gameplay.Tokens;
 using UnityEngine;
+using Util;
 
 namespace Gameplay.Abilities
 {
@@ -15,7 +16,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             int damage = Mathf.Clamp(Caster.MaxHealth - Caster.CurrentHealth, 0, maxDamage);
-            token.Damage(damage, aggroSource: Caster.IAggroManager);
+            token.Damage(GlobalDefinitions.PhysicalDamageType, damage, aggroReceiver: Caster.IAggroManager);
         }
 
         public override void OnCastStart()

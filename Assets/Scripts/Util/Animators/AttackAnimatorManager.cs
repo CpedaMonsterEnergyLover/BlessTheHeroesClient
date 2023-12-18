@@ -24,7 +24,6 @@ namespace Util.Animators
 
         public void StartAnimation(Transform self, AttackType attackType, BaseAttackVariation variation, Vector3 point)
         {
-            Debug.Log($"Start Animation, variation: {variation}");
             if(variation is null) return;
             
             var animator = attackTypeToAnimator[(int)attackType];

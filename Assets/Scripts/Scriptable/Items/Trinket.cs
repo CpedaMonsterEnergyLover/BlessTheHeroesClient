@@ -1,6 +1,5 @@
-﻿using Gameplay.Inventory;
-using Gameplay.Tokens;
-using UI;
+﻿using Gameplay.Tokens;
+using UI.Browsers;
 using UnityEngine;
 
 namespace Scriptable
@@ -17,6 +16,6 @@ namespace Scriptable
         public override int Slot => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ? 3 : 2;
 
         public override bool AllowClick 
-            => TokenBrowser.Instance.SelectedToken is HeroToken {ActionPoints: > 0};
+            => TokenBrowser.SelectedToken is HeroToken {ActionPoints: > 0};
     }
 }

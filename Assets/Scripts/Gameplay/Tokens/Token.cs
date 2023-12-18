@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Gameplay.Abilities;
@@ -14,7 +15,7 @@ using Gameplay.Interaction;
 using Scriptable;
 using Scriptable.AttackVariations;
 using TMPro;
-using UI;
+using UI.Browsers;
 using UnityEngine;
 using Util;
 using Util.Animators;
@@ -39,8 +40,9 @@ namespace Gameplay.Tokens
         [SerializeField] private TMP_Text healthText;
         [SerializeField] protected TJ aggroManager;
         [SerializeField] private InteractionLine interactionLine;
+        [SerializeField] private Transform abilitiesTransform;
 
-        private readonly Ability[] abilities = new Ability[4];
+        private readonly List<Ability> abilities = new();
         private Tween movementTween;
 
         protected int maxHealthBonus;
@@ -51,13 +53,11 @@ namespace Gameplay.Tokens
         protected int speedBonus;
         
         protected abstract int DefaultActionPoints { get; }
-        protected Card Card { get; set; }
+        protected Card Card { get; private set; }
         public abstract bool CanBeTargeted { get; }
         public T Scriptable { get; private set; }
         public IAggroManager IAggroManager => aggroManager;
-        public bool IsPlayingAnimation => 
-            damageAnimator.IsPlayingAnimation || 
-            (movementTween is not null && movementTween.IsPlaying());
+        protected bool IsPlayingAnimation => movementTween is not null && movementTween.IsPlaying();
         public int CurrentHealth { get; private set; }
         public int MaxHealth => Scriptable.Health + maxHealthBonus;
         public int CurrentMana { get; private set; }
@@ -96,7 +96,13 @@ namespace Gameplay.Tokens
 
         // Class methods
         protected abstract void Die();
-        protected virtual void OnPlayersTurnStarted() { }
+
+        protected virtual void OnPlayersTurnStarted()
+        {
+            SetActionPoints(DefaultActionPoints);
+            SetMovementPoints(Speed);
+            UpdateOutlineByCanInteract();
+        }
         protected virtual void OnMonstersTurnStarted() { }
 
         
@@ -124,7 +130,7 @@ namespace Gameplay.Tokens
 
         private void PostInit()
         {
-            TokenBrowser.Instance.SelectFirst(this);
+            if(TokenBrowser.SelectedToken is null) TokenBrowser.SelectToken(this);
             aggroManager.Activate(this);
             transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.InQuad).OnComplete(() =>
             {
@@ -144,52 +150,80 @@ namespace Gameplay.Tokens
         protected bool ConsumeActionPointForMovement()
         {
             if (ActionPoints <= 0) return false;
-            ActionPoints--;
+            SetActionPoints(ActionPoints - 1);
             MovementPoints += Speed;
-            InvokeDataChangedEvent();
             return true;
         }
         
-        public async UniTask Damage(int damage, Sprite overrideDamageSprite = null, IAggroManager aggroSource = null, int delay = 200)
+        public async UniTask Damage(DamageType damageType, int damage, IAggroManager aggroReceiver = null, int delay = 200)
         {
-            if(Dead) return;
+            if(damageType is null || Dead) return;
+            var delaySpan = TimeSpan.FromMilliseconds(delay);
+            CancellationToken token = gameObject.GetCancellationTokenOnDestroy();
+
+            Transform sourceTransform = aggroReceiver is null ? null : aggroReceiver.Bearer.TokenTransform;
             var absorbed = OnDamageAbsorbed?.Invoke(damage);
 
             int absorb = absorbed ?? 0;
             if (damage > 0 && absorb > 0)
             {
-                await damageAnimator.PlayDamage(absorb, GlobalDefinitions.DefensedDamageAnimationSprite, delay);
+                await UniTask.Delay(delaySpan, cancellationToken: token);
+                await damageAnimator.PlayDamageAsync(absorb, damageType, DamageImpact.Absorb, sourceTransform);
                 if (absorb >= damage)
                     return;
                 
                 damage -= absorb;
             }
+
+            DamageImpact impact = ImpactDamage(damageType, damage, out damage);
             
-            if(aggroSource is not null) 
-                IAggroManager.AddAggro(damage, aggroSource.Wearer);
+            if(aggroReceiver is not null) 
+                aggroReceiver.AddAggro(damage, this);
             
             int health = CurrentHealth - damage;
-            OnDamaged?.Invoke(damage);
-            
+            OnDamaged?.Invoke(damageType, damage);
+
             if (health <= 0)
             {
                 Dead = true;
-                await damageAnimator.PlayDamage(damage, overrideDamageSprite, delay);
+                await UniTask.Delay(delaySpan, cancellationToken: token);
                 SetHealth(health);
+                await damageAnimator.PlayDamageAsync(damage, damageType, impact, sourceTransform);
                 OnDeath?.Invoke(this);
                 Die();
                 await Despawn();
             }
             else
             {
-                await damageAnimator.PlayDamage(damage, overrideDamageSprite, delay);
+                await UniTask.Delay(delaySpan, cancellationToken: token);
                 SetHealth(health);
+                await damageAnimator.PlayDamageAsync(damage, damageType, impact, sourceTransform);
                 
                 if(IToken.DraggedToken is not null) 
                     interactableOutline.SetEnabled(CanBeTargeted && 
-                                            IToken.DraggedToken.TokenActionPoints != 0 && 
-                                            IsInAttackRange(IToken.DraggedToken));
+                                                   IToken.DraggedToken.TokenActionPoints != 0 && 
+                                                   IsInAttackRange(IToken.DraggedToken));
             }
+        }
+
+        private DamageImpact ImpactDamage(DamageType damageType, int damage, out int impacted)
+        {
+            impacted = damage;
+            CreatureType creatureType = Scriptable.CreatureType;
+            
+            if (creatureType.ResistantTo(damageType))
+            {
+                impacted = Mathf.Clamp(damage - Mathf.CeilToInt(damage * 0.5f) , 0, int.MaxValue);
+                return DamageImpact.Resist;
+            }
+
+            if (creatureType.VulnerableTo(damageType))
+            {
+                impacted = Mathf.Clamp(damage + Mathf.CeilToInt(damage * 0.5f) , 0, int.MaxValue);
+                return DamageImpact.Vulnerable;
+            }
+            
+            return DamageImpact.Normal;
         }
 
         public virtual async UniTask Despawn()
@@ -226,16 +260,13 @@ namespace Gameplay.Tokens
         
         private void InstantiateAbilities()
         {
-            for (int i = 0; i < 4; i++)
+            foreach (Ability ability in Scriptable.Abilities)
             {
-                var ability = Scriptable.Abilities[i];
-                if (ability is not null)
-                {
-                    var inst = Instantiate(ability, transform);
-                    inst.gameObject.name = ability.Title;
-                    abilities[i] = inst;
-                }
+                var inst = Instantiate(ability, abilitiesTransform);
+                inst.gameObject.name = ability.Title;
+                abilities.Add(inst);
             }
+
             foreach (Ability ability in abilities)
             {
                 if(ability is not null)
@@ -285,10 +316,11 @@ namespace Gameplay.Tokens
 
         // IToken
         public GameObject GameObject => gameObject;
-        public bool Dead { get; private set; }
+        public bool Dead { get; protected set; }
         public abstract DiceSet AttackDiceSet { get; }
         public abstract DiceSet MagicDiceSet { get; }
         public abstract DiceSet DefenseDiceSet { get; }
+        public abstract DamageType DamageType { get; }
         public abstract int AttackDiceAmount { get; }
         public abstract int DefenseDiceAmount { get; }
         public abstract BaseAttackVariation AttackVariation { get; }
@@ -296,12 +328,20 @@ namespace Gameplay.Tokens
         public event IToken.TokenEvent OnDestroyed;
         public event IToken.TokenEvent OnStatsChanged;
         public event IToken.TokenEvent OnActionsChanged;
+        public event IToken.TokenEvent OnMovementPointsChanged;
         public event IToken.TokenEvent OnHealthChanged;
         public event IToken.TokenEvent OnManaChanged;
+        public event IToken.TokenEvent OnDeath;
         public event IToken.TokenAttackEvent OnBeforeAttackPerformed;
         public event IToken.TokenAttackEvent OnAfterAttackPerformed;
+        public event IToken.TokenDamageEvent OnDamaged;
+        public event IToken.TokenResourceEvent OnHealed;
+        public event IToken.TokenResourceEvent OnManaReplenished;
+        public event IToken.TokenMoveEvent OnMove;
+        public event IToken.TokenDamageAbsorbtionEvent OnDamageAbsorbed;
         public int Speed => Scriptable.Speed + speedBonus;
         public AttackType AttackType => Scriptable.AttackType;
+        public ArmorType ArmorType => Scriptable.ArmorType;
         public InteractableOutline InteractableOutline => interactableOutline;
         public Card TokenCard => Card;
         Token IToken.ScriptableToken => Scriptable;
@@ -327,7 +367,7 @@ namespace Gameplay.Tokens
         {
             AttackAnimatorManager.StartAnimation(transform, AttackType, AttackVariation, target.TokenTransform.position);
 
-            bool magicAttack = AttackType is AttackType.Magic;
+            bool magicAttack = DamageType.Origin is DamageType.DamageOrigin.Magic;
             
             int damage;
             int attackEnergy;
@@ -366,9 +406,10 @@ namespace Gameplay.Tokens
             }
             
             Debug.Log($"Hit: {hit}, Damage: {damage}, Defensed: {defensed}");
+            AttackAnimatorManager.StopAnimation(transform, AttackType);
+
             if(!hit)
             {
-                AttackAnimatorManager.StopAnimation(transform, AttackType);
                 ((IToken) this).InvokeOnTokenMissGlobal();
                 return;
             }
@@ -376,7 +417,7 @@ namespace Gameplay.Tokens
             int finalDamage = def ? Mathf.Clamp(damage - defensed, 0, int.MaxValue) : damage;
             OnBeforeAttackPerformed?.Invoke(this, target, Scriptable.AttackType, damage, defensed);
             await UniTask.WhenAll(
-                target.Damage(finalDamage, aggroSource: aggroManager), 
+                target.Damage(DamageType, finalDamage, aggroReceiver: aggroManager, delay: AttackVariation.DamageDelay), 
                 AttackAnimatorManager.AnimateAttack(transform, AttackType, target.TokenTransform)
             );
             AttackAnimatorManager.StopAnimation(transform, AttackType);
@@ -410,7 +451,7 @@ namespace Gameplay.Tokens
         public abstract bool CanClick { get; }
         public void OnClick(InteractionResult result)
         {
-            TokenBrowser.Instance.SelectToken(this);
+            TokenBrowser.SelectToken(this);
         }
     }
 }

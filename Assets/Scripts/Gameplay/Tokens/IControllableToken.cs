@@ -1,5 +1,4 @@
 ﻿using Gameplay.Aggro;
-using Gameplay.Interaction;
 
 namespace Gameplay.Tokens
 {

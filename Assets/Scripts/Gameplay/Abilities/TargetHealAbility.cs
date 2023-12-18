@@ -15,7 +15,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             
-            token.Heal(heal, aggroManager: Caster.IAggroManager);
+            token.Heal(heal, aggroReceiver: Caster.IAggroManager);
         }
 
         public override void OnCastStart()

@@ -2,10 +2,9 @@
 using Cysharp.Threading.Tasks;
 using Effects;
 using Gameplay.Cards;
-using Gameplay.GameField;
 using Gameplay.Tokens;
-using UI.Elements;
 using UnityEngine;
+using Util;
 using Util.Animators;
 using Util.Enums;
 
@@ -63,11 +62,11 @@ namespace Gameplay.Abilities
             for (int i = 0; i < targetsAmount; i++)
             {
                 var target = targets[i];
-                var arrow = EffectsManager.GetEffect<EffectArrow>();
+                var arrow = PoolManager.GetEffect<EffectArrow>();
                 arrow.SetPosition(attackAnimator.ArrowPosition);
                 arrow.SetRotation(attackAnimator.GetRotation(target.TokenTransform.position));
                 arrow.Shoot(target.TokenTransform).Forget();
-                target.Damage(arrowDamage, aggroSource: Caster.IAggroManager).Forget();
+                target.Damage(GlobalDefinitions.PhysicalDamageType, arrowDamage, aggroReceiver: Caster.IAggroManager).Forget();
             }
             
             UpgradeStage();
