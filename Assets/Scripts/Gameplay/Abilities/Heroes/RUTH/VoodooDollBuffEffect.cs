@@ -1,5 +1,7 @@
-﻿using Gameplay.Tokens;
+﻿using Gameplay.Interaction;
+using Gameplay.Tokens;
 using Scriptable;
+using Util;
 using BuffEffect = Gameplay.BuffEffects.BuffEffect;
 
 namespace Gameplay.Abilities
@@ -8,8 +10,8 @@ namespace Gameplay.Abilities
     {
         private IToken target;
         
-        private void OnDamaged(DamageType damageType, int damage) => target?.Damage(damageType, damage);
-        private void OnHealed(int heal) => target?.Heal(heal);
+        private void OnDamaged(DamageType damageType, int damage) => target?.Damage(damageType, damage, null);
+        private void OnHealed(int heal) => target?.Heal(GlobalDefinitions.ShadowDamageType, heal, null);
         private void OnManaReplenished(int mana) => target?.ReplenishMana(mana);
 
         protected override void OnApplied()
@@ -33,7 +35,7 @@ namespace Gameplay.Abilities
             
         }
 
-        private void OnDestroyed(IToken t)
+        private void OnDestroyed(IInteractable interactable)
         {
             IToken token = Manager.Token;
             token.OnDamaged -= OnDamaged;
@@ -47,5 +49,6 @@ namespace Gameplay.Abilities
         protected override void OnTick()
         {
         }
+        
     }
 }

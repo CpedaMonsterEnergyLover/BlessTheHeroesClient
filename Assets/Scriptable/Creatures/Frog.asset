@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Frog
   creatureType: {fileID: 11400000, guid: 93ad9d203e057d74981f79e831fc0221, type: 2}
-  sprite: {fileID: 21300000, guid: 5b5d515974039d8488707f0dcbcefc77, type: 3}
+  sprite: {fileID: 21300000, guid: 579cf801fcc059e48b1f0e92ed385fbd, type: 3}
   health: 1
   mana: 0
   speed: 1
@@ -23,7 +23,10 @@ MonoBehaviour:
   armorType: 0
   damageType: {fileID: 11400000, guid: 4026f66ee129e2645a232fc16d330c85, type: 2}
   attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
-  canAct: 1
+  allowedToAct: 1
+  allowedToMove: 1
+  allowedToAttack: 0
+  allowedToCast: 1
   attackDiceAmount: 1
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}

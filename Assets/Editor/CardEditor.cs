@@ -28,7 +28,7 @@ namespace Editor
                 
                 if(token is null) return;
 
-                token.SetCard(manager);
+                token.Card = manager;
                 manager.AddToken(token);
             }
         }

@@ -15,28 +15,60 @@ namespace UI
         [SerializeField] private TMP_Text fullnessText;
         [SerializeField] private TMP_Text coinsText;
         [SerializeField] private Image avatarImage;
-        [SerializeField] private TMP_Text titleText;
         
         private InventorySlot[] slots;
         private Tween tween;
         private InventoryManager openedManager;
 
-        private bool lockTarget;
-        private bool isOpened;
+        public bool IsOpened { get; private set; }
 
 
 
-        public void Toggle(HeroToken hero, bool targetStaysTheSame = false)
+        public void Toggle(HeroToken hero)
         {
             if(tween is not null) return;
-            lockTarget = targetStaysTheSame;
             bool state = !slotsTransform.gameObject.activeInHierarchy;
-            if(state)
-            {
+            if (state)
                 Open(hero);
+            else 
+                Close();
+            PlayAnimation(state);
+        }
+
+        private void Open(HeroToken hero)
+        {
+            if(IsOpened) return;
+            
+            InventoryManager manager = hero.InventoryManager;
+            openedManager = manager;
+            IsOpened = true;
+            LinkSlots();
+            openedManager.OnCoinsUpdate += UpdateCoinsText;
+            openedManager.OnItemsUpdate += UpdateInventory;
+            UpdateHeroIcon(hero);
+            UpdateCoinsText(openedManager.Coins);
+            UpdateInventory(openedManager.Items);
+            TokenBrowser.OnTokenSelected += SwitchToken;
+        }
+
+        public void Close()
+        {
+            if(!IsOpened) return;
+            
+            IsOpened = false;
+            openedManager.OnCoinsUpdate -= UpdateCoinsText;
+            openedManager.OnItemsUpdate -= UpdateInventory;
+            TokenBrowser.OnTokenSelected -= SwitchToken;
+            openedManager = null;
+        }
+
+        public void PlayAnimation(bool state)
+        {
+            if (state)
+            {
                 slotsTransform.localScale = Vector3.zero;
                 slotsTransform.gameObject.SetActive(true);
-            } else Close();
+            }
             tween = slotsTransform.DOScale(state ? Vector3.one : Vector3.zero, 0.15f).OnComplete(() =>
             {
                 if(!state) slotsTransform.gameObject.SetActive(false);
@@ -44,34 +76,10 @@ namespace UI
             });
         }
 
-        private void Open(HeroToken hero)
-        {
-            InventoryManager manager = hero.InventoryManager;
-            isOpened = true;
-            openedManager = manager;
-            openedManager.OnCoinsUpdate += UpdateCoinsText;
-            openedManager.OnItemsUpdate += UpdateInventory;
-            /*if(!lockTarget) */TokenBrowser.OnTokenSelected += OnTokenSelected;
-            UpdateHero(hero);
-            TryCreateSlots(manager.Capacity);
-            UpdateCoinsText(manager.Coins);
-            UpdateInventory(manager.Items);
-        }
-
-        private void Close()
-        {
-            if(openedManager is null) return;
-            isOpened = false;
-            openedManager.OnCoinsUpdate -= UpdateCoinsText;
-            openedManager.OnItemsUpdate -= UpdateInventory;
-            /*if(!lockTarget) */TokenBrowser.OnTokenSelected -= OnTokenSelected;
-            openedManager = null;
-        }
-
         private void UpdateInventory(Item[] items)
         {
-            if(!isOpened) return;
-
+            if(!IsOpened) return;
+            
             int slotIndex = 0;
             int slotsAmount = slots.Length;
             
@@ -101,34 +109,42 @@ namespace UI
             fullnessText.SetText($"{slotIndex}/{slotsAmount}");
         }
 
-        private void UpdateHero(HeroToken hero)
-        {
-            avatarImage.sprite = hero.Scriptable.Sprite;
-            titleText.SetText($"{hero.Scriptable.Name}'s inventory");
-        }
-        
+        private void UpdateHeroIcon(HeroToken hero) => avatarImage.sprite = hero.Scriptable.Sprite;
+
         private void UpdateCoinsText(int coins) => coinsText.SetText($"Coins: {coins}");
 
-        private void TryCreateSlots(int amount)
+        private void LinkSlots()
         {
-            if(slots is not null) return;
-            
-            slots = new InventorySlot[amount];
-            for (int i = 0; i < amount; i++) 
-                slots[i] = Instantiate(inventorySlotPrefab, slotsTransform);
-        }
-
-        private void OnTokenSelected(IToken token)
-        {
-            Close();
-            
-            if(token is not HeroToken hero)
+            if(slots is not null)
             {
-                slotsTransform.gameObject.SetActive(false);
+                foreach (InventorySlot slot in slots) 
+                    slot.InventoryManager = openedManager;
                 return;
             }
+            
+            int amount = openedManager.Capacity;
+            slots = new InventorySlot[amount];
+            for (int i = 0; i < amount; i++)
+            {
+                var slot = Instantiate(inventorySlotPrefab, slotsTransform);
+                slot.InventoryManager = openedManager;
+                slots[i] = slot;
+            }
+        }
 
+        private void SwitchToken(IToken token)
+        {
+            if(token is not HeroToken hero)
+            {
+                Close();
+                PlayAnimation(false);
+                return;
+            }
+            
+            Close();
             Open(hero);
         }
+
+        // public bool IsOpenedFor(IToken token) => IsOpened && token is HeroToken hero && hero.InventoryManager.Equals(openedManager);
     }
 }

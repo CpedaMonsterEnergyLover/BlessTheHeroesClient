@@ -3,6 +3,6 @@
     public interface IInteractableOnClick : IInteractable
     {
         public bool CanClick { get; }
-        public void OnClick(InteractionResult result);
+        public void OnClick(InteractionResult result, int clickCount);
     }
 }

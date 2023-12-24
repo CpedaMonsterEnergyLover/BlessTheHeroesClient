@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Gameplay.Interaction;
 using Gameplay.Tokens;
 using MyBox;
 using Scriptable;
@@ -25,6 +26,7 @@ namespace UI.Browsers
         [SerializeField] private AttackTypeIndicator attackTypeIndicator;
         [SerializeField] private ArmorTypeIndicator armorTypeIndicator;
         [SerializeField] private CreatureTypeIndicator creatureTypeIndicator;
+        [SerializeField] private CreatureAttackIndicator creatureAttackIndicator;
         [SerializeField] private GameObject energyGO;
         [Separator("Slots")]
         [SerializeField] private EquipmentSlot[] equipmentSlots = new EquipmentSlot[4];
@@ -82,16 +84,25 @@ namespace UI.Browsers
 
             if(token is HeroToken hero)
             {
+                SetCreatureAttack(false);
                 UpdateEquipment(hero);
                 energyGO.SetActive(true);
                 bagSlot.SetActive(true);
-            } else {
+            } else
+            {
+                SetCreatureAttack(true, token.AttackDiceAmount);
                 HideEquipment();
                 energyGO.SetActive(false);
                 bagSlot.SetActive(false);
             }
 
             SubTokenEvents(token);
+        }
+
+        private void SetCreatureAttack(bool isActive, int amount = 0)
+        {
+            creatureAttackIndicator.SetAttackDiceAmount(amount);
+            creatureAttackIndicator.gameObject.SetActive(isActive);
         }
 
         private void OnActionsChanged(IToken token)
@@ -203,7 +214,10 @@ namespace UI.Browsers
             equipmentSlots[slot].ClearItem();
         }
         
-        private void OnDestroyed(IToken token) => UnsubTokenEvents(token);
+        private void OnDestroyed(IInteractable interactable)
+        {
+            if(interactable is IToken token) UnsubTokenEvents(token);
+        }
 
         private void SubTokenEvents(IToken token)
         {

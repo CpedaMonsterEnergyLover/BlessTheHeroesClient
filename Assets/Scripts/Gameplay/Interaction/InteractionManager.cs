@@ -1,4 +1,8 @@
-﻿using Camera;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Camera;
+using Cysharp.Threading.Tasks;
 using UI.Interaction;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,25 +11,34 @@ namespace Gameplay.Interaction
 {
     public class InteractionManager : MonoBehaviour
     {
-        [Header("Settings")]
+        [SerializeField] private int doubleClickTresholdMS = 500;
         [SerializeField] private float dragTimeTreshold;
         [SerializeField] private float dragDistanceTreshold;
         [SerializeField] private InteractionTooltip interactionTooltip;
 
         private bool dragInitialized;
+        private bool dragStartOnUI;
         private float dragThresholdTimer;
         private Vector2 dragOrigin;
         private IInteractable clickedInteractable;
-        private bool dragStartOnUI;
-
-
+        
+        private static UniTask clickTask;
+        private static bool interacting;
+        private static readonly List<IInteractable> TargetsCache = new();
         public static bool Dragging { get; private set; }
-        public static bool Interacting { get; private set; }
 
-        public delegate void InteractionManagerEvent(Vector3 mousePos = default);
-        public static event InteractionManagerEvent OnCameraDragStart;
-        public static event InteractionManagerEvent OnCameraDrag;
-        public static event InteractionManagerEvent OnCameraDragEnd;
+        public static bool AnyInteractionActive
+            => Dragging || InspectionManager.Inspecting || AbilityCaster.IsDragging || ItemPicker.IsPicked; 
+
+        public delegate void CameraDragEvent(Vector3 mousePos = default);
+        public static event CameraDragEvent OnCameraDragStart;
+        public static event CameraDragEvent OnCameraDrag;
+        public static event CameraDragEvent OnCameraDragEnd;
+
+        public delegate void InteractableDragEvent();
+        public static event InteractableDragEvent OnInteractableDragStart;
+        public static event InteractableDragEvent OnInteractableDragEnd;
+
         
         
 
@@ -71,12 +84,14 @@ namespace Gameplay.Interaction
             if (clickedInteractable is IInteractableOnDrag {CanInteract: true} interactableOnDrag)
             {
                 interactableOnDrag.OnDragStart(GetInteractionResult());
-                // Invoke
-                Interacting = true;
+                TargetsCache.Clear();
+                interactableOnDrag.GetInteractionTargets(TargetsCache);
+                UpdateOutlinesOnCastStart();
+                interacting = true;
             }
             else
             {
-                Interacting = false;
+                interacting = false;
                 clickedInteractable = null;
                 OnCameraDragStart?.Invoke(MainCamera.Instance.GetMousePosition());
             }
@@ -85,34 +100,37 @@ namespace Gameplay.Interaction
         private void Drag()
         {
             if(dragStartOnUI) return;
-            if(!Interacting) OnCameraDrag?.Invoke(MainCamera.Instance.GetMousePosition());
+            if(!interacting) OnCameraDrag?.Invoke(MainCamera.Instance.GetMousePosition());
             else if(clickedInteractable is IInteractableOnDrag interactableOnDrag) 
                 interactionTooltip.Show(interactableOnDrag.OnDrag(GetInteractionResult()));
         }
 
         private void CancelDrag()
         {
-            if(dragStartOnUI) return;
+            if (dragStartOnUI) return;
             if (!Dragging)
             {
                 if (clickedInteractable is IInteractableOnClick {CanClick: true} interactableOnClick)
-                    interactableOnClick.OnClick(GetInteractionResult());
+                {
+                    interactableOnClick.OnClick(GetInteractionResult(), clickTask.Status is UniTaskStatus.Pending ? 2 : 1);
+                    clickTask = ClickTask();
+                }
             }
             else if(clickedInteractable is IInteractableOnDrag interactableOnDrag)
             {
                 interactableOnDrag.OnDragEnd(GetInteractionResult());
-                // Invoke
+                UpdateOutlinesOnCastEnd();
                 interactionTooltip.Show(null);
             }
 
-            Interacting = false;
+            interacting = false;
             clickedInteractable = null;
             Dragging = false;
             dragInitialized = false;
             OnCameraDragEnd?.Invoke();
         }
         
-        public InteractionResult GetInteractionResult()
+        public static InteractionResult GetInteractionResult()
         {
             if(EventSystem.current.IsPointerOverGameObject() || 
                !Physics.Raycast(
@@ -123,6 +141,23 @@ namespace Gameplay.Interaction
             return info.collider.TryGetComponent(out InteractionCollider interactionCollider) ?
                 new InteractionResult(true, interactionCollider.Target, info.point) :
                 new InteractionResult(false);
+        }
+        
+        private static void UpdateOutlinesOnCastStart()
+        {
+            OnInteractableDragStart?.Invoke();
+            foreach (IInteractable t in TargetsCache.Where(cached => !cached.Dead)) t.EnableOutline();
+        }
+        
+        private static void UpdateOutlinesOnCastEnd()
+        {
+            OnInteractableDragEnd?.Invoke();
+            foreach (IInteractable t in TargetsCache.Where(cached => !cached.Dead)) t.UpdateOutline();
+        }
+
+        private async UniTask ClickTask()
+        {
+            await UniTask.Delay(doubleClickTresholdMS);
         }
     }
 }

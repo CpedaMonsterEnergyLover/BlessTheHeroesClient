@@ -23,14 +23,14 @@ namespace Gameplay.Abilities
             
             foreach (IControllableToken hero in card.Heroes)
             {
-                hero.Damage(GlobalDefinitions.PhysicalDamageType,3);
+                hero.Damage(GlobalDefinitions.PhysicalDamageType,3, Caster);
             }
         }
 
         public override bool GetTarget(out IInteractable target)
         {
-            target = Caster.TokenCard;
-            return Caster.TokenCard.Heroes.Count(h => !h.Dead) > 0;
+            target = Caster.Card;
+            return Caster.Card.Heroes.Count(h => !h.Dead) > 0;
         }
     }
 }

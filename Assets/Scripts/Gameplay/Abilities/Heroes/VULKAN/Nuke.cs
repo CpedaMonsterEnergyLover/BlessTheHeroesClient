@@ -38,7 +38,7 @@ namespace Gameplay.Abilities
             ManageTween();
             nukeParticles.Play();
             foreach (IUncontrollableToken creature in card.Creatures) 
-                creature.Damage(GlobalDefinitions.FireDamageType, damage, aggroReceiver: Caster.IAggroManager);
+                creature.Damage(GlobalDefinitions.FireDamageType, damage, Caster, false);
             castBalllight.intensity = 15f;
             castBalllight.range = 3f;
             castBalllight.DOIntensity(0, 1f);

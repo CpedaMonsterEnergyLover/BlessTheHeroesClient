@@ -10,31 +10,26 @@ using Scriptable.AttackVariations;
 using UnityEngine;
 using Util.Animators;
 using Util.Enums;
-using Util.Interaction;
 
 namespace Gameplay.Tokens
 {
     public interface IToken : IInteractableOnClick
     {
-        public static IToken DraggedToken { get; private set; }
-        
-        
-        
         // Methods
         public List<Card> GetCardsInAttackRange();
         public bool DrainMana(int amount);
-        public void SetCard(Card card);
         public UniTask Attack(IToken target);
         public UniTask Move(Card card);
         public bool Push(Card card);
         public UniTask Despawn();
         public bool IsInAttackRange(IToken attacker);
         public void InvokeOnTokenMissGlobal() => OnTokenMissGlobal?.Invoke(this);
+        public bool HasAbility(string id, out Ability ability);
         
         
         // API
-        public UniTask Damage(DamageType damageType, int damage, IAggroManager aggroReceiver = null, int delay = 200);
-        public void Heal(int health, IAggroManager aggroReceiver = null);
+        public UniTask Damage(DamageType damageType, int damage, IToken attacker, bool useAttackerPosition = true, int delay = 200);
+        public void Heal(DamageType healType, int health, IToken caster, bool useCasterPosition = true);
         public void ReplenishMana(int mana);
         public void SetActionPoints(int amount);
         public void SetMovementPoints(int amount);
@@ -54,16 +49,15 @@ namespace Gameplay.Tokens
         public AttackType AttackType { get; }
         public ArmorType ArmorType { get; }
         public int Speed { get; }
-        public Scriptable.DiceSet AttackDiceSet { get; }
-        public Scriptable.DiceSet MagicDiceSet { get; }
-        public Scriptable.DiceSet DefenseDiceSet { get; }
-        public Scriptable.DamageType DamageType { get; }
+        public DiceSet AttackDiceSet { get; }
+        public DiceSet MagicDiceSet { get; }
+        public DiceSet DefenseDiceSet { get; }
+        public DamageType DamageType { get; }
         public int AttackDiceAmount { get; }
         public int DefenseDiceAmount { get; }
-        public Scriptable.Token ScriptableToken { get; }
+        public Token ScriptableToken { get; }
         public Transform TokenTransform { get; }
-        public InteractableOutline InteractableOutline { get; }
-        public Card TokenCard { get; }
+        public Card Card { get; set; }
         public int TokenActionPoints { get; }
         public int MaxHealth { get; }
         public int MaxMana { get; }
@@ -72,21 +66,19 @@ namespace Gameplay.Tokens
         public int SpellPower { get; }
         public int AttackPower { get; }
         public int Defense { get; }
-        public bool Dead { get; }
         public Ability[] Abilities { get; }
-        public bool HasAbility(string id, out Ability ability);
         public AttackAnimatorManager AttackAnimatorManager { get; }
         public BuffManager BuffManager { get; }
-        public IAggroManager IAggroManager { get; }
-        public BaseAttackVariation AttackVariation { get; }
+        public IAggroManager BaseAggroManager { get; }
+        public bool CanBeTargeted { get; }
+        public bool CanCast { get; }
+        public bool CanAct { get; }
+        
         
 
         // Events
         public delegate void TokenEvent(IToken token);
-        public static event TokenEvent OnStartDragging;
-        public static event TokenEvent OnEndDragging;
         public static event TokenEvent OnTokenMissGlobal;
-        public event TokenEvent OnDestroyed;
         public event TokenEvent OnStatsChanged;
         public event TokenEvent OnDeath;
         public event TokenEvent OnManaChanged;
@@ -112,18 +104,5 @@ namespace Gameplay.Tokens
         
         public delegate void TokenMoveEvent(IToken t, Card card);
         public event TokenMoveEvent OnMove;
-
-
-        public void InvokeStartDraggingEvent()
-        {
-            DraggedToken = this;
-            OnStartDragging?.Invoke(this);
-        }
-
-        public void InvokeEndDraggingEvent()
-        {
-            DraggedToken = null;
-            OnEndDragging?.Invoke(this);
-        }
     }
 }

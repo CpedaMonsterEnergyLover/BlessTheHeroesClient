@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Gameplay.Inventory;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Gameplay.Cards
 
 
 
-        private void TryGiveItems()
+        private async UniTask TryGiveItems()
         {
             var candidates = heroes
                 .Where(h => h is HeroToken {Dead: false})
@@ -28,6 +29,7 @@ namespace Gameplay.Cards
                 if(inventoryManager.IsEmpty) return;
                 foreach (Item item in inventoryManager.Items)
                 {
+                    await UniTask.Delay(500);
                     int amount = item.Amount;
                     Scriptable.Item scriptable = item.Scriptable;
                     hero.InventoryManager.AddItem(scriptable, amount, out int left);
@@ -40,7 +42,7 @@ namespace Gameplay.Cards
         {
             foreach (Scriptable.Item item in items) 
                 inventoryManager.AddItem(item, 1, out _);
-            TryGiveItems();
+            TryGiveItems().Forget();
         }
         
         public void AddItemDrop(Scriptable.Item item) => inventoryManager.AddItem(item, 1, out _);

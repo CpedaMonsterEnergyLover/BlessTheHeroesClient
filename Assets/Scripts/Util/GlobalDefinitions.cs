@@ -1,7 +1,6 @@
 ﻿using Gameplay.Tokens;
 using MyBox;
 using Scriptable;
-using Scriptable.AttackVariations;
 using UnityEngine;
 
 namespace Util
@@ -9,19 +8,14 @@ namespace Util
     public class GlobalDefinitions : MonoBehaviour
     {
         private static GlobalDefinitions Instance { get; set; }
-        GlobalDefinitions() => Instance = this;
+        private GlobalDefinitions() => Instance = this;
 
-        [SerializeField] private BaseAttackVariation defaultAttackVariation;
         [Separator("Prefabs")]
         [SerializeField] private HeroToken heroTokenPrefab;
         [SerializeField] private CompanionToken companionTokenPrefab;
         [SerializeField] private CreatureToken creatureTokenPrefab;
         [SerializeField] private BossToken bossTokenPrefab;
-        [Separator("Damage Sprites")]
-        [SerializeField] private Sprite damageAnimationSprite;
-        [SerializeField] private Sprite poisonDamageAnimationSprite;
-        [SerializeField] private Sprite defensedDamageAnimationSprite;
-        [SerializeField] private Sprite healingAnimationSprite;
+
         [Separator("Outlines")]
         [SerializeField] private Vector3 tokenOutlineWidth;
         [SerializeField] private Vector3 cardOutlineWidth;
@@ -41,6 +35,7 @@ namespace Util
         [SerializeField] private DamageType poisonDamageType;
         [SerializeField] private DamageType shadowDamageType;
         [SerializeField] private DamageType waterDamageType;
+        [SerializeField] private DamageType psychicDamageType;
         
         
         
@@ -56,17 +51,17 @@ namespace Util
         public static DamageType PoisonDamageType => Instance.poisonDamageType;
         public static DamageType ShadowDamageType => Instance.shadowDamageType;
         public static DamageType WaterDamageType => Instance.waterDamageType;
-        public static BaseAttackVariation BaseAttackVariation => Instance.defaultAttackVariation;
+        public static DamageType PsychicDamageType => Instance.psychicDamageType;
         public static Vector3 TokenOutlineWidth => Instance.tokenOutlineWidth;
         public static Vector3 CardOutlineWidth => Instance.cardOutlineWidth;
         public static Vector4 TokenOutlineGreenColor => Instance.tokenOutlineGreenColor;
         public static Vector4 TokenOutlineYellowColor => Instance.tokenOutlineYellowColor;
         public static Vector4 TokenOutlineRedColor => Instance.tokenOutlineRedColor;
-        public static Sprite DamageAnimationSprite => Instance.damageAnimationSprite;
-        public static Sprite DefensedDamageAnimationSprite => Instance.defensedDamageAnimationSprite;
-        public static Sprite PoisonDamageAnimationSprite => Instance.poisonDamageAnimationSprite;
-        public static Sprite HealingAnimationSprite => Instance.healingAnimationSprite;
 
+        public static readonly int PropertyOutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
+        public static readonly int PropertyOutlineColor = Shader.PropertyToID("_OutlineColor");
+        public static readonly int PropertyOutlineWidth = Shader.PropertyToID("_OutlineWidth");
+        
 
         public static BossToken CreateBossToken(Boss boss)
         {

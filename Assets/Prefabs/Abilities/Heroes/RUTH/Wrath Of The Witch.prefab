@@ -44,10 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 608edb04ed2c467da840013950ba8685, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  title: Wraith of the Witch
+  title: Wrath of the Witch
   icon: {fileID: 21300000, guid: 6eba67dde714d064fae070eed95f8ed7, type: 3}
-  detailDescription: angry ruth daum girl
-  literalDescription: 
+  statDescription: angry ruth daum girl
+  description: 
   pattern: 5
   radius: 1
   includeCenter: 1

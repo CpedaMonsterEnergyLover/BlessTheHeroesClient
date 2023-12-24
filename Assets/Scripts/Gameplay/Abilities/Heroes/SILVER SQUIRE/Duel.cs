@@ -45,5 +45,6 @@ namespace Gameplay.Abilities
         }
 
         public override bool ValidateTarget(IInteractable target) => ValidateEnemy(target);
+        public IToken Token => Caster;
     }
 }

@@ -18,8 +18,8 @@ namespace Gameplay.Abilities
 
         public override async UniTask Cast(IInteractable target)
         {
-            int enemiesAmount = Caster.TokenCard.Creatures.Count(c => !c.Dead);
-            PatternSearch.IterateArea(Caster.TokenCard.GridPosition, 1, pos =>
+            int enemiesAmount = Caster.Card.Creatures.Count(c => !c.Dead);
+            PatternSearch.IterateArea(Caster.Card.GridPosition, 1, pos =>
             {
                 if(!FieldManager.GetCard(pos, out Card card)) return;
                 var toBuff = card.Heroes.Where(h => !h.Dead);
@@ -30,5 +30,7 @@ namespace Gameplay.Abilities
                 }
             });
         }
+
+        public IToken Token => Caster;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Gameplay.Abilities;
 using Gameplay.Dice;
+using Gameplay.Interaction;
 using Gameplay.Inventory;
 using Scriptable;
 using Scriptable.AttackVariations;
@@ -8,7 +9,7 @@ using UnityEngine;
 
 namespace Gameplay.Tokens
 {
-    public class HeroToken : ControllableToken<Hero>, IHeroToken
+    public class HeroToken : ControllableToken<Hero>, IHeroToken, IItemReceiver
     {
         [SerializeField] private InventoryManager inventoryManager;
         
@@ -25,9 +26,7 @@ namespace Gameplay.Tokens
 
         private readonly Equipment[] equipment = new Equipment[4];
         private readonly Ability[] equipmentAbilities = new Ability[4];
-
         public Ability[] EquipmentAbilities => equipmentAbilities.ToArray();
-
         public InventoryManager InventoryManager => inventoryManager;
         
         
@@ -44,7 +43,7 @@ namespace Gameplay.Tokens
             SetMana(MaxMana);
         }
         
-        protected override void Die()
+        protected override void Die(IToken attacker)
         {
             Debug.Log("Hero is dead");
         }
@@ -74,7 +73,7 @@ namespace Gameplay.Tokens
             if (item is null) return;
             
             RemoveAbility(item, slot);
-            InventoryManager.AddItem(equipment[slot] /*, transform.position*/, 1, out int leftAmount);
+            InventoryManager.AddItem(equipment[slot] /*, transform.position*/, 1, out _);
             maxManaBonus -= item.Mana;
             SetMana(CurrentMana - item.Mana < 0 ? 1 : CurrentMana - item.Mana);
             maxHealthBonus -= item.Health;
@@ -113,7 +112,7 @@ namespace Gameplay.Tokens
 
         public void Resurrect()
         {
-            Dead = false;
+            dead = false;
             SetHealth(1);
             SetMana(1);
             SetActionPoints(1);

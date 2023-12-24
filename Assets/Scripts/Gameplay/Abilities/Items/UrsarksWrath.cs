@@ -16,7 +16,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             int damage = Mathf.Clamp(Caster.MaxHealth - Caster.CurrentHealth, 0, maxDamage);
-            token.Damage(GlobalDefinitions.PhysicalDamageType, damage, aggroReceiver: Caster.IAggroManager);
+            token.Damage(GlobalDefinitions.PhysicalDamageType, damage, Caster);
         }
 
         public override void OnCastStart()

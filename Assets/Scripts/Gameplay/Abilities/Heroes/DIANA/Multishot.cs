@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Cysharp.Threading.Tasks;
-using Effects;
+using Pooling;
 using Gameplay.Cards;
 using Gameplay.Tokens;
 using UnityEngine;
@@ -47,7 +47,7 @@ namespace Gameplay.Abilities
                attackTarget is not CreatureToken creatureToken ||
                attackType is not AttackType.Ranged) return;
 
-            Card card = attackTarget.TokenCard;
+            Card card = attackTarget.Card;
             var creatures = card.Creatures;
             creatures.Remove(creatureToken);
             var targets = creatures.OrderBy(_ => Random.value).Take(stage).ToArray();
@@ -66,7 +66,7 @@ namespace Gameplay.Abilities
                 arrow.SetPosition(attackAnimator.ArrowPosition);
                 arrow.SetRotation(attackAnimator.GetRotation(target.TokenTransform.position));
                 arrow.Shoot(target.TokenTransform).Forget();
-                target.Damage(GlobalDefinitions.PhysicalDamageType, arrowDamage, aggroReceiver: Caster.IAggroManager).Forget();
+                target.Damage(GlobalDefinitions.PhysicalDamageType, arrowDamage, Caster).Forget();
             }
             
             UpgradeStage();

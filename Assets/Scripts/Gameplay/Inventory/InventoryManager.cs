@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using Gameplay.Interaction;
+using Gameplay.Tokens;
+using Pooling;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -7,10 +11,10 @@ namespace Gameplay.Inventory
 {
     public class InventoryManager : MonoBehaviour
     {
-        [FormerlySerializedAs("slotsAmount")] 
         [SerializeField] private int capacity;
-
-        private /*readonly */List<Item> items = new();
+        [SerializeField] private bool createTextAnimation;
+        
+        private /*readonly*/ List<Item> items = new();
 
         public int Coins { get; private set; }
         public int Capacity => capacity;
@@ -23,12 +27,15 @@ namespace Gameplay.Inventory
         public int debug_ToAddAmount;
 #endif
 
+        private HeroToken hero;
         public delegate void InventoryItemsUpdateEvent(Item[] items);
         public event InventoryItemsUpdateEvent OnItemsUpdate;
         public delegate void InventoryCoinsUpdateEvent(int coins);
         public event InventoryCoinsUpdateEvent OnCoinsUpdate;
+
+
         
-        
+        private void Awake() => TryGetComponent(out hero);
 
         public void AddItem(Scriptable.Item itemToAdd,/* Vector3 giveFrom, */int amount, out int leftAmount)
         {
@@ -42,12 +49,16 @@ namespace Gameplay.Inventory
 
             leftAmount = amount - canFit;
             /*await EffectsManager.GetEffect<EffectLoot>().AnimateGather(giveFrom, itemToAdd);*/
-            
+
+            if (createTextAnimation && hero is not null) 
+                PoolManager.GetEffect<EffectText>().PlayText(transform, $"<size=2>+{canFit}</size> {itemToAdd.Name}").Forget();
+
             OnItemsUpdate?.Invoke(Items);
         }
 
         public void RemoveItem(Scriptable.Item itemToRemove, int amount)
         {
+            if(amount == 0) return;
             var item = items.FirstOrDefault(i => i.Scriptable.Equals(itemToRemove));
             if(item is null) return;
             item.Amount -= amount;
@@ -108,6 +119,12 @@ namespace Gameplay.Inventory
             if(amount <= 0) return;
             Coins = Mathf.Clamp(Coins - amount, 0, int.MaxValue);
             OnCoinsUpdate?.Invoke(Coins);
+        }
+
+        public bool TryGetHero(out HeroToken bearer)
+        {
+            bearer = hero;
+            return bearer is not null;
         }
     }
 }

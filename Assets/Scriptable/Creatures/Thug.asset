@@ -23,7 +23,10 @@ MonoBehaviour:
   armorType: 2
   damageType: {fileID: 11400000, guid: 4026f66ee129e2645a232fc16d330c85, type: 2}
   attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
-  canAct: 1
+  allowedToAct: 1
+  allowedToMove: 1
+  allowedToAttack: 1
+  allowedToCast: 1
   attackDiceAmount: 3
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}
@@ -31,5 +34,5 @@ MonoBehaviour:
   sharedLootDropModifier: 1
   dropTable:
     content: []
-    coinsDropRate: 0.7
+    coinsDropRate: 0.472
     coins: {x: 1, y: 3}

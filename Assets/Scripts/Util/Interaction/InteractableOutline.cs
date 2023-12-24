@@ -3,24 +3,22 @@ using UnityEngine;
 
 namespace Util.Interaction
 {
-    public class InteractableOutline : MonoBehaviour
+    public abstract class InteractableOutline : MonoBehaviour
     {
         [SerializeField] private MeshRenderer meshRenderer;
         
         private MaterialPropertyBlock materialPropertyBlock;
-        private static readonly int PropertyOutlineEnabled = Shader.PropertyToID("_OutlineEnabled");
-        private static readonly int PropertyOutlineColor = Shader.PropertyToID("_OutlineColor");
-        private static readonly int PropertyOutlineWidth = Shader.PropertyToID("_OutlineWidth");
-
         private Vector4 currentColor = Vector4.zero;
-        protected IInteractable Interactable { get; private set; }
+        protected IInteractable interactable;
+        protected abstract Vector3 OutlineWidth { get; }
+        
+        
+        
 
-        
-        
         protected virtual void Awake()
         {
             materialPropertyBlock = new MaterialPropertyBlock();
-            if (!TryGetComponent(out IInteractable interactable))
+            if (!TryGetComponent(out interactable))
             {
                 Debug.LogError($"InteractableOutline on GO {gameObject.name} couldn't find IInteractable component. Outline is disabled.");
                 var single = meshRenderer.materials[0];
@@ -29,19 +27,20 @@ namespace Util.Interaction
                 return;
             }
 
-            Interactable = interactable;
-        }
-
-        public void SetOutlineWidth(Vector3 width)
-        {
-            materialPropertyBlock.SetVector(PropertyOutlineWidth, width);
-            meshRenderer.SetPropertyBlock(materialPropertyBlock, 1);
+            SetOutlineWidth();
+            SubEvents();
         }
 
         public void SetEnabled(bool isEnabled)
         {
-            SetColor(Interactable.OutlineColor);
-            materialPropertyBlock.SetFloat(PropertyOutlineEnabled, isEnabled ? 1f : 0f);
+            SetColor(interactable.OutlineColor);
+            materialPropertyBlock.SetFloat(GlobalDefinitions.PropertyOutlineEnabled, isEnabled ? 1f : 0f);
+            meshRenderer.SetPropertyBlock(materialPropertyBlock, 1);
+        }
+
+        private void SetOutlineWidth()
+        {
+            materialPropertyBlock.SetVector(GlobalDefinitions.PropertyOutlineWidth, OutlineWidth);
             meshRenderer.SetPropertyBlock(materialPropertyBlock, 1);
         }
 
@@ -49,8 +48,40 @@ namespace Util.Interaction
         {
             if(color.Equals(currentColor)) return;
             currentColor = color;
-            materialPropertyBlock.SetVector(PropertyOutlineColor, color);
+            materialPropertyBlock.SetVector(GlobalDefinitions.PropertyOutlineColor, color);
             meshRenderer.SetPropertyBlock(materialPropertyBlock, 1);
         }
+
+        protected virtual void SubEvents()
+        {
+            ItemPicker.OnItemPickedUp += OnInteractionStart;
+            ItemPicker.OnItemPickedDown += OnInteractionEnd;
+            InteractionManager.OnInteractableDragStart += OnInteractionStart;
+            InteractionManager.OnInteractableDragEnd += OnInteractionEnd;
+            AbilityCaster.OnAbilityCastEnd += OnInteractionEnd;
+            AbilityCaster.OnAbilityCastStart += OnInteractionStart;
+            interactable.OnDestroyed += OnDestroyed;
+        }
+
+        protected virtual void UnsubEvents(IInteractable target)
+        {
+            ItemPicker.OnItemPickedUp -= OnInteractionStart;
+            ItemPicker.OnItemPickedDown -= OnInteractionEnd;
+            InteractionManager.OnInteractableDragStart -= OnInteractionStart;
+            InteractionManager.OnInteractableDragEnd -= OnInteractionEnd;
+            AbilityCaster.OnAbilityCastEnd -= OnInteractionEnd;
+            AbilityCaster.OnAbilityCastStart -= OnInteractionStart;
+            target.OnDestroyed -= OnDestroyed;
+        }
+
+        private void OnDestroyed(IInteractable target)
+        {
+            UnsubEvents(target);
+            SetEnabled(false);
+        }
+        
+        private void OnInteractionStart() => SetEnabled(false);
+
+        private void OnInteractionEnd() => SetEnabled(interactable.CanInteract);
     }
 }

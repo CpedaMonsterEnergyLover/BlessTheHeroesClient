@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Effects;
+using Pooling;
 using Gameplay.Cards;
 using Gameplay.GameField;
 using Gameplay.Interaction;
@@ -38,7 +38,7 @@ namespace Gameplay.Abilities
             {
                 jumpCounter++;
                 var iTargets = new List<IToken>();
-                PatternSearch.IteratePlus(currentUnit.TokenCard.GridPosition, 1, pos =>
+                PatternSearch.IteratePlus(currentUnit.Card.GridPosition, 1, pos =>
                 {
                     if (FieldManager.GetCard(pos, out Card card) && card.IsOpened)
                     {
@@ -75,8 +75,8 @@ namespace Gameplay.Abilities
                 lineRenderer.SetPosition(i, pos);
 
                 if (t is IControllableToken)
-                    t.Heal(currentDamage, aggroReceiver: Caster.IAggroManager);
-                else t.Damage(GlobalDefinitions.HolyDamageType, currentDamage, aggroReceiver: Caster.IAggroManager, delay: 0);
+                    t.Heal(GlobalDefinitions.HolyDamageType, currentDamage, Caster, false);
+                else t.Damage(GlobalDefinitions.HolyDamageType, currentDamage, Caster, false, 0);
                 currentDamage += damagePerUnit;
             }
             
@@ -100,9 +100,9 @@ namespace Gameplay.Abilities
         public override bool ValidateTarget(IInteractable target)
         {
             return target is IToken token &&
-                   token.TokenCard.Equals(Caster.TokenCard) &&
+                   token.Card.Equals(Caster.Card) &&
                    !ReferenceEquals(Caster, target) &&
-                   PatternSearch.CheckPlus(Caster.TokenCard.GridPosition, token.TokenCard.GridPosition, 1);
+                   PatternSearch.CheckPlus(Caster.Card.GridPosition, token.Card.GridPosition, 1);
         }
     }
 }

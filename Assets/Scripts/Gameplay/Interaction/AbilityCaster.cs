@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Gameplay.Abilities;
 using Gameplay.Dice;
 using Gameplay.Tokens;
@@ -11,20 +12,15 @@ namespace Gameplay.Interaction
 {
     public class AbilityCaster : MonoBehaviour
     {
-        [SerializeField] private InteractionManager interactionManager;
-
         private IControllableToken caster;
-        private static InteractionManager InteractionManager { get; set; }
         private static readonly List<IInteractable> TargetsCache = new();
         public static bool IsDragging { get; private set; }
 
-
+        public delegate void OutlineEvent();
+        public static event OutlineEvent OnAbilityCastStart;
+        public static event OutlineEvent OnAbilityCastEnd;
         
-        private void Awake()
-        {
-            InteractionManager = interactionManager;
-            interactionManager = null;
-        }
+        
 
         private void OnEnable()
         {
@@ -47,15 +43,15 @@ namespace Gameplay.Interaction
 
         private void OnCastStart(ActiveAbility ability)
         {
-            if(ability.Caster is not IControllableToken controllable ||
+            if(IsDragging ||
+               ability.Caster is not IControllableToken controllable ||
                !ability.ApproveCast(controllable)) return;
 
             caster = controllable;
-            caster.InvokeStartDraggingEvent();
             TargetsCache.Clear();
             ability.GetTargetsList(TargetsCache);
-            foreach (IInteractable target in TargetsCache) 
-                target.Outline.SetEnabled(true);
+            UpdateOutlinesOnCastStart();
+            
             IsDragging = true;
             ability.OnCastStart();
             var interactionResult = InteractionManager.GetInteractionResult();
@@ -65,7 +61,8 @@ namespace Gameplay.Interaction
         private void OnCast(ActiveAbility ability)
         {
             if(!IsDragging) return;
-            
+
+            IsDragging = true;
             var interactionResult = InteractionManager.GetInteractionResult();
             bool validTarget = TargetsCache.Contains(interactionResult.Target);
             caster.InteractionLine.SetEnabled(interactionResult.IsValid, interactionResult.IntersectionPoint);
@@ -81,10 +78,8 @@ namespace Gameplay.Interaction
         private void OnCastEnd(ActiveAbility ability)
         {
             if (!IsDragging) return;
-
-            caster.InvokeEndDraggingEvent();
-            foreach (IInteractable target in TargetsCache) 
-                target.UpdateOutlineByCanInteract();
+            
+            UpdateOutlinesOnCastEnd();
             IsDragging = false;
             ability.OnCastEnd();
             var interactionResult = InteractionManager.GetInteractionResult();
@@ -97,17 +92,12 @@ namespace Gameplay.Interaction
         {
             TargetsCache.Clear();
             instant.GetTargetsList(TargetsCache);
-            instant.Caster.InvokeStartDraggingEvent();
-            foreach (IInteractable target in TargetsCache) 
-                target.Outline.SetEnabled(true);
+            UpdateOutlinesOnCastStart();
         }
 
         private void OnInstantAbilityHoverExit(InstantAbility instant)
         {
-            // Invoke
-            instant.Caster.InvokeEndDraggingEvent();
-            foreach (IInteractable target in TargetsCache) 
-                target.UpdateOutlineByCanInteract();
+            UpdateOutlinesOnCastEnd();
         }
 
         public static void Cast(IToken caster, IInteractable target, CastableAbility castable)
@@ -123,12 +113,24 @@ namespace Gameplay.Interaction
 
 
             if (castable.Healthcost > 0)
-                caster.Damage(GlobalDefinitions.BloodDamageType, castable.Healthcost);
+                caster.Damage(GlobalDefinitions.BloodDamageType, castable.Healthcost, null);
             
             castable.SetOnCooldown();
             castable.Cast(target);
             if (castable.Energycost == 0 && castable.RequiresAct) 
                 caster.SetActionPoints(caster.ActionPoints - 1);
+        }
+
+        private static void UpdateOutlinesOnCastStart()
+        {
+            OnAbilityCastStart?.Invoke();
+            foreach (IInteractable t in TargetsCache.Where(cached => !cached.Dead)) t.EnableOutline();
+        }
+        
+        private static void UpdateOutlinesOnCastEnd()
+        {
+            OnAbilityCastEnd?.Invoke();
+            foreach (IInteractable t in TargetsCache.Where(cached => !cached.Dead)) t.UpdateOutline();
         }
     }
 }

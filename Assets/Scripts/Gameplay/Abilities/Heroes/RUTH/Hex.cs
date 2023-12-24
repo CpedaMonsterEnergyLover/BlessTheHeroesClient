@@ -23,7 +23,7 @@ namespace Gameplay.Abilities
         {
             if(target is not CreatureToken creature) return;
 
-            Card targetCard = creature.TokenCard;
+            Card targetCard = creature.Card;
             /*Caster.TokenCard.RemoveTokenWithoutUpdate(creature);
             Destroy(creature.gameObject);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);*/

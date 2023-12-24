@@ -1,7 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Effects;
+using Pooling;
 using Gameplay.GameCycle;
+using Gameplay.Interaction;
+using Gameplay.Inventory;
 using Gameplay.Tokens;
 using Scriptable;
 using UI.Elements;
@@ -12,7 +14,7 @@ using UnityEngine.UI;
 
 namespace UI.Browsers
 {
-    public class PartyFrame : PoolObject, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    public class PartyFrame : Poolable, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IItemReceiver
     {
         [SerializeField] private Image icon;
         [SerializeField] private Image deadImage;
@@ -21,24 +23,25 @@ namespace UI.Browsers
         [SerializeField] private ProgressBar mana;
         [SerializeField] private ActionIndicator actions;
         [SerializeField] private Transform movePivot;
-        [SerializeField] private Image bagButton;
         
         private Tween damageTween;
         private Tween sizeTween;
         private Tween moveTween;
+        private IToken CurrentToken { get; set; }
 
-        private IToken currentToken;
-        
-        public Inventory Inventory { get; set; }
+        public static PartyFrame FrameUnderCursor { get; private set; }
         
         
 
         private void OnEnable()
         {
+            deadImage.color = deadImage.color.WithAlpha(0f);
             transform.localScale = Vector3.zero;
             AnimateResize(1f);
             OnTokenBrowserTokenSelected(TokenBrowser.SelectedToken);
         }
+
+        private void OnDestroy() => UnsubEvents(CurrentToken);
 
         public override void OnPool() => gameObject.SetActive(false);
 
@@ -47,7 +50,7 @@ namespace UI.Browsers
 
         public void SetToken(IControllableToken token)
         {
-            currentToken = token;
+            CurrentToken = token;
             icon.sprite = token.ScriptableToken.Sprite;
             UpdateHealth(token);
             UpdateMana(token);
@@ -93,8 +96,10 @@ namespace UI.Browsers
             } else UpdateDead(token);
         }
 
-        private void OnTokenDestroy(IToken token)
+        private void OnTokenDestroy(IInteractable interactable)
         {
+            if(interactable is not IToken token) return;
+            
             UnsubEvents(token);
             AnimateResize(0);
             OnTokenDestroyAsync().Forget();
@@ -121,12 +126,14 @@ namespace UI.Browsers
             if(canInteract) outlineImage.color = token.OutlineColor;
             outlineImage.enabled = canInteract;
         }
+        
+        private void UpdateOutline(IInteractable interactable) => UpdateOutline((IToken)interactable);
 
         private void OnMonstersTurnStarted() => outlineImage.enabled = false;
 
         private void OnTokenBrowserTokenSelected(IToken token)
         {
-            AnimateMove(token == currentToken ? 75 : 50f);
+            AnimateMove(token == CurrentToken ? -80 : -55f);
         }
         
         private void SubEvents(IToken token)
@@ -141,6 +148,7 @@ namespace UI.Browsers
             token.OnActionsChanged += UpdateActions;
             token.OnActionsChanged += UpdateOutline;
             token.OnMovementPointsChanged += UpdateOutline;
+            token.OnInitialized += UpdateOutline;
             if (token is HeroToken hero) hero.OnResurrect += UpdateDead;
         }
         
@@ -156,6 +164,7 @@ namespace UI.Browsers
             token.OnActionsChanged -= UpdateActions;
             token.OnActionsChanged -= UpdateOutline;
             token.OnMovementPointsChanged -= UpdateOutline;
+            token.OnInitialized -= UpdateOutline;
             if (token is HeroToken hero) hero.OnResurrect -= UpdateDead;
         }
 
@@ -173,35 +182,33 @@ namespace UI.Browsers
                 .OnKill(() => moveTween = null);
         }
 
-        
         // Pointer events
         public void OnPointerClick(PointerEventData eventData)
         {
+            if(InteractionManager.AnyInteractionActive) return;
+            
             if(Input.GetMouseButtonUp(0))
             {
-                TokenBrowser.SelectToken(currentToken);
+                TokenBrowser.SelectToken(CurrentToken);
                 if (eventData.clickCount == 2)
                 {
                     // TODO: camera
                 }
             } 
         }
-
-        public void ToggleInventory()
-        {
-            if(currentToken is HeroToken hero) Inventory.Toggle(hero, true);
-        }
-
+        
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if(currentToken is not HeroToken) return;
-            bagButton.enabled = true;
+            FrameUnderCursor = this;
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if(currentToken is not HeroToken) return;
-            bagButton.enabled = false;
+            FrameUnderCursor = null;
         }
+
+
+        // IItemReceiver
+        public InventoryManager InventoryManager => CurrentToken is HeroToken hero ? hero.InventoryManager : null;
     }
 }

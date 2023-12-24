@@ -8,6 +8,6 @@ namespace Scriptable
         public override bool AllowClick => false;
         public override string CategoryName => "Resource";
         public override int StackSize => 20;
-        public override void OnClickFromInventorySlot() { }
+        public override void Consume() { }
     }
 }

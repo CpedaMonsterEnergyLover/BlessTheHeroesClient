@@ -17,7 +17,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             
-            await token.Damage(damageType, damage, aggroReceiver: Caster.IAggroManager);
+            await token.Damage(damageType, damage, Caster);
         }
 
         public override void OnCastStart()

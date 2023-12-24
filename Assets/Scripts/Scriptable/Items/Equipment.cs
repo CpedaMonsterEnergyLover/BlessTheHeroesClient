@@ -49,7 +49,7 @@ namespace Scriptable
             return sb;
         }
         
-        public override void OnClickFromInventorySlot()
+        public override void Consume()
         {
             if(TokenBrowser.SelectedToken is not HeroToken hero) return;
             hero.InventoryManager.RemoveItem(this, 1);
@@ -63,5 +63,6 @@ namespace Scriptable
             hero.Equip(this, Slot);
             if(unequipped) hero.ReturnLostHealthAndMana(unequipped, this);
         }
+        
     }
 }

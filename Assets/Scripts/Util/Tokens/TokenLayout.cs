@@ -85,7 +85,7 @@ namespace Util.Tokens
         private async UniTask WaitUntilAnimationEnds()
         {
             await UniTask.WaitUntil(() => !transform.Cast<Transform>().Any(child => DOTween.IsTweening(child, true)));
-            card.OnTokenLayoutAnimationEnded(this);
+            // card.OnTokenLayoutAnimationEnded(this);
             playingAnimation = false;
         }
 

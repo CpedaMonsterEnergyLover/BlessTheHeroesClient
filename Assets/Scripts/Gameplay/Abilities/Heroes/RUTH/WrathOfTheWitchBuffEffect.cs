@@ -5,6 +5,6 @@ namespace Gameplay.Abilities
 {
     public class WrathOfTheWitchBuffEffect : DamageOverTimeBuffEffect
     {
-        protected override Sprite OverrideDamageSprite => null;
+        protected virtual Sprite OverrideDamageSprite => null;
     }
 }

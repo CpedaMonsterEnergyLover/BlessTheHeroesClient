@@ -37,5 +37,7 @@ namespace Gameplay.Abilities
                 ? ValidateAlly(target)
                 : ValidateEnemy(target);
         }
+
+        public IToken Token => Caster;
     }
 }

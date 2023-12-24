@@ -15,13 +15,14 @@ namespace Gameplay.Tokens
         public override BaseAttackVariation AttackVariation => Scriptable.AttackVariation;
         protected override bool CanInteractWithCards => false;
         public override bool CanClick => true;
-        public override bool CanInteract => Scriptable.CanAct && base.CanInteract;
+        protected override int DefaultActionPoints => Scriptable.AllowedToAct ? 1 : 0;
 
-        protected override int DefaultActionPoints => Scriptable.CanAct ? 1 : 0;
+        public override bool CanAct => Scriptable.AllowedToAct && base.CanAct;
+        public override bool CanAttack => Scriptable.AllowedToAttack && base.CanAttack;
+        public override bool CanWalk => Scriptable.AllowedToMove && base.CanWalk;
+        public override bool CanCast => Scriptable.AllowedToCast && base.CanCast;
 
-        
-        
-        protected override void Die()
+        protected override void Die(IToken attacker)
         {
         }
     }

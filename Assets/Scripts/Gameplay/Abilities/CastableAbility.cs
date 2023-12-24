@@ -40,7 +40,7 @@ namespace Gameplay.Abilities
 
         public void GetTargetsList(List<IInteractable> targets)
         {
-            PatternSearch.IteratePattern(pattern, Caster.TokenCard.GridPosition, card =>
+            PatternSearch.IteratePattern(pattern, Caster.Card.GridPosition, card =>
             {
                 if(ValidateTarget(card)) targets.Add(card);
                 targets.AddRange(card.Creatures.Where(ValidateTarget));
@@ -51,7 +51,7 @@ namespace Gameplay.Abilities
         public virtual bool ApproveCast(IToken token)
             => CurrentCooldown == 0 &&
                Manacost <= token.CurrentMana && 
-               (!RequiresAct || token.ActionPoints > 0);
+               (!RequiresAct || token.CanCast);
         
         private void Awake()
         {
@@ -102,7 +102,5 @@ namespace Gameplay.Abilities
         protected bool ValidateOpenedCard(IInteractable target) => target is Card { IsOpened: true };
         
         protected bool ValidateCreature(IInteractable target) => target is CreatureToken {CanBeTargeted: true};
-
-        protected bool ValidateHero(IInteractable target) => target is IControllableToken;
     }
 }

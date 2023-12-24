@@ -313,9 +313,9 @@ GameObject:
   - component: {fileID: 9215731978486654801}
   - component: {fileID: 9215731978486654800}
   - component: {fileID: 9215731978486654815}
-  - component: {fileID: 9080794781544889184}
   - component: {fileID: 5992900588271308330}
   - component: {fileID: 8406770667774554528}
+  - component: {fileID: 34187811411193836}
   m_Layer: 6
   m_Name: HeroToken
   m_TagString: Untagged
@@ -3352,13 +3352,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAnimatorManager: {fileID: 7088628766526942921}
   damageAnimator: {fileID: 4014080397265036325}
-  interactableOutline: {fileID: 9080794781544889184}
   spriteRenderer: {fileID: 9215731977589091015}
   buffManager: {fileID: 5992900588271308330}
   healthText: {fileID: 5560491609374957051}
   aggroManager: {fileID: 1453304250524476121}
   interactionLine: {fileID: 9215731978606770172}
   abilitiesTransform: {fileID: 6209491481120312909}
+  interactableOutline: {fileID: 34187811411193836}
   inventoryManager: {fileID: 8406770667774554528}
 --- !u!114 &9215731978486654815
 MonoBehaviour:
@@ -3373,19 +3373,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   component: {fileID: 9215731978486654800}
---- !u!114 &9080794781544889184
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9215731978486654813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63c5052d5e12432a8d5dcafd8c041996, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshRenderer: {fileID: 9215731978486654803}
 --- !u!114 &5992900588271308330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3411,8 +3398,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   capacity: 10
+  createTextAnimation: 1
   debug_ItemToAdd: {fileID: 0}
   debug_ToAddAmount: 0
+--- !u!114 &34187811411193836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9215731978486654813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3db32fda129f44b7a59ee386d65ac1c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 9215731978486654803}
 --- !u!1001 &347992842693184643
 PrefabInstance:
   m_ObjectHideFlags: 0

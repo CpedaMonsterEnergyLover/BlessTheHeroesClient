@@ -23,7 +23,10 @@ MonoBehaviour:
   armorType: 0
   damageType: {fileID: 11400000, guid: 4026f66ee129e2645a232fc16d330c85, type: 2}
   attackVariation: {fileID: 11400000, guid: 0ef4c8f9a00a4ce44a1bd31ac1549234, type: 2}
-  canAct: 0
+  allowedToAct: 0
+  allowedToMove: 0
+  allowedToAttack: 0
+  allowedToCast: 0
   attackDiceAmount: 0
   overrideAttackDice: {fileID: 0}
   overrideMagicDice: {fileID: 0}

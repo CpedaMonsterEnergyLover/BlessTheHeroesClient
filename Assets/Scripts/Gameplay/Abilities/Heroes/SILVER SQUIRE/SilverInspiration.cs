@@ -28,5 +28,7 @@ namespace Gameplay.Abilities
             token.SetActionPoints(token.ActionPoints + 1);
             token.BuffManager.ApplyEffect(this, silverInspirationBuffEffect, buffDuration);
         }
+
+        public IToken Token => Caster;
     }
 }

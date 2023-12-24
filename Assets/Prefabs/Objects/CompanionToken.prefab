@@ -81,7 +81,7 @@ SpriteRenderer:
   m_Size: {x: 0.48, y: 0.48}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &2490524065927022890
@@ -99,9 +99,9 @@ GameObject:
   - component: {fileID: 2490524065927022892}
   - component: {fileID: 2490524065927022893}
   - component: {fileID: 2490524065927022866}
-  - component: {fileID: 6737157480940522983}
   - component: {fileID: 8415840901339995557}
   - component: {fileID: 3924706943976568056}
+  - component: {fileID: 4527157237068615484}
   m_Layer: 6
   m_Name: CompanionToken
   m_TagString: Untagged
@@ -4910,19 +4910,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   component: {fileID: 8415840901339995557}
---- !u!114 &6737157480940522983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2490524065927022890}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63c5052d5e12432a8d5dcafd8c041996, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshRenderer: {fileID: 2490524065927022895}
 --- !u!114 &8415840901339995557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4937,13 +4924,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAnimatorManager: {fileID: 8643949962767905489}
   damageAnimator: {fileID: 1496904750969267281}
-  interactableOutline: {fileID: 6737157480940522983}
   spriteRenderer: {fileID: 2490524064731954013}
   buffManager: {fileID: 3924706943976568056}
   healthText: {fileID: 372848957065825259}
   aggroManager: {fileID: 4303211772196352979}
   interactionLine: {fileID: 6616051344645227511}
   abilitiesTransform: {fileID: 5989920802573847905}
+  interactableOutline: {fileID: 4527157237068615484}
 --- !u!114 &3924706943976568056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4956,6 +4943,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fed1931319ae49be8a7a7aced021fdb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4527157237068615484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2490524065927022890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3db32fda129f44b7a59ee386d65ac1c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 2490524065927022895}
 --- !u!1 &2490524066452477076
 GameObject:
   m_ObjectHideFlags: 0

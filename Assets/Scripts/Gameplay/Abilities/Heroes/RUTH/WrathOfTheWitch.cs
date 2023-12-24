@@ -26,15 +26,16 @@ namespace Gameplay.Abilities
         {
             if (target is not IUncontrollableToken creature) return;
             
-            Util.DiceUtil.CaclulateMagicDiceThrow(diceAmount, Caster.MagicDiceSet, Caster.SpellPower, 
+            DiceUtil.CaclulateMagicDiceThrow(diceAmount, Caster.MagicDiceSet, Caster.SpellPower, 
                 out int damage, out int energy, out int[] sides);
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, diceAmount, sides);
             EnergyManager.Instance.AddEnergy(Caster, energy);
             
-            creature.Damage(GlobalDefinitions.ShadowDamageType, damage, aggroReceiver: Caster.IAggroManager);
+            creature.Damage(GlobalDefinitions.ShadowDamageType, damage, Caster);
             creature.BuffManager.ApplyEffect(this, wrathOfTheWitchBuffEffect, buffDuration);
         }
 
         public override bool ValidateTarget(IInteractable target) => ValidateEnemy(target);
+        public IToken Token => Caster;
     }
 }

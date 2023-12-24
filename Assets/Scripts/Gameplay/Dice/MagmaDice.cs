@@ -18,9 +18,9 @@ namespace Gameplay.Dice
             sparkParticles.Play();
         }
 
-        public override void OnClick(InteractionResult result)
+        public override void OnClick(InteractionResult result, int clickCount)
         {
-            base.OnClick(result);
+            base.OnClick(result, clickCount);
             sparkParticles.transform.position = result.IntersectionPoint;
             sparkParticles.Play();
         }

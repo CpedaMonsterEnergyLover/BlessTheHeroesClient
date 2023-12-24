@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Effects;
+using Pooling;
 using Scriptable;
 using UnityEngine;
 using Util.Enums;
@@ -21,6 +21,7 @@ namespace Util.Tokens
         [SerializeField] private ParticleSystem holyParticles;
         [SerializeField] private ParticleSystem earthParticles;
         [SerializeField] private ParticleSystem airParticles;
+        [SerializeField] private ParticleSystem psychicParticles;
 
         private readonly Dictionary<DamageType, ParticleSystem> damageToParticles = new();
 
@@ -36,8 +37,10 @@ namespace Util.Tokens
             damageToParticles[GlobalDefinitions.ArcaneDamageType] = arcaneParticles;
             damageToParticles[GlobalDefinitions.ColdDamageType] = coldParticles;
             damageToParticles[GlobalDefinitions.HolyDamageType] = holyParticles;
-            damageToParticles[GlobalDefinitions.AirDamageType] = airParticles;
-            damageToParticles[GlobalDefinitions.EarthDamageType] = earthParticles;
+            // TODO: create animations
+            // damageToParticles[GlobalDefinitions.AirDamageType] = airParticles;
+            // damageToParticles[GlobalDefinitions.EarthDamageType] = earthParticles;
+            // damageToParticles[GlobalDefinitions.PsychicDamageType] = psychicParticles;
         }
 
 
@@ -56,7 +59,7 @@ namespace Util.Tokens
         public async UniTask PlayHealingAsync(int healing, DamageType damageType, DamageImpact impact, Transform sourceTransform = null)
         {
             if(damageToParticles.ContainsKey(damageType)) damageToParticles[damageType].Play();
-            await PoolManager.GetEffect<EffectText>().PlayHealing(transform, healing, damageType, impact, sourceTransform);
+            await PoolManager.GetEffect<EffectText>().PlayHealing(transform, healing, damageType, sourceTransform);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Gameplay.Abilities
             IToken spawned = token is IUncontrollableToken
                 ? GlobalDefinitions.CreateCreatureToken(tokenToSpawn)
                 : GlobalDefinitions.CreateCompanionToken(tokenToSpawn);
-            Caster.TokenCard.AddToken(spawned, resetPosition: true, instantly: false);
+            Caster.Card.AddToken(spawned, resetPosition: true, instantly: false);
             spawned.BuffManager.ApplyEffect(this, voodooDollBuffEffect, int.MaxValue);
         }
 
@@ -38,8 +38,10 @@ namespace Gameplay.Abilities
         {
             return target is IToken token && !token.ScriptableToken.Equals(tokenToSpawn) &&
                    (target is IUncontrollableToken creature
-                       ? creature.CanBeTargeted && Caster.TokenCard.HasSpaceForCreature()
-                       : target is IControllableToken && Caster.TokenCard.HasSpaceForHero());
+                       ? creature.CanBeTargeted && Caster.Card.HasSpaceForCreature()
+                       : target is IControllableToken && Caster.Card.HasSpaceForHero());
         }
+        
+        public IToken Token => Caster;
     }
 }

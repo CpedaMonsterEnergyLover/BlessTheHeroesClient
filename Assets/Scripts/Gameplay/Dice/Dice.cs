@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Camera;
 using Cysharp.Threading.Tasks;
+using Gameplay.Cards;
 using Gameplay.Interaction;
 using Scriptable;
 using Simulation;
@@ -18,10 +20,40 @@ namespace Gameplay.Dice
         [SerializeField] protected new Rigidbody rigidbody;
         [SerializeField] private TMP_Text[] texts = new TMP_Text[6];
 
+        private bool dead;
         private bool isReplaying;
         private static readonly TimeSpan delay = TimeSpan.FromMilliseconds(1000 / 60f);
 
+        
 
+        private void OnEnable()
+        {
+            GameTable.OnDoubleClick += OnTableDoubleClick;
+            Card.OnDoubleClick += OnTableDoubleClick;
+        }
+
+        private void OnDisable()
+        {
+            GameTable.OnDoubleClick -= OnTableDoubleClick;
+            Card.OnDoubleClick -= OnTableDoubleClick;
+        }
+
+        private void OnDestroy()
+        {
+            dead = true;
+            OnDisable();
+            OnDestroyed?.Invoke(this);
+        }
+
+        private void OnTableDoubleClick(Vector3 pos)
+        {
+            if(isReplaying || rigidbody.velocity.sqrMagnitude >= 30 || rigidbody.transform.position.y > 2f) return;
+
+            Vector3 direction = (transform.position - pos).normalized;
+            direction.y = 0.55f;
+            rigidbody.AddForce(direction * 2.5f, ForceMode.Impulse);
+            rigidbody.AddTorque(new Vector3(direction.z, direction.y, -direction.x), ForceMode.Impulse);
+        }
 
         public async UniTask ReplayAsync(DiceRollReplay replay)
         {
@@ -59,18 +91,13 @@ namespace Gameplay.Dice
         }
 
         
-        
         // IDice
         public Rigidbody Rigidbody => rigidbody;
         public Transform GetSide(int i) => texts[i].transform;
         
         
-        // IInteractable
-        public InteractableOutline Outline => null;
-        public void UpdateOutlineByCanInteract() { }
-        
-        
         // IInteractableOnDrag
+        public bool Dead => dead;
         public bool CanInteract => !isReplaying;
         public void OnDragStart(InteractionResult result)
         {
@@ -100,11 +127,16 @@ namespace Gameplay.Dice
             return null;
         }
 
-        
+        public void GetInteractionTargets(List<IInteractable> targets) { }
+
+
         // IInteractableOnClick
         public Vector4 OutlineColor => Vector4.zero;
+        public InteractableOutline InteractableOutline => null;
+        public event IInteractable.InteractableEvent OnDestroyed;
+        public event IInteractable.InteractableEvent OnInitialized;
         public bool CanClick => CanInteract;
-        public virtual void OnClick(InteractionResult result)
+        public virtual void OnClick(InteractionResult result, int clickCount)
         {
             if(rigidbody.transform.position.y > 1.3f) return;
 

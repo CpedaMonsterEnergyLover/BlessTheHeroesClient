@@ -8,7 +8,7 @@ using Util.LootTables;
 
 namespace Scriptable
 {
-    [CreateAssetMenu(menuName = "Location/Location card")]
+    [CreateAssetMenu(menuName = "Location/Location Card")]
     public class Location : ScriptableObject
     {
         [SerializeField] private new string name;
@@ -17,10 +17,13 @@ namespace Scriptable
         [SerializeField] private Sprite sprite;
         [SerializeField] private string description;
         [SerializeField] private DropTable dropTable = new();
-        [SerializeField] private bool hasCardAction;
+        [Separator("Terrain Effect"), SerializeField] private bool hasTerrainEffect;
+        [SerializeField, ConditionalField(nameof(hasTerrainEffect), false, true)]
+        private Gameplay.Cards.TerrainEffects.TerrainEffect terrainEffect;
+        [Separator("Card Action"), SerializeField] private bool hasCardAction;
         [SerializeField, ConditionalField(nameof(hasCardAction), false, true)]
         private CardAction cardAction;
-        [SerializeField] private bool hasOpeningEvent;
+        [Separator("Opening Event"), SerializeField] private bool hasOpeningEvent;
         [SerializeField, ConditionalField(nameof(hasOpeningEvent), false, true)] 
         private EvaluatorSet openingEvaluator = new();
 
@@ -39,7 +42,7 @@ namespace Scriptable
                 return sb.ToString();
             }
         }
-
+        
         public string LiteralDescription => description;
         public Sprite Sprite => sprite;
         public DropTable DropTable => dropTable;
@@ -50,5 +53,7 @@ namespace Scriptable
         public CardAction CardAction => cardAction;
         public bool HasOpeningEvent => hasOpeningEvent;
         public EvaluatorSet OpeningEvaluator => openingEvaluator;
+        public Gameplay.Cards.TerrainEffects.TerrainEffect TerrainEffect => terrainEffect;
+        public bool HasTerrainEffect => hasTerrainEffect;
     }
 }

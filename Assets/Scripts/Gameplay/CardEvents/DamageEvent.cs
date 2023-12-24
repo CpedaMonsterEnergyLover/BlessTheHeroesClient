@@ -18,11 +18,11 @@ namespace Gameplay.Events
             switch (targetSelector)
             {
                 case TargetSelector.Card:
-                    foreach (HeroToken hero in card.Heroes) 
-                        hero.Damage(damageType, damage);
+                    foreach (IControllableToken hero in card.Heroes) 
+                        hero.Damage(damageType, damage, null);
                     break;
                 case TargetSelector.Executor:
-                    executor.Damage(damageType, damage);
+                    executor.Damage(damageType, damage, null);
                     break;
             }
         }

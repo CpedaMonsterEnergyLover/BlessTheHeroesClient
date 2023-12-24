@@ -11,7 +11,10 @@ namespace Scriptable
         [Separator("Creature fields")]
         [SerializeField] private DamageType damageType;
         [SerializeField] private BaseAttackVariation attackVariation;
-        [SerializeField] private bool canAct;
+        [SerializeField] private bool allowedToAct;
+        [SerializeField, ConditionalField(nameof(allowedToAct), false, true)] private bool allowedToMove;
+        [SerializeField, ConditionalField(nameof(allowedToAct), false, true)] private bool allowedToAttack;
+        [SerializeField, ConditionalField(nameof(allowedToAct), false, true)] private bool allowedToCast;
         [SerializeField, Range(1, 3)] private int attackDiceAmount;
         [SerializeField] private DiceSet overrideAttackDice;
         [SerializeField] private DiceSet overrideMagicDice;
@@ -21,7 +24,10 @@ namespace Scriptable
         [SerializeField] private DropTable dropTable = new();
         
         public DamageType DamageType => damageType;
-        public bool CanAct => canAct;
+        public bool AllowedToMove => allowedToMove;
+        public bool AllowedToAttack => allowedToAttack;
+        public bool AllowedToCast => allowedToCast;
+        public bool AllowedToAct => allowedToAct;
         public int AttackDiceAmount => attackDiceAmount;
         public override DropTable DropTable => dropTable;
         public float SharedLootDropModifier => sharedLootDropModifier;

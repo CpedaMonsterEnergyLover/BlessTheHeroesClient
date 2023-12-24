@@ -28,10 +28,10 @@ namespace Gameplay.Abilities
             if(target is not Card card) return;
 
             await Caster.Move(card);
-            var enemies = Caster.TokenCard.Creatures.Where(c => !c.Dead);
+            var enemies = Caster.Card.Creatures.Where(c => !c.Dead);
             foreach (IUncontrollableToken token in enemies)
             {
-                token.Damage(GlobalDefinitions.PhysicalDamageType, damage, aggroReceiver: Caster.IAggroManager);
+                token.Damage(GlobalDefinitions.PhysicalDamageType, damage, Caster);
                 token.AggroManager.AddAggro(damage, Caster);
             }
             Caster.BuffManager.ApplyEffect(this, shieldSlamBuffEffect, buffDuration);
@@ -41,5 +41,7 @@ namespace Gameplay.Abilities
         {
             return target is Card { IsOpened: true } card && card.HasSpaceForHero();
         }
+
+        public IToken Token => Caster;
     }
 }

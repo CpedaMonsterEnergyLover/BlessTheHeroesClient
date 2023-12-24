@@ -2,6 +2,7 @@
 using Gameplay.BuffEffects;
 using Gameplay.Cards;
 using Gameplay.Interaction;
+using Gameplay.Tokens;
 using UnityEngine;
 
 namespace Gameplay.Abilities
@@ -17,5 +18,7 @@ namespace Gameplay.Abilities
         {
             Caster.BuffManager.ApplyEffect(this, effectToApply, effectDuration);
         }
+
+        public IToken Token => Caster;
     }
 }

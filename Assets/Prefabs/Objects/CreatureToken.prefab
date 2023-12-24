@@ -100,8 +100,8 @@ GameObject:
   - component: {fileID: 2490524065927022893}
   - component: {fileID: 2490524065927022867}
   - component: {fileID: 2490524065927022866}
-  - component: {fileID: 6737157480940522983}
   - component: {fileID: 3924706943976568056}
+  - component: {fileID: 5184613701211158372}
   m_Layer: 6
   m_Name: CreatureToken
   m_TagString: Untagged
@@ -4911,13 +4911,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAnimatorManager: {fileID: 6956707918400526001}
   damageAnimator: {fileID: 1496904750969267281}
-  interactableOutline: {fileID: 6737157480940522983}
   spriteRenderer: {fileID: 2490524064731954013}
   buffManager: {fileID: 3924706943976568056}
   healthText: {fileID: 8155665514788931829}
   aggroManager: {fileID: 5236360493177790522}
   interactionLine: {fileID: 9124721032346394126}
   abilitiesTransform: {fileID: 7493771149400528567}
+  interactableOutline: {fileID: 5184613701211158372}
 --- !u!114 &2490524065927022866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4931,19 +4931,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   component: {fileID: 2490524065927022867}
---- !u!114 &6737157480940522983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2490524065927022890}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63c5052d5e12432a8d5dcafd8c041996, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshRenderer: {fileID: 2490524065927022895}
 --- !u!114 &3924706943976568056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4956,6 +4943,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fed1931319ae49be8a7a7aced021fdb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5184613701211158372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2490524065927022890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3db32fda129f44b7a59ee386d65ac1c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 2490524065927022895}
 --- !u!1 &2490524066452477076
 GameObject:
   m_ObjectHideFlags: 0

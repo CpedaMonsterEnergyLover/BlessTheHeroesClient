@@ -20,7 +20,6 @@ namespace Gameplay.Tokens
     public abstract class UncontrollableToken<T> : Token<T, UncontrollableAggroManager>, IUncontrollableToken
         where T : Scriptable.Token
     {
-        public override bool CanBeTargeted => !Dead && !IsPlayingAnimation;
         public override bool CanInteract => false;
         public override bool CanClick => true;
         public UncontrollableAggroManager AggroManager => aggroManager;
@@ -29,19 +28,16 @@ namespace Gameplay.Tokens
             ? GlobalDefinitions.TokenOutlineGreenColor
             : GlobalDefinitions.TokenOutlineRedColor;
         protected abstract float SharedLootDropModifier { get; }
-        
 
 
-        public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(false);
-        
-        protected override void Die()
+
+        protected override void Die(IToken attacker)
         { 
             if(Scriptable.DropTable is null) return;
             var drops = Scriptable.DropTable.DropLoot();
             drops.AddRange(FieldManager.InstantiatedFloor.DropSharedLoot(SharedLootDropModifier));
             if(drops.Count == 0) return;
 
-            IToken attacker = null;
             // Если смерть от рук героя, выдать предметы ему, а если не получилось ему, то на карту
             if (attacker is HeroToken hero)
             {
@@ -62,9 +58,8 @@ namespace Gameplay.Tokens
 
         private async UniTask<bool> TryMakeAttack(IControllableToken target)
         {
-            if (target is null ||
-                AttackDiceAmount == 0 || 
-                ActionPoints == 0 || 
+            if (!target.CanBeTargeted ||
+                !CanAttack || 
                 !target.IsInAttackRange(this)) return false;
             
             SetActionPoints(ActionPoints - 1);
@@ -87,12 +82,11 @@ namespace Gameplay.Tokens
             List<Card> cards = new();
             PatternSearch.IterateNeighbours(Card.GridPosition, pos =>
             {
-                if (FieldManager.GetCard(pos, out Card card) &&
-                    card.IsOpened &&
-                    card.HasSpaceForToken(this)) cards.Add(card);
+                if (FieldManager.GetCard(pos, out Card card) && CanWalkOnCard(card)) cards.Add(card);
             });
             if (cards.Count <= 0) return false;
-            
+
+            if (previousCard is not null && cards.Count > 1 && cards.Contains(previousCard)) cards.Remove(previousCard);
             await Walk(cards[Random.Range(0, cards.Count)]);
             await UniTask.Delay(TimeSpan.FromMilliseconds(200));
             await UniTask.WaitUntil(() => !IsPlayingAnimation);
@@ -102,19 +96,19 @@ namespace Gameplay.Tokens
         private async UniTask<bool> TryWalkInAttackRange(IControllableToken target)
         {
             Debug.Log($"{Scriptable.Name}'s turn *: TryWalkInAttackRange");
-            if (AttackType is AttackType.Melee)
-            {
-                Card targetCard = target.TokenCard;
-                if (!targetCard.IsOpened || !targetCard.HasSpaceForToken(this)) return false;
-                await Walk(targetCard);
-                return true;
-            }
 
             if (AttackType is AttackType.Ranged)
             {
                 return await TryWalkInRandomDirection();
             }
 
+            if (AttackType is AttackType.Melee)
+            {
+                Card targetCard = target.Card;
+                if (!CanWalkOnCard(targetCard)) return false;
+                await Walk(targetCard);
+                return true;
+            }
             return false;
         }
 
@@ -186,50 +180,43 @@ namespace Gameplay.Tokens
         public async UniTask MakeTurn()
         {
             int counter = 0;
-
-            int actions = ActionPoints;
-            int movements = MovementPoints;
             bool lockPosition = false;
 
-            while ((actions > 0 || movements > 0) 
-                   && counter <= 10)
+            while ((CanAct || CanWalk) && counter <= 10)
             {
                 counter++;
 
                 IControllableToken aggroTarget = null;
 
-                if (actions > 0)
+                if (CanAct)
                 {
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: GetAggroTarget");
-                    if (!AggroManager.GetAggroTarget(out aggroTarget))
+                    if (CanAttack && !AggroManager.GetAggroTarget(out aggroTarget))
                     {
                         Debug.Log($"{Scriptable.Name}'s turn {counter}: TryGetAttackTarget");
                         aggroTarget = TryGetAttackTarget();
                     }
                     
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryCastAbility");
-                    if(await TryCastAbility())
+                    if(CanCast && await TryCastAbility())
                     {
-                        actions--;
                         continue;
                     }
                     
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryMakeAttack");
-                    if(await TryMakeAttack(aggroTarget))
+                    if(CanAttack && aggroTarget is not null && await TryMakeAttack(aggroTarget))
                     {
-                        actions--;
                         if(!aggroTarget.Dead) 
                             lockPosition = true;
                         continue;
                     }
                 }
                 
-                if (!lockPosition && movements > 0)
+                if (!lockPosition && CanWalk)
                 {
                     Debug.Log($"{Scriptable.Name}'s turn {counter}: TryWalk");
                     if (await TryWalk(aggroTarget))
                     {
-                        movements--;
                         continue;
                     }
                 }
@@ -241,8 +228,6 @@ namespace Gameplay.Tokens
             {
                 Debug.LogError($"{Scriptable.Name}: AI turn took more than 10 iterations, aborting process...");
             }
-            
-            
         }
     }
 }

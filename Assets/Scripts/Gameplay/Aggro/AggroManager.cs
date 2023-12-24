@@ -28,7 +28,7 @@ namespace Gameplay.Aggro
         {
             cluster = new Dictionary<T, int>();
             Token = (TJ) wearer;
-            OnSelfMove(Token, Token.TokenCard);
+            OnSelfMove(Token, Token.Card);
             gameObject.SetActive(true);
         }
         
@@ -44,7 +44,7 @@ namespace Gameplay.Aggro
             var tmp = cluster.Keys.ToArray();
             foreach (T token in tmp)
             {
-                if(OutOfAggroRange(token.TokenCard)) 
+                if(OutOfAggroRange(token.Card)) 
                     RemoveAggro(int.MaxValue, token);
             }
             
@@ -66,7 +66,7 @@ namespace Gameplay.Aggro
             else 
                 cluster.Add(source, amount);
             
-            if(!mirrored) source.IAggroManager.AddAggro(amount, Token, true);
+            if(!mirrored) source.BaseAggroManager.AddAggro(amount, Token, true);
         }
 
         private void RemoveAggro(int amount, T source, bool mirrored)
@@ -76,12 +76,12 @@ namespace Gameplay.Aggro
             cluster[source] -= amount;
             if (cluster[source] <= 0) cluster.Remove(source);
             
-            if(!mirrored) source.IAggroManager.RemoveAggro(amount, Token, true);
+            if(!mirrored) source.BaseAggroManager.RemoveAggro(amount, Token, true);
         }
         
         public void AddAggro(int amount, IToken source, bool mirrored = false)
         {
-            if(amount <= 0 || source is not T ss || OutOfAggroRange(source.TokenCard)) return;
+            if(amount <= 0 || source is not T ss || OutOfAggroRange(source.Card)) return;
             AddAggro(amount, ss, mirrored);
         }
         public void RemoveAggro(int amount, IToken source, bool mirrored = false)
@@ -94,14 +94,14 @@ namespace Gameplay.Aggro
             if(amount == 0) return;
             var tmp = cluster.ToArray();
             if(amount > 0)
-                foreach (var pair in tmp) pair.Key.IAggroManager.AddAggro(amount, Token);
+                foreach (var pair in tmp) pair.Key.BaseAggroManager.AddAggro(amount, Token);
             else
-                foreach (var pair in tmp) pair.Key.IAggroManager.RemoveAggro(-amount, Token);
+                foreach (var pair in tmp) pair.Key.BaseAggroManager.RemoveAggro(-amount, Token);
         }
         
         private bool OutOfAggroRange(Card target)
         {
-            Card current = Token.TokenCard;
+            Card current = Token.Card;
             return !current.Equals(target) && (current.GridPosition - target.GridPosition).sqrMagnitude != 1;
         }
         

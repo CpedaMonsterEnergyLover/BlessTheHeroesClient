@@ -19,6 +19,7 @@ namespace Gameplay.Interaction
         
         private void Update()
         {
+            if(ItemPicker.IsPicked) return;
             bool pressed = Inspecting ? Input.GetMouseButtonUp(1) : Input.GetMouseButtonDown(1);
             
             if (pressed)

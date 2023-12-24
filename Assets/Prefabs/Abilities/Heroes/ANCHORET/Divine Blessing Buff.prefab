@@ -48,6 +48,7 @@ MonoBehaviour:
   scriptable: {fileID: 11400000, guid: 9936c342cc7d7fb438fa977e0c4fa134, type: 2}
   manaPerTick: 1
   healthPerTick: 1
+  healType: {fileID: 11400000, guid: a04d525488ef79343ab0966e1e89eaa8, type: 2}
   maxHealthBonus: 2
   maxManaBonus: 2
 --- !u!1 &3011942203581149331

@@ -53,7 +53,8 @@ namespace UI
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
+            if(InteractionManager.AnyInteractionActive) return;
+            
             if (Equipment is not null && 
                 eventData.clickCount == 2 && 
                 TokenBrowser.SelectedToken is HeroToken heroToken)

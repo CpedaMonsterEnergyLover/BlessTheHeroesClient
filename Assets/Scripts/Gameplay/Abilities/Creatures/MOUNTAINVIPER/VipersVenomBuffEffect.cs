@@ -6,6 +6,5 @@ namespace Gameplay.Abilities
 {
     public class VipersVenomBuffEffect : DamageOverTimeBuffEffect
     {
-        protected override Sprite OverrideDamageSprite => GlobalDefinitions.PoisonDamageAnimationSprite;
     }
 }

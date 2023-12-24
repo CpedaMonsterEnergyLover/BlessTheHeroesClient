@@ -14,9 +14,9 @@ namespace Gameplay.Abilities
         private IControllableToken summonedToken;
 
 
-        private void OnTokenDestroy(IToken t)
+        private void OnTokenDestroy(IInteractable interactable)
         {
-            t.OnDestroyed -= OnTokenDestroy;
+            interactable.OnDestroyed -= OnTokenDestroy;
             summonedToken = null;
         }
 
@@ -24,7 +24,7 @@ namespace Gameplay.Abilities
         {
             return base.ApproveCast(token) && 
                    summonedToken is null &&
-                   Caster.TokenCard.HasSpaceForHero();
+                   Caster.Card.HasSpaceForHero();
         }
 
         public override bool ValidateTarget(IInteractable target) => target is Card;
@@ -33,7 +33,7 @@ namespace Gameplay.Abilities
         {
             summonedToken = GlobalDefinitions.CreateCompanionToken(toSummon);
             summonedToken.OnDestroyed += OnTokenDestroy;
-            Caster.TokenCard.AddToken(summonedToken, resetPosition: true, instantly: false);
+            Caster.Card.AddToken(summonedToken, resetPosition: true, instantly: false);
             return default;
         }
     }

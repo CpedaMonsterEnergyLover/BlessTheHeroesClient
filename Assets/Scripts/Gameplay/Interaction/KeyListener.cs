@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Gameplay.Interaction
 {
@@ -16,7 +17,6 @@ namespace Gameplay.Interaction
         private void Update()
         {
             if(Input.anyKeyDown) OnAnyKeyDown?.Invoke(HeldKeys);
-
             var released = HeldKeys.Where(Input.GetKeyUp).ToArray();
             HeldKeys.ExceptWith(released);
             foreach (KeyCode keyCode in released) 

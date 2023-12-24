@@ -11,8 +11,6 @@ namespace Gameplay.BuffEffects
         [SerializeField] private DamageType damageType;
 
 
-        protected abstract Sprite OverrideDamageSprite { get; }
-
         protected override void OnApplied()
         {
         }
@@ -23,10 +21,7 @@ namespace Gameplay.BuffEffects
 
         protected override void OnTick()
         {
-            IAggroManager aggroManager = Applier is Ability ability ? ability.Caster.IAggroManager : null;
-            
-            Manager.Token.Damage(damageType, damagePerTick, 
-                aggroReceiver: aggroManager);
+            Manager.Token.Damage(damageType, damagePerTick, Applier.Token, false);
         }
     }
 }

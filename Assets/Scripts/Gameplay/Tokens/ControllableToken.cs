@@ -1,5 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
-using Effects;
+﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Pooling;
 using Gameplay.Aggro;
 using Gameplay.Cards;
 using Gameplay.Dice;
@@ -22,49 +23,37 @@ namespace Gameplay.Tokens
     {
         public ControllableAggroManager AggroManager => aggroManager;
 
-        public override bool CanInteract => 
-            TurnManager.CurrentStage is TurnStage.PlayersTurn &&
-            !Dead &&
-            // IToken.DraggedToken is null &&
-            // !IsPlayingAnimation &&
-            (ActionPoints > 0 || MovementPoints > 0);
-
         public override Vector4 OutlineColor => ActionPoints == 0
             ? GlobalDefinitions.TokenOutlineYellowColor
             : GlobalDefinitions.TokenOutlineGreenColor;
-        
+
+        public override bool CanInteract => TurnManager.CurrentStage is TurnStage.PlayersTurn && (CanAct || CanWalk);
+        public override bool CanWalk => base.CanWalk || CanAct;
+
         protected abstract bool CanInteractWithCards { get; }
-        public override bool CanBeTargeted => false;
 
 
         
-        public override void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(Initialized && CanInteract);
-
         protected override void Init()
         {
             base.Init();
             PoolManager.GetEffect<PartyFrame>().SetToken(this);
-        }
-
-        protected override void OnMonstersTurnStarted()
-        {
-            InteractableOutline.SetEnabled(false);
         }
         
         private InteractionTooltipData OnHoverCreature(IUncontrollableToken creature)
         {
             if (!creature.CanBeTargeted) return new InteractionTooltipData();
 
-            if (AttackDiceAmount == 0)
+            if (!CanAttack)
             {
                 return new InteractionTooltipData(InteractionMode.Attack, InteractionState.Abandon,
-                    "Attack", "No weapon\nequipped");
+                    "Attack", "Unable to attack");
             }
             
-            if (ActionPoints == 0)
+            if (!CanAct)
             {
                 return new InteractionTooltipData(InteractionMode.Attack, InteractionState.Abandon,
-                    "Attack", "Not enough\nACT");
+                    "Attack", "Unable to act");
             }
             
             return creature.IsInAttackRange(this)
@@ -87,23 +76,31 @@ namespace Gameplay.Tokens
 
             if (inWalkRange)
             {
-                mode = card.IsOpened ? InteractionMode.Move : InteractionMode.OpenCard;
-                title = card.IsOpened ? "Move" : "Open";
+                mode = card.IsOpened 
+                    ? InteractionMode.Move 
+                    : InteractionMode.OpenCard;
+                title = card.IsOpened 
+                    ? "Move" : "Open";
                 if (mode is InteractionMode.OpenCard && !CanInteractWithCards)
                 {
                     state = InteractionState.Abandon;
-                    subTitle = "Companions\ncannot open cards";
-                } else state = InteractionState.Allow;
+                    subTitle = "Unable to interact\nwith cards";
+                } else if(mode is InteractionMode.Move)
+                {
+                    bool canWalk = CanWalkOnCard(card);
+                    state = canWalk ? InteractionState.Allow : InteractionState.Abandon;
+                    subTitle = canWalk ? string.Empty : "Not enough MOV";
+                };
             }
             else if(Card == card)
             {
                 if (card.HasAvailableAction)
                 {
-                    subTitle = CanInteractWithCards ? "Not enough\nACT" : "Companions\ncannot interact\nwith cards";
+                    subTitle = CanInteractWithCards ? "Unable to act" : "Unable to interact\nwith cards";
                     title = card.Scriptable.CardAction.Name;
                     mode = InteractionMode.Action;
                     state = CanInteractWithCards ? 
-                        ActionPoints > 0 
+                        CanAct 
                             ? InteractionState.Allow 
                             : InteractionState.Abandon 
                         : InteractionState.Abandon;
@@ -120,10 +117,9 @@ namespace Gameplay.Tokens
 
         private void OnDragOnCreature(IUncontrollableToken creature)
         {
-            if (ActionPoints == 0 || 
+            if (!CanAttack || 
                 !creature.CanBeTargeted || 
-                !creature.IsInAttackRange(this) ||
-                AttackDiceAmount == 0)
+                !creature.IsInAttackRange(this))
             {
                 AttackAnimatorManager.StopAnimation(transform, AttackType);
                 return;
@@ -135,7 +131,7 @@ namespace Gameplay.Tokens
 
         private void OnDragOnCard(Card card)
         {
-            if(card.IsPlayingAnimation) return;
+            if (card.IsPlayingAnimation) return;
             if (Card == card)
             {
                 UseCardAction(card);
@@ -144,21 +140,19 @@ namespace Gameplay.Tokens
             
             if(!PatternSearch.CheckNeighbours(Card.GridPosition, card.GridPosition)) 
                 return;
-            
-            if (card.IsOpened &&
-                card.HasSpaceForToken(this) &&
-                (MovementPoints > 0 || ConsumeActionPointForMovement()))
-            {
-                TryWalk(card).Forget();
-            }
-            else
+
+            bool canWalk = CanWalkOnCard(card); 
+            Debug.Log($"OnDragOnCard, can walk: {canWalk}");
+            if (canWalk)
+                WalkOrFlee(card).Forget();
+            else if(!card.IsOpened)
                 OpenCard(card);
         }
 
-        private async UniTask TryWalk(Card card)
+        private async UniTask WalkOrFlee(Card card)
         {
             int creaturesAmount = Card.CreaturesAmount;
-            if (creaturesAmount == 0 || Speed > creaturesAmount)
+            if (creaturesAmount == 0 || Speed >= creaturesAmount)
             {
                 await Walk(card);
                 return;
@@ -179,9 +173,7 @@ namespace Gameplay.Tokens
         
         private void OpenCard(Card card)
         {
-            if (!CanInteractWithCards ||
-                (MovementPoints <= 0 &&
-                 !ConsumeActionPointForMovement())) return;
+            if (!CanInteractWithCards || (!CanWalk && !ConsumeActionPointForMovement())) return;
             
             SetMovementPoints(MovementPoints - 1);
             card.Open();
@@ -190,7 +182,7 @@ namespace Gameplay.Tokens
         private void UseCardAction(Card card)
         {
             if(!CanInteractWithCards || 
-               ActionPoints == 0 ||
+               !CanAct ||
                !card.HasAvailableAction) return;
             
             card.Scriptable.CardAction.Execute(card, this);
@@ -202,11 +194,10 @@ namespace Gameplay.Tokens
         // IInteractableOnDrag
         public virtual void OnDragStart(InteractionResult result)
         {
-            ((IToken) this).InvokeStartDraggingEvent();
             InteractionLine.Enable(result.IntersectionPoint);
             TokenBrowser.SelectToken(this);
             
-            UpdateOutlinesOnDragStart();
+            // UpdateOutlinesOnDragStart();
         }
 
         public InteractionTooltipData OnDrag(InteractionResult result)
@@ -243,12 +234,11 @@ namespace Gameplay.Tokens
 
         public virtual void OnDragEnd(InteractionResult result)
         {
-            UpdateOutlinesOnDragEnd();
+            // UpdateOutlinesOnDragEnd();
             
             InteractionLine.Disable();
             if (!result.IsValid)
             {
-                ((IToken) this).InvokeEndDraggingEvent();
                 return;
             }
             
@@ -261,41 +251,32 @@ namespace Gameplay.Tokens
                     OnDragOnCard(card);
                     break;
             }
-            
-            ((IToken) this).InvokeEndDraggingEvent();
         }
 
-        private void UpdateOutlinesOnDragStart()
+        public void GetInteractionTargets(List<IInteractable> targets)
         {
-            PatternSearch.IterateNeighbours(Card.GridPosition, pos =>
+            if (CanWalk || CanAct)
             {
-                if(FieldManager.GetCard(pos, out Card card))
+                PatternSearch.IterateNeighbours(Card.GridPosition, card =>
                 {
                     if(card.IsOpened)
-                        card.InteractableOutline.SetEnabled(!card.IsPlayingHeroesAnimation);
-                    else 
-                        card.InteractableOutline.SetEnabled(CanInteractWithCards && !card.IsPlayingHeroesAnimation);
-                }
-            });
-            if (ActionPoints != 0)
-            {
-                if (CanInteractWithCards && Card.HasAvailableAction)
-                    Card.InteractableOutline.SetEnabled(true);
-                
-                if(AttackDiceAmount != 0)
-                    foreach (Card card in GetCardsInAttackRange()) 
-                        card.OutlineAttackableCreatures(true);
+                    {
+                        if (CanWalkOnCard(card)) targets.Add(card);
+                    }
+                    else if(CanInteractWithCards) targets.Add(card);
+                });
             }
-        }
 
-        private void UpdateOutlinesOnDragEnd()
-        {
-            PatternSearch.IteratePlus(Card.GridPosition, 1,pos =>
+            if (CanAttack)
             {
-                if(FieldManager.GetCard(pos, out Card card)) card.InteractableOutline.SetEnabled(false);
-            });
-            foreach (Card card in GetCardsInAttackRange()) 
-                card.OutlineAttackableCreatures(false);
+                var inRange = GetCardsInAttackRange();
+                foreach (Card card in inRange)
+                {
+                    targets.AddRange(card.Creatures);
+                }
+            }
+
+            if (CanAct && Card.HasAvailableAction && CanInteractWithCards) targets.Add(Card);
         }
     }
 }

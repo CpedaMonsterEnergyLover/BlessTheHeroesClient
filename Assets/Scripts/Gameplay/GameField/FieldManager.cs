@@ -69,9 +69,9 @@ namespace Gameplay.GameField
             int storyLength = InstantiatedFloor.StoryLength;
             if (storyProgress >= storyLength) return false;
 
-            float target = 1f / (storyLength * 1.5f);
+            float target = 1f / (storyLength/* * 1.5f*/);
             float current = Mathf.Clamp01((float) OpenedCardsCounter / (fieldSize * fieldSize) -
-                                          storyProgress / (storyLength * 1.5f));
+                                          storyProgress / (1f * storyLength/* * 1.5f*/));
             
             float probability = Mathf.Clamp01(Instance.storyProbabilityCurve.Evaluate(current / target));
             if (Random.value > probability) return false;
@@ -116,7 +116,7 @@ namespace Gameplay.GameField
         public static List<IUncontrollableToken> GetAllCreatures()
         {
             List<IUncontrollableToken> creatures = new();
-            foreach (var (pos, card) in Cards)
+            foreach (var (_, card) in Cards)
             {
                 if(card.IsOpened)
                     creatures.AddRange(card.Creatures);

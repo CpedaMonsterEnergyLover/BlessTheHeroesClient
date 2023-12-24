@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Gameplay.Cards.TerrainEffects;
 using Gameplay.Dice;
 using Gameplay.GameField;
 using Gameplay.Interaction;
@@ -16,17 +18,40 @@ using Util.Tokens;
 
 namespace Gameplay.Cards
 {
-    public partial class Card : MonoBehaviour, 
-        IInteractableOnClick
+    public partial class Card : MonoBehaviour, IInteractableOnClick
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private TokenLayout creaturesLayout;
         [SerializeField] private TokenLayout heroesLayout;
-        [SerializeField] private InteractableOutline interactableOutline;
         [SerializeField] private TMP_Text eventText;
-        
+        [SerializeField] private InteractableOutline interactableOutline;
+        [SerializeField] private TerrainManager terrainManager;
+
+        private bool dead;
         private readonly List<IUncontrollableToken> creatures = new(8);
         private readonly List<IControllableToken> heroes = new(8);
+        
+        public delegate void TokenMoveEvent(IToken token);
+        public event TokenMoveEvent OnTokenAdded;
+        public event TokenMoveEvent OnTokenRemoved;
+
+        public delegate void MovementCostEvent(List<int> costModificators);
+        public event MovementCostEvent OnMovementCostCollected;
+        
+        public delegate void TableDoubleClickEvent(Vector3 position);
+        public static event TableDoubleClickEvent OnDoubleClick;
+
+        private static readonly List<int> MovementCostCollectionCache = new();
+
+        public int MovementCost
+        {
+            get
+            {
+                MovementCostCollectionCache.Clear();
+                OnMovementCostCollected?.Invoke(MovementCostCollectionCache);
+                return MovementCostCollectionCache.Count == 0 ? 1 : MovementCostCollectionCache.Max();
+            }
+        }
 
 #if UNITY_EDITOR
         public Scriptable.Token debug_TokenToSpawn;
@@ -34,12 +59,10 @@ namespace Gameplay.Cards
 
 
         
-        public InteractableOutline Outline => interactableOutline;
         public bool OpenOnStart { get; set; }
         public bool IsOpened { get; private set; }
         public Scriptable.Location Scriptable { get; private set; }
         public Vector2Int GridPosition { get; private set; }
-        public InteractableOutline InteractableOutline => interactableOutline;
         // TODO: .where(x => !x.Dead)
         public List<IUncontrollableToken> Creatures => creatures.ToList();
         public List<IControllableToken> Heroes => heroes.ToList();
@@ -53,19 +76,24 @@ namespace Gameplay.Cards
             IsPlayingCreaturesAnimation;
 
         public bool HasBoss => creatures.FirstOrDefault(c => c is BossToken) is not null;
-        public bool HasAvailableAction => Scriptable.CardAction is not null;
+        public bool HasAvailableAction => Scriptable.HasAction;
         private Sequence animationSequence;
 
         
 
         // Unity methods
+        private void OnDestroy()
+        {
+            dead = true;
+            OnDestroyed?.Invoke(this);
+        }
+
         private void Start()
         {
             IsOpened = OpenOnStart;
             transform.rotation = IsOpened 
                 ? Quaternion.Euler(Vector3.zero)
                 : Quaternion.Euler(new Vector3(0, 0, 180));
-            interactableOutline.SetOutlineWidth(GlobalDefinitions.CardOutlineWidth);
 
             PreInit().Forget();
         }
@@ -79,42 +107,50 @@ namespace Gameplay.Cards
 #if UNITY_STANDALONE
             spriteRenderer.sprite = Scriptable.Sprite;
 #endif
+            OnInitialized?.Invoke(this);
         }
         
-        public void UpdateOutlineByCanInteract() => interactableOutline.SetEnabled(false);
-
         public void Open()
         {
             if(IsOpened) return;
-            IsOpened = true;
-
-            FieldManager.OpenedCardsCounter++;
             
+            IsOpened = true;
+            FieldManager.OpenedCardsCounter++;
             OpenAsync().Forget();
         }
 
         private async UniTaskVoid OpenAsync()
         {
-            if (FieldManager.TryOpenStoryCard(GridPosition)) 
-                await PreInit();
-            
-            animationSequence = DOTween.Sequence()
-                .Append(transform.DORotate(Vector3.zero, 0.75f))
-                .Insert(0, transform.DOJump(transform.position, 1, 1, 0.75f));
-        
-            await animationSequence.AsyncWaitForKill();
+            if (FieldManager.TryOpenStoryCard(GridPosition)) await PreInit();
+
+            CreateTerrainEffect();
+            await PlayOpeningAnimation();
             UpdateEventText(false, Scriptable.HasAction);
             AddResourceDrops();
             await ExecuteOpeningEvent();
+        }
+
+        private void CreateTerrainEffect()
+        {
+            if(Scriptable.HasTerrainEffect) terrainManager.ApplyEffect(Scriptable.TerrainEffect, int.MaxValue);
+        }
+        
+        private async Task PlayOpeningAnimation()
+        {
+            animationSequence = DOTween.Sequence()
+                .Append(transform.DORotate(Vector3.zero, 0.75f))
+                .Insert(0, transform.DOJump(transform.position, 1, 1, 0.75f));
+
+            await animationSequence.AsyncWaitForKill();
             animationSequence = null;
         }
 
         public void Close()
         {
             if(!IsOpened) return;
+            
             FieldManager.OpenedCardsCounter--;
             IsOpened = false;
-            
             animationSequence = DOTween.Sequence()
                 .Append(transform.DORotate(new Vector3(0, 0, 180), 0.75f))
                 .Insert(0, transform.DOJump(transform.position, 1, 1, 0.75f))
@@ -170,7 +206,10 @@ namespace Gameplay.Cards
                 creatures.Add(uncontrollable);
                 creaturesLayout.AttachToken(token, resetPosition, except, instantly);
             }
-            token.SetCard(this);
+            token.Card = this;
+            
+            OnTokenAdded?.Invoke(token);
+            if (token is HeroToken) TryGiveItems().Forget();
         }
 
         public async UniTask AddTokenAsync(IToken token)
@@ -198,6 +237,8 @@ namespace Gameplay.Cards
                     creaturesLayout.UpdateLayout(instantly: instantly);
                 }
             }
+            
+            OnTokenRemoved?.Invoke(token);
         }
 
         public void PushOrDespawnCreatures()
@@ -205,8 +246,10 @@ namespace Gameplay.Cards
             var neighbours = new List<Card>();
             PatternSearch.IteratePlus(GridPosition, 1, v =>
             {
-                if (FieldManager.GetCard(v, out Card n) && n.IsOpened) neighbours.Add(n);
+                if (FieldManager.GetCard(v, out Card n) && n.IsOpened) 
+                    neighbours.Add(n);
             }, includeCenter: false);
+            
             foreach (IUncontrollableToken creature in Creatures)
             {
                 if(creature is BossToken) return;
@@ -277,22 +320,6 @@ namespace Gameplay.Cards
                 _ => Vector3.zero
             };
         }
-        
-        public void OutlineAttackableCreatures(bool isEnabled)
-        {
-            foreach (IUncontrollableToken token in creatures) 
-                token.InteractableOutline.SetEnabled(isEnabled && token.CanBeTargeted);
-        }
-
-        public void OnTokenLayoutAnimationEnded(TokenLayout tokenLayout)
-        {
-            if (tokenLayout == heroesLayout)
-            {
-                if (IToken.DraggedToken is not null &&
-                    PatternSearch.CheckNeighbours(IToken.DraggedToken.TokenCard.GridPosition, GridPosition))
-                    interactableOutline.SetEnabled(true);
-            }
-        }
 
         private void UpdateEventText(bool hasEvent, bool hasAction)
         {
@@ -303,8 +330,15 @@ namespace Gameplay.Cards
         
         // IInteractableOnClick
         public Vector4 OutlineColor => GlobalDefinitions.TokenOutlineGreenColor;
+        public InteractableOutline InteractableOutline => interactableOutline;
+        public event IInteractable.InteractableEvent OnDestroyed;
+        public event IInteractable.InteractableEvent OnInitialized;
         public bool CanClick => true;
-        public bool CanInteract => !IsOpened;
-        public void OnClick(InteractionResult result) => Open();
+        public bool Dead => dead;
+        public bool CanInteract => false;
+        public void OnClick(InteractionResult result, int clickCount)
+        {
+            if(clickCount > 1) OnDoubleClick?.Invoke(result.IntersectionPoint);
+        }
     }
 }

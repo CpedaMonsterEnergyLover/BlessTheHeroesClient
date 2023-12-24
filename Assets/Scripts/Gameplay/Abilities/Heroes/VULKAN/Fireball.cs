@@ -24,7 +24,7 @@ namespace Gameplay.Abilities
             AnimateCast(true);
 
             // Throw dice
-            Util.DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, Caster.MagicDiceSet, Caster.SpellPower,
+            DiceUtil.CaclulateMagicDiceThrow(attackDiceAmount, Caster.MagicDiceSet, Caster.SpellPower,
                 out int damage, out int energy, out int[] sides);
             await DiceManager.ThrowReplay(Caster.MagicDiceSet, attackDiceAmount, sides);
             if(Caster is HeroToken) EnergyManager.Instance.AddEnergy(Caster, energy);
@@ -40,7 +40,7 @@ namespace Gameplay.Abilities
             
             // Animate explosion
             AnimateExplosionLight();
-            creature.Damage(GlobalDefinitions.FireDamageType, damage, aggroReceiver: Caster.IAggroManager);
+            creature.Damage(GlobalDefinitions.FireDamageType, damage, Caster);
             explosionParticles.Play();
             await UniTask.WaitUntil(() => !explosionParticles.isPlaying);
             transform.localPosition = new Vector3(0, 0.5f, 0);

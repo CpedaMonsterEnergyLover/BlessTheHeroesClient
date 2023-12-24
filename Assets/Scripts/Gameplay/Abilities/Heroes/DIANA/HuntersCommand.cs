@@ -15,7 +15,7 @@ namespace Gameplay.Abilities
             await Caster.Attack(creature);
             if (tameAbility is not null && 
                 tameAbility.CurrentCompanion is not null &&
-                tameAbility.CurrentCompanion.TokenCard == creature.TokenCard)
+                tameAbility.CurrentCompanion.Card == creature.Card)
             {
                 if(creature.Dead) return;
                 await tameAbility.CurrentCompanion.Attack(creature);

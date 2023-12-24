@@ -6,7 +6,6 @@ using Gameplay.Cards;
 using Gameplay.Dice;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
-using Scriptable;
 using UnityEngine;
 using Util;
 using Random = UnityEngine.Random;
@@ -16,7 +15,6 @@ namespace Gameplay.Abilities
     public class FireStorm : FireAbility
     {
         [Header("FireStorm Fields")]
-        [SerializeField] private DamageType damageType;
         [SerializeField] private int diceAmount;
         [SerializeField] private ParticleSystem stormParticles;
         [SerializeField] private Light stormLight;
@@ -61,7 +59,7 @@ namespace Gameplay.Abilities
                 int count = creatures.Length;
                 if(count == 0) return;
                 await UniTask.Delay(TimeSpan.FromSeconds(delay));
-                creatures[0].Damage(GlobalDefinitions.FireDamageType,1, aggroReceiver: Caster.IAggroManager, delay: 0).Forget();
+                creatures[0].Damage(GlobalDefinitions.FireDamageType,1, Caster, false, 0).Forget();
             }
         }
     }

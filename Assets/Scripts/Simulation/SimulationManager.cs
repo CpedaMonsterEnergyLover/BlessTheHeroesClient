@@ -13,7 +13,7 @@ namespace Simulation
         
         private static Scene simulationScene;
         private static bool simulating;
-        private static readonly Dictionary<Dice, SimulationCube> simulationCubes = new ();
+        private static readonly Dictionary<Dice, SimulationCube> SimulationCubes = new ();
 
         private static SimulationCube SimulationCubePrefab { get; set; }
 
@@ -26,13 +26,13 @@ namespace Simulation
 
         private static SimulationCube GetSimulationCubeForDice(Dice dice)
         {
-            if (simulationCubes.TryGetValue(dice, out SimulationCube cube)) return cube;
+            if (SimulationCubes.TryGetValue(dice, out SimulationCube cube)) return cube;
             
             cube = Instantiate(SimulationCubePrefab);
             cube.DiceReference = dice;
             cube.gameObject.SetActive(false);
             SceneManager.MoveGameObjectToScene(cube.gameObject, simulationScene);
-            simulationCubes.Add(dice, cube);
+            SimulationCubes.Add(dice, cube);
             return cube;
         }
 
@@ -55,7 +55,7 @@ namespace Simulation
             }
             
             for(int i = 0; i < amount; i++) 
-                replays[i].GetResult(simulationCubes[dices[i]]);
+                replays[i].GetResult(SimulationCubes[dices[i]]);
             EndSimulation();
             Dice.PrintDiceRollResult(replays.Select(replay => replay.Result).ToArray());
             return replays;
@@ -75,7 +75,7 @@ namespace Simulation
                 Physics.Simulate(Time.fixedDeltaTime);
                 for (int i = 0; i < amount; i++)
                 {
-                    IDice cube = simulationCubes[dices[i]];
+                    IDice cube = SimulationCubes[dices[i]];
                     replays[i].Stamp(cube.Rigidbody);
                     float cubeVelocity = cube.Rigidbody.velocity.sqrMagnitude;
                     if (cubeVelocity > max) max = cubeVelocity;
@@ -104,7 +104,7 @@ namespace Simulation
 
         private static void ActualizeCubePositions()
         {
-            foreach (SimulationCube cube in simulationCubes.Values) 
+            foreach (SimulationCube cube in SimulationCubes.Values) 
                 cube.ActualizePosition();
         }
 

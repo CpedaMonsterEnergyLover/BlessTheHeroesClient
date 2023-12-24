@@ -28,5 +28,7 @@ namespace Gameplay.Abilities
             particles.Play();
             await UniTask.WaitUntil(() => !particles.isPlaying);
         }
+        
+        public IToken Token => Caster;
     }
 }

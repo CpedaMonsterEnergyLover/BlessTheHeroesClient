@@ -19,5 +19,7 @@ namespace Gameplay.Abilities
         {
             target.BuffManager.ApplyEffect(this, effectToApply, duration);
         }
+
+        public IToken Token => Caster;
     }
 }

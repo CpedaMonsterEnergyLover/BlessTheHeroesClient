@@ -40,8 +40,8 @@ MonoBehaviour:
   sharedLootTable:
     content:
     - lootTable: {fileID: 11400000, guid: eb70f86cf27dd4f40964e47d63b43d94, type: 2}
-      value: 0.056
+      value: 0.075
     - lootTable: {fileID: 11400000, guid: 2a1eca430617ce1468ca9cc29cf09dac, type: 2}
-      value: 0.084
+      value: 0.125
     coinsDropRate: 0
     coins: {x: 0, y: 0}

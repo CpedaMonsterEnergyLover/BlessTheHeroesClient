@@ -55,7 +55,7 @@ namespace Gameplay.BuffEffects
                 effect.Manager = this;
                 effect.Applier = applier;
                 effect.Refresh(duration);
-                effects.Add(buff.Scriptable, effect);
+                effects.Add(scriptable, effect);
             }
 
             OnEffectApplied?.Invoke(Token, buff);

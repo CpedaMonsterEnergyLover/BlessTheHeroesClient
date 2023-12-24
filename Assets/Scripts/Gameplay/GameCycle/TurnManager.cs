@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Gameplay.GameField;
 using Gameplay.Tokens;
@@ -15,9 +16,9 @@ namespace Gameplay.GameCycle
         private bool bossesAlive = false;
 
         public delegate void TurnEvent();
-        public static TurnEvent OnPlayersTurnStarted;
-        public static TurnEvent OnMonstersTurnStarted;
-        public static TurnEvent OnBossesTurnStarted;
+        public static event TurnEvent OnPlayersTurnStarted;
+        public static event TurnEvent OnMonstersTurnStarted;
+        public static event TurnEvent OnBossesTurnStarted;
 
         public static TurnStage CurrentStage { get; private set; }
 
@@ -77,13 +78,10 @@ namespace Gameplay.GameCycle
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
             OnMonstersTurnStarted?.Invoke();
             turnBrowser.SetPassButtonEnabled(false);
-            foreach (IUncontrollableToken creature in FieldManager.GetAllCreatures())
+            foreach (var creature in FieldManager.GetAllCreatures().Where(creature => !creature.Dead))
             {
-                if(creature.Dead) continue;
-                creature.InteractableOutline.SetEnabled(true);
                 await creature.MakeTurn();
                 await UniTask.Delay(TimeSpan.FromMilliseconds(200));
-                creature.InteractableOutline.SetEnabled(false);
             }
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
             NextTurn();

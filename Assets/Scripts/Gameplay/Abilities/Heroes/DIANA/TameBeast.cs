@@ -48,18 +48,18 @@ namespace Gameplay.Abilities
         private async UniTask Tame(IInteractable target)
         {
             if(target is not CreatureToken creature || 
-               !Caster.TokenCard.HasSpaceForHero()) return;
+               !Caster.Card.HasSpaceForHero()) return;
             
-            Caster.TokenCard.RemoveTokenWithoutUpdate(creature);
+            Caster.Card.RemoveTokenWithoutUpdate(creature);
             Destroy(creature.gameObject);
-            await Caster.TokenCard.UpdateLayout(creature);
+            await Caster.Card.UpdateLayout(creature);
 
             CompanionToken companion = GlobalDefinitions.CreateCompanionToken(creature.Scriptable);
             companion.AddMaxHealth(healthBonus);
             companion.AddDefense(defenseBonus);
             companion.AddAttackPower(attackPowerBonus);
             companion.AddSpeed(speedBonus);
-            Caster.TokenCard.AddToken(companion, resetPosition: true, instantly: false);
+            Caster.Card.AddToken(companion, resetPosition: true, instantly: false);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
             companion.SetHealth(Mathf.Clamp(creature.CurrentHealth + healthBonus, 1, companion.MaxHealth));
 
@@ -73,14 +73,14 @@ namespace Gameplay.Abilities
 
         private async UniTask Free()
         {
-            if(!CurrentCompanion.TokenCard.HasSpaceForCreature()) return;
+            if(!CurrentCompanion.Card.HasSpaceForCreature()) return;
             
-            CurrentCompanion.TokenCard.RemoveTokenWithoutUpdate(CurrentCompanion);
+            CurrentCompanion.Card.RemoveTokenWithoutUpdate(CurrentCompanion);
             Destroy(CurrentCompanion.gameObject);
-            await CurrentCompanion.TokenCard.UpdateLayout(CurrentCompanion);
+            await CurrentCompanion.Card.UpdateLayout(CurrentCompanion);
             
             CreatureToken creature = GlobalDefinitions.CreateCreatureToken(CurrentCompanion.Scriptable);
-            CurrentCompanion.TokenCard.AddToken(creature, resetPosition: true, instantly: false);
+            CurrentCompanion.Card.AddToken(creature, resetPosition: true, instantly: false);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
             creature.SetHealth(Mathf.Clamp(CurrentCompanion.CurrentHealth - healthBonus, 1, int.MaxValue));
 
@@ -105,10 +105,10 @@ namespace Gameplay.Abilities
             return CurrentCompanion is null 
                 ? target is CreatureToken {CanBeTargeted: true} creature && 
                   // creature.Scriptable.CreatureType is CreatureType.Beast && 
-                  creature.TokenCard == Caster.TokenCard && 
-                  Caster.TokenCard.HasSpaceForHero()
+                  creature.Card == Caster.Card && 
+                  Caster.Card.HasSpaceForHero()
                 : ReferenceEquals(target, CurrentCompanion) && 
-                  CurrentCompanion.TokenCard.HasSpaceForCreature();
+                  CurrentCompanion.Card.HasSpaceForCreature();
         }
     }
 }

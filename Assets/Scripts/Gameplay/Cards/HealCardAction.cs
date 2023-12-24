@@ -1,4 +1,5 @@
 ﻿using Gameplay.Tokens;
+using Scriptable;
 using UnityEngine;
 using Util.Enums;
 
@@ -9,6 +10,7 @@ namespace Gameplay.Cards
         [Header("HealHeroes")]
         [SerializeField] private TargetSelector selector;
         [SerializeField] private int amount;
+        [SerializeField] private DamageType healType;
         
         public override string Description
             => $"restores {amount} health to {(selector == TargetSelector.Card ? " all heroes on that location." : " a hero.")}";
@@ -21,10 +23,10 @@ namespace Gameplay.Cards
             {
                 case TargetSelector.Card:
                     foreach (IControllableToken hero in card.Heroes) 
-                        hero.Heal(amount);
+                        hero.Heal(healType, amount, null);
                     break;
                 case TargetSelector.Executor:
-                    executor.Heal(amount);
+                    executor.Heal(healType, amount, null);
                     break;
             }
         }

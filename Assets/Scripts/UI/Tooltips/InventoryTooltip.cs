@@ -48,7 +48,7 @@ namespace UI.Tooltips
                         : "<color=red>Selected hero cannot equip this" );
                     actionText.gameObject.SetActive(true);
                 } else actionText.gameObject.SetActive(false);
-            } else if (item is Scriptable.Consumable && 
+            } else if (item is Scriptable.Usable && 
                        TokenBrowser.SelectedToken is HeroToken heroToken)
             {
                 actionText.SetText(heroToken.ActionPoints > 0 

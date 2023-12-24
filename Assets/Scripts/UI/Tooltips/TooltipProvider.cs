@@ -8,14 +8,15 @@ namespace UI.Tooltips
     {
         protected abstract void ShowTooltip();
         protected abstract void HideTooltip();
-        
-        public T LastValue { get; protected set; }
+
+        protected T LastValue { get; set; }
         private bool shown;
         
         
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
+            if(InteractionManager.AnyInteractionActive) return;
+
             ShowTooltip();
             shown = true;
         }

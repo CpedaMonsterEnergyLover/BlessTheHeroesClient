@@ -13,7 +13,7 @@ namespace Gameplay.Abilities
 
         public override async UniTask Cast(IInteractable target)
         {
-            Caster.IAggroManager.ChangeClusterAggro(aggroChange);
+            Caster.BaseAggroManager.ChangeClusterAggro(aggroChange);
         }
     }
 }

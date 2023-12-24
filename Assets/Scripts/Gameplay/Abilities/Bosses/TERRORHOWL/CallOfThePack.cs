@@ -30,8 +30,8 @@ namespace Gameplay.Abilities
 
         public override bool GetTarget(out IInteractable target)
         {
-            target = Caster.TokenCard;
-            var cards = GetCardsForSpawn(Caster.TokenCard);
+            target = Caster.Card;
+            var cards = GetCardsForSpawn(Caster.Card);
             return CountPossibleSpawnAmount(cards) > 2;
         }
 

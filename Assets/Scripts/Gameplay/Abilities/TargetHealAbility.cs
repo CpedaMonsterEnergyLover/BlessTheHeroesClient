@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Interaction;
 using Gameplay.Tokens;
+using Scriptable;
 using UnityEngine;
 
 namespace Gameplay.Abilities
@@ -8,6 +9,7 @@ namespace Gameplay.Abilities
     public class TargetHealAbility : ActiveAbility
     {
         [SerializeField] private int heal;
+        [SerializeField] private DamageType healType;
         
         public override bool ValidateTarget(IInteractable target) => ValidateAlly(target);
 
@@ -15,7 +17,7 @@ namespace Gameplay.Abilities
         {
             if(target is not IToken token) return;
             
-            token.Heal(heal, aggroReceiver: Caster.IAggroManager);
+            token.Heal(healType, heal, Caster);
         }
 
         public override void OnCastStart()

@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using Gameplay.Aggro;
+using Scriptable;
 using UnityEngine;
 using Util;
 using Util.Enums;
@@ -51,20 +52,22 @@ namespace Gameplay.Tokens
             InvokeDataChangedEvent();
         }
         
-        public void Heal(int health, IAggroManager aggroReceiver = null)
+        public void Heal(DamageType healType, int health, IToken caster, bool useCasterPosition = true)
         {
             if(Dead) return;
             int raw = CurrentHealth + health;
             int clamped = Mathf.Clamp(raw, CurrentHealth, MaxHealth);
-            if(aggroReceiver is not null)
+            if(caster is not null)
             {
                 int aggro = health - (raw - clamped);
                 foreach (var creature in Card.Creatures) 
-                    aggroReceiver.AddAggro(aggro, creature);
+                    caster.BaseAggroManager.AddAggro(aggro, creature);
             }
             SetHealth(clamped);
-            damageAnimator.PlayHealingAsync(health, GlobalDefinitions.HolyDamageType, DamageImpact.Normal,
-                 aggroReceiver is null ? null : aggroReceiver.Bearer.TokenTransform).Forget();
+            damageAnimator.PlayHealingAsync(
+                health,
+                healType, 
+                DamageImpact.Normal, caster is not null && useCasterPosition ? caster.TokenTransform : null).Forget();
             OnHealed?.Invoke(health);
         }
 
@@ -79,14 +82,12 @@ namespace Gameplay.Tokens
         {
             MovementPoints = Mathf.Clamp(amount, 0, int.MaxValue);
             OnMovementPointsChanged?.Invoke(this);
-            UpdateOutlineByCanInteract();
         }
 
         public void SetActionPoints(int amount)
         {
             ActionPoints = Mathf.Clamp(amount, 0, 4);
             OnActionsChanged?.Invoke(this);
-            UpdateOutlineByCanInteract();
         }
         
         public bool DrainMana(int amount)

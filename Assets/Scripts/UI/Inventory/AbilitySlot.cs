@@ -60,7 +60,7 @@ namespace UI
             }
         }
 
-        public void ClearAbility(Sprite sprite)
+        protected void ClearAbility(Sprite sprite)
         {
             if (Ability is not null) Ability.AbilitySlot = null;
             Ability = null;
@@ -117,7 +117,40 @@ namespace UI
         
         public void UpdateResourceCost() => resourceIndicator.SetAbility(Ability);
 
+        protected virtual void UpdateTooltipOnPointerEnter() => TooltipManager.AbilityTooltip.SetAbility(Ability);
+        protected virtual void UpdateTooltipOnPointerExit() => TooltipManager.AbilityTooltip.SetAbility(null);
+        protected virtual void UpdateTooltipOnPointerClick() => TooltipManager.AbilityTooltip.SetAbility(null);
 
+
+        // IPointerHandler
+        public virtual void OnPointerEnter(PointerEventData eventData)
+        {
+            if(InteractionManager.AnyInteractionActive) return;
+
+            UpdateTooltipOnPointerEnter();
+            if(Ability is InstantAbility instant) OnInstantAbilityHoverEnter?.Invoke(instant);
+        }
+
+        public virtual void OnPointerExit(PointerEventData eventData)
+        {
+            UpdateTooltipOnPointerExit();
+            if(Ability is InstantAbility instant) OnInstantAbilityHoverExit?.Invoke(instant);
+        }
+
+        public virtual void OnPointerClick(PointerEventData eventData)
+        {
+            if(Ability is not InstantAbility instant) return;
+            if(InteractionManager.AnyInteractionActive) return;
+
+
+            if (eventData.clickCount == 1)
+            {
+                UpdateTooltipOnPointerClick();
+                AbilityCaster.Cast(TokenBrowser.SelectedToken, Ability.Caster.Card, instant);  
+            }
+        }
+
+        
         // IDragHandler
         public void OnBeginDrag(PointerEventData eventData)
         {
@@ -136,37 +169,6 @@ namespace UI
         {
             if(Ability is not ActiveAbility active) return;
             OnCast?.Invoke(active);
-        }
-        
-        protected virtual void UpdateTooltipOnPointerEnter() => TooltipManager.AbilityTooltip.SetAbility(Ability);
-        protected virtual void UpdateTooltipOnPointerExit() => TooltipManager.AbilityTooltip.SetAbility(null);
-        protected virtual void UpdateTooltipOnPointerClick() => TooltipManager.AbilityTooltip.SetAbility(null);
-        
-        
-        // IPointerHandler
-        public virtual void OnPointerEnter(PointerEventData eventData)
-        {
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-            UpdateTooltipOnPointerEnter();
-            if(Ability is InstantAbility instant) OnInstantAbilityHoverEnter?.Invoke(instant);
-        }
-
-        public virtual void OnPointerExit(PointerEventData eventData)
-        {
-            UpdateTooltipOnPointerExit();
-            if(Ability is InstantAbility instant) OnInstantAbilityHoverExit?.Invoke(instant);
-        }
-
-        public virtual void OnPointerClick(PointerEventData eventData)
-        {
-            if(Ability is not InstantAbility instant) return;
-            if(InspectionManager.Inspecting || InteractionManager.Dragging || AbilityCaster.IsDragging) return;
-
-            if (eventData.clickCount == 1)
-            {
-                UpdateTooltipOnPointerClick();
-                AbilityCaster.Cast(TokenBrowser.SelectedToken, Ability.Caster.TokenCard, instant);  
-            }
         }
     }
 }
